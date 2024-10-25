@@ -1,3 +1,9 @@
-﻿@inherits Microsoft.AspNetCore.Components.LayoutComponentBase
+﻿@using DBetter.Frontend.Components
+@inherits Microsoft.AspNetCore.Components.LayoutComponentBase
 
-@Body
+<main class="d-flex vh-100">
+    <Sidebar/>
+    <article class="w-100 p-4">
+        @Body
+    </article>
+</main>
