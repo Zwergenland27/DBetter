@@ -1,24 +1,40 @@
+@inject IJSRuntime js
+
 <div class="d-flex flex-column flex-shrink-0 bg-body-tertiary" style="width: 4.5rem;">
     <div class="d-block p-3 border-bottom text-center" >DB</div>
     <nav class="nav nav-pills nav-flush flex-column mb-auto text-center">
         <div class="nav-item">
-            <NavLink class="nav-link py-3 border-bottom rounded-0" href="" Match="NavLinkMatch.All">
-                <i class="material-icons display-6">home</i>
+            <NavLink class="nav-link py-3 border-bottom rounded-0" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="right" data-bs-content="Home" href="" Match="NavLinkMatch.All">
+                <i class="material-icons">home</i>
             </NavLink>
         </div>
         <div class="nav-item">
-            <NavLink class="nav-link py-3 border-bottom rounded-0" href="Connection">
-                <i class="material-icons display-6">search</i>
+            <NavLink class="nav-link py-3 border-bottom rounded-0" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="right" data-bs-content="Search connection" href="Connection">
+                <i class="material-icons">search</i>
             </NavLink>
         </div>
         <div>
-            <NavLink class="nav-link py-3 border-bottom rounded-0" href="Trips">
+            <NavLink class="nav-link py-3 border-bottom rounded-0" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="right" data-bs-content="My trips" href="Trips">
                 <i class="material-icons">route</i>
             </NavLink>
         </div>
     </nav>
 </div>
 
+<script>
+    function addTooltips() {
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+    }
+
+</script>
+
 @code {
-    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await js.InvokeVoidAsync("addTooltips");
+        }
+    }
 }
