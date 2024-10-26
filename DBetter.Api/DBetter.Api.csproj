@@ -12,7 +12,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DBetter.Application\DBetter.Application.csproj" />
       <ProjectReference Include="..\DBetter.Contracts\DBetter.Contracts.csproj" />
+      <ProjectReference Include="..\DBetter.Infrastructure\DBetter.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

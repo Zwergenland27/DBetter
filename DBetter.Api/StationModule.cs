@@ -1,7 +1,7 @@
 using DBetter.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DBetter.Backend;
+namespace DBetter.Api;
 
 public static class StationModule
 {

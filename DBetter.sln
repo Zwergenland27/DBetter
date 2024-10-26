@@ -1,10 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Backend", "DBetter.Backend\DBetter.Backend.csproj", "{2745D4A9-1D99-4F55-87EA-FAF1AE1E0822}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Api", "DBetter.Api\DBetter.Api.csproj", "{2745D4A9-1D99-4F55-87EA-FAF1AE1E0822}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Contracts", "DBetter.Contracts\DBetter.Contracts.csproj", "{F3524E91-351D-40BB-AFF6-313DB931FF43}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Frontend", "DBetter.Frontend\DBetter.Frontend.csproj", "{817251AC-D56E-43BC-8418-3A1F07D8B11A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Application", "DBetter.Application\DBetter.Application.csproj", "{6FF50B55-6B90-42D3-86A4-819E0AAD7789}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Infrastructure", "DBetter.Infrastructure\DBetter.Infrastructure.csproj", "{DE6D3D6B-1887-4CDA-9EE7-B8152B3F1272}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Domain", "DBetter.Domain\DBetter.Domain.csproj", "{CEE11E83-D60F-49A4-A665-A9174565BACD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +30,17 @@ Global
 		{817251AC-D56E-43BC-8418-3A1F07D8B11A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{817251AC-D56E-43BC-8418-3A1F07D8B11A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{817251AC-D56E-43BC-8418-3A1F07D8B11A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FF50B55-6B90-42D3-86A4-819E0AAD7789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FF50B55-6B90-42D3-86A4-819E0AAD7789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FF50B55-6B90-42D3-86A4-819E0AAD7789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FF50B55-6B90-42D3-86A4-819E0AAD7789}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE6D3D6B-1887-4CDA-9EE7-B8152B3F1272}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE6D3D6B-1887-4CDA-9EE7-B8152B3F1272}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE6D3D6B-1887-4CDA-9EE7-B8152B3F1272}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE6D3D6B-1887-4CDA-9EE7-B8152B3F1272}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEE11E83-D60F-49A4-A665-A9174565BACD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEE11E83-D60F-49A4-A665-A9174565BACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEE11E83-D60F-49A4-A665-A9174565BACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEE11E83-D60F-49A4-A665-A9174565BACD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
