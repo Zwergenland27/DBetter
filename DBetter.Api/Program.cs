@@ -1,7 +1,11 @@
 using DBetter.Api;
+using DBetter.Application;
+using DBetter.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddApplicationLayer();
+builder.Services.AddInfrastructureLayer();
 
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri("https://www.bahn.de/web/api/") });
 // Add services to the container.
