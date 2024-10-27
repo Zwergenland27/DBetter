@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="MediatR" Version="12.4.1" />
-      <PackageReference Include="Zwergenland.CleanDomainValidation" Version="1.0.0-alpha-hf-01" />
+      <PackageReference Include="Zwergenland.CleanDomainValidation" Version="1.0.0" />
     </ItemGroup>
 
 </Project>

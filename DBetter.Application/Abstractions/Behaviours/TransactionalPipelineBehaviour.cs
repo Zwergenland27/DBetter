@@ -4,15 +4,14 @@ using MediatR;
 
 namespace DBetter.Application.Abstractions.Behaviours;
 
-internal class TransactionalPipelineBehaviour<TRequest, Tresponse>(
-    IUnitOfWork unitOfWork) : IPipelineBehavior<TRequest, Tresponse>
+internal class TransactionalPipelineBehaviour<TRequest, TResponse>(
+    IUnitOfWork unitOfWork) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : CleanDomainValidation.Application.IRequest
-    where Tresponse : ICanFail
+    where TResponse : ICanFail
 {
-    private IPipelineBehavior<TRequest, Tresponse> _pipelineBehaviorImplementation;
-    public async Task<Tresponse> Handle(TRequest request, RequestHandlerDelegate<Tresponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        unitOfWork.BeginTransaction();
+        await unitOfWork.BeginTransaction();
         try
         {
             var result = await next();

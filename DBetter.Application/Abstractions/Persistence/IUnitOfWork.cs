@@ -1,8 +1,8 @@
 namespace DBetter.Application.Abstractions.Persistence;
 
-public interface IUnitOfWork
+public interface IUnitOfWork : IDisposable
 {
-    void BeginTransaction();
+    Task BeginTransaction(CancellationToken cancellationToken = default);
     
     Task CommitAsync(CancellationToken cancellationToken = default);
     
