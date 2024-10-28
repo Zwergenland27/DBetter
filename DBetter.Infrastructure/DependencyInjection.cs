@@ -1,3 +1,4 @@
+using DBetter.Application.Abstractions.Persistence;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
@@ -16,7 +17,7 @@ public static class DependencyInjection
     
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         return services;
     }
