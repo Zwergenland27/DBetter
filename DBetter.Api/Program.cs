@@ -11,7 +11,12 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri("https://
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "DBetter.Contracts.xml"));
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "DBetter.Api.xml"));
+    
+});
 
 builder.Services.AddCors(options =>
 {
@@ -37,5 +42,6 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 app.AddStationEndpoints();
+app.AddUserEndpoints();
 
 app.Run();
