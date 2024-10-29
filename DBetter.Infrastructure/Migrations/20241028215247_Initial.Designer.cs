@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBetter.Infrastructure.Migrations
 {
     [DbContext(typeof(DBetterContext))]
-    [Migration("20241027211452_Initial")]
+    [Migration("20241028215247_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -42,13 +42,47 @@ namespace DBetter.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("_passwordHash")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("PasswordHash");
+
+                    b.Property<string>("_passwordSalt")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("PasswordSalt");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("DBetter.Domain.Users.User", b =>
+                {
+                    b.OwnsOne("DBetter.Domain.Users.ValueObjects.RefreshToken", "_refreshToken", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<DateTime>("Expires")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("Token")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("Users");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("_refreshToken");
                 });
 #pragma warning restore 612, 618
         }

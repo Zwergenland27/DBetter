@@ -33,9 +33,12 @@ public class UserMapping : IEntityTypeConfiguration<User>
                 email => email.Value,
                 value => Email.Create(value).Value);
         
-        builder.Property(user => user.Password)
-            .HasConversion(
-                password => password.Value,
-                value => Password.Create(value).Value);
+        builder.Property("_passwordHash")
+            .HasColumnName("PasswordHash");
+        
+        builder.Property("_passwordSalt")
+            .HasColumnName("PasswordSalt");
+
+        builder.OwnsOne<RefreshToken>("_refreshToken");
     }
 }

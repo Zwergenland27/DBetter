@@ -4,11 +4,11 @@ using DBetter.Contracts.Users;
 using DBetter.Domain.Errors;
 using DBetter.Domain.Users;
 
-namespace DBetter.Application.Users.Commands.RegisterCommand;
+namespace DBetter.Application.Users.Commands.Register;
 
-public class RegisterUserCommandHandler(IUserRepository repository) : ICommandHandler<RegisterCommand.RegisterUserCommand, UserResult>
+public class RegisterUserCommandHandler(IUserRepository repository) : ICommandHandler<RegisterCommand, UserResult>
 {
-    public async Task<CanFail<UserResult>> Handle(RegisterCommand.RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<CanFail<UserResult>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var existingUser = await repository.GetByEmailAsync(request.Email);
         if (existingUser is not null) return DomainErrors.User.Exists;

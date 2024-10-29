@@ -3,7 +3,7 @@ using CleanDomainValidation.Application;
 
 namespace DBetter.Contracts.Users.Commands;
 
-public class RegisterUserParameters : IParameters
+public class RegisterParameters : IParameters
 {
     /// <summary>
     /// First name of the user

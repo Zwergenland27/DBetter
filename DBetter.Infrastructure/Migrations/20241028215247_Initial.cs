@@ -19,7 +19,11 @@ namespace DBetter.Infrastructure.Migrations
                     Firstname = table.Column<string>(type: "text", nullable: false),
                     Lastname = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false)
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    PasswordSalt = table.Column<string>(type: "text", nullable: false),
+                    _refreshToken_Token = table.Column<string>(type: "text", nullable: true),
+                    _refreshToken_Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    _refreshToken_Expires = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
