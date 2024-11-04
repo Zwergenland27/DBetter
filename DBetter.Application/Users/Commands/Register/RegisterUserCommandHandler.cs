@@ -17,6 +17,7 @@ public class RegisterUserCommandHandler(IUserRepository repository) : ICommandHa
             request.Firstname,
             request.Lastname,
             request.Email,
+            request.Birthday,
             request.Password);
 
         if (user.HasFailed) return user.Errors;

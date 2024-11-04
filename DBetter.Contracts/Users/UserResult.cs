@@ -23,4 +23,9 @@ public class UserResult
     /// </summary>
     /// <example>max.mustermann@gmail.com</example>
     public string Email { get; set; }
+    
+    /// <summary>
+    /// Birthday of the user
+    /// </summary>
+    public DateTime Birthday { get; set; }
 }

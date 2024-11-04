@@ -27,8 +27,12 @@ public class RegisterRequestBuilder : IRequestBuilder<RegisterParameters, Regist
         var password = builder.ClassProperty(r => r.Password)
             .Required(ApplicationErrors.User.Register.Password.Missing)
             .Map(p => p.Password, Password.Create);
+        
+        var birthday = builder.ClassProperty(r => r.Birthday)
+            .Required(ApplicationErrors.User.Register.Birthday.Missing)
+            .Map(p => p.Birthday, Birthday.Create);
 
-        return builder.Build(() => new RegisterCommand(firstname, lastname, email, password));
+        return builder.Build(() => new RegisterCommand(firstname, lastname, email, password, birthday));
     }
 }
 
@@ -36,4 +40,5 @@ public record RegisterCommand(
     Firstname Firstname,
     Lastname Lastname,
     Email Email,
-    Password Password) : ICommand<UserResult>;
+    Password Password,
+    Birthday Birthday) : ICommand<UserResult>;

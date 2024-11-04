@@ -27,6 +27,12 @@ public class RegisterParameters : IParameters
     public string? Email { get; set; }
     
     /// <summary>
+    /// Birthday of the user
+    /// </summary>
+    [Required]
+    public DateTime? Birthday { get; set; }
+    
+    /// <summary>
     /// Password of the user
     /// </summary>
     /// <example>super-secret-password</example>

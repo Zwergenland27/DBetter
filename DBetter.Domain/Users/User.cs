@@ -11,6 +11,8 @@ public class User : AggregateRoot<UserId>
     private string _passwordHash;
 
     private string _passwordSalt;
+
+    private readonly List<Discount> _discounts = [];
     
     private RefreshToken? _refreshToken;
     public Firstname Firstname { get; private set; }
@@ -19,22 +21,30 @@ public class User : AggregateRoot<UserId>
     
     public Email Email { get; private set; }
     
+    public Birthday Birthday { get; private set; }
+    
+    public IReadOnlyList<Discount> Discounts => _discounts.AsReadOnly();
+    
+    public IReadOnlyList<Discount> CurrentDiscounts => _discounts.Where(discount => discount.ValidUntilUtc is null || discount.ValidUntilUtc <= DateTime.UtcNow).ToList().AsReadOnly();
+    
     private User(
         UserId id,
         Firstname firstname,
         Lastname lastname,
         Email email,
+        Birthday birthday,
         string passwordHash,
         string passwordSalt) : base(id)
     {
         Firstname = firstname;
         Lastname = lastname;
         Email = email;
+        Birthday = birthday;
         _passwordHash = passwordHash;
         _passwordSalt = passwordSalt;
     }
     
-    public static CanFail<User> Register(Firstname firstname, Lastname lastname, Email email, Password password)
+    public static CanFail<User> Register(Firstname firstname, Lastname lastname, Email email, Birthday birthday, Password password)
     {
         string passwordHash;
         string passwordSalt;
@@ -45,9 +55,24 @@ public class User : AggregateRoot<UserId>
             passwordHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password.Value)));
         }
         
-        var user = new User(UserId.CreateNew(), firstname, lastname, email, passwordHash, passwordSalt);
+        var user = new User(UserId.CreateNew(), firstname, lastname, email, birthday, passwordHash, passwordSalt);
 
         return user;
+    }
+    
+    public CanFail AddDiscount(Discount newDiscount)
+    {
+        CanFail result = new();
+        _discounts.ForEach(discount =>
+        {
+            result.InheritFailure(discount.CanCoExist(newDiscount));
+        });
+
+        if (result.HasFailed) return result.Errors;
+        
+        _discounts.Add(newDiscount);
+        
+        return CanFail.Success;
     }
     
     public void SetRefreshToken(RefreshToken refreshToken)
@@ -71,11 +96,13 @@ public class User : AggregateRoot<UserId>
     public CanFail EditPersonalData(
         Firstname? firstname,
         Lastname? lastname,
-        Email? email)
+        Email? email,
+        Birthday? birthday)
     {
         if (firstname is not null) Firstname = firstname;
         if (lastname is not null) Lastname = lastname;
         if (email is not null) Email = email;
+        if (birthday is not null) Birthday = birthday;
         
         return CanFail.Success;
     }

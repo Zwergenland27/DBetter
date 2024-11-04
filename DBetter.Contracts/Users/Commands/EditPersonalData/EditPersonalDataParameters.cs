@@ -32,4 +32,10 @@ public class EditPersonalDataParameters : IParameters
     /// <example>max.mustermann@gmail.com</example>
     [Required]
     public string? Email { get; set; }
+    
+    /// <summary>
+    /// Birthday of the user
+    /// </summary>
+    [Required]
+    public DateTime? Birthday { get; set; }
 }

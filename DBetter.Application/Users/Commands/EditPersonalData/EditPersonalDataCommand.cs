@@ -27,8 +27,12 @@ public class EditPersonalDataRequestBuilder : IRequestBuilder<EditPersonalDataPa
         var email = builder.ClassProperty(r => r.Email)
             .Optional()
             .Map(p => p.Email, Email.Create);
+        
+        var birthday = builder.ClassProperty(r => r.Birthday)
+            .Optional()
+            .Map(p => p.Birthday, Birthday.Create);
 
-        return builder.Build(() => new EditPersonalDataCommand(id, firstname, lastname, email));
+        return builder.Build(() => new EditPersonalDataCommand(id, firstname, lastname, email, birthday));
     }
 }
 
@@ -36,4 +40,5 @@ public record EditPersonalDataCommand(
     UserId Id,
     Firstname? Firstname,
     Lastname? Lastname,
-    Email? Email) : ICommand<UserResult>;
+    Email? Email,
+    Birthday? Birthday) : ICommand<UserResult>;

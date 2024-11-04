@@ -33,12 +33,38 @@ public class UserMapping : IEntityTypeConfiguration<User>
                 email => email.Value,
                 value => Email.Create(value).Value);
         
-        builder.Property("_passwordHash")
-            .HasColumnName("PasswordHash");
-        
-        builder.Property("_passwordSalt")
-            .HasColumnName("PasswordSalt");
+        builder.Property(user => user.Birthday)
+            .HasConversion(
+                birthday => birthday.Utc,
+                value => Birthday.Create(value).Value);
 
-        builder.OwnsOne<RefreshToken>("_refreshToken");
+        builder.Property("_passwordHash")
+            .HasColumnName("PasswordHash")
+            .IsRequired();
+
+        builder.Property("_passwordSalt")
+            .HasColumnName("PasswordSalt")
+            .IsRequired();
+
+        builder.ComplexProperty<RefreshToken>("_refreshToken")
+            .IsRequired();
+
+        builder.Ignore(user => user.Discounts);
+        builder.Ignore(user => user.CurrentDiscounts);
+
+        builder.OwnsMany<Discount>("_discounts", discountBuilder =>
+        {
+            discountBuilder.ToTable("Discounts");
+            
+            discountBuilder.WithOwner().HasForeignKey("UserId");
+
+            discountBuilder.Property<Guid>("Id");
+            discountBuilder.HasKey("Id");
+
+            discountBuilder.Property(discount => discount.Type);
+            discountBuilder.Property(discount => discount.Class);
+            discountBuilder.Property(discount => discount.BoughtAtUtc);
+            discountBuilder.Property(discount => discount.ValidUntilUtc);
+        });
     }
 }

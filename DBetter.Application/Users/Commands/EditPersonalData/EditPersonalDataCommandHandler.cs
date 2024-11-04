@@ -16,7 +16,8 @@ public class EditPersonalDataCommandHandler(IUserRepository repository) : IComma
         var result = user.EditPersonalData(
             request.Firstname,
             request.Lastname,
-            request.Email);
+            request.Email,
+            request.Birthday);
 
         if (result.HasFailed) return result.Errors;
 

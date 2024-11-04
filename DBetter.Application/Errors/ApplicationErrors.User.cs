@@ -23,6 +23,11 @@ public static partial class ApplicationErrors
                 public static Error Missing => Error.Validation("User.Create.Email.Missing", "Email is required");
             }
             
+            public static class Birthday
+            {
+                public static Error Missing => Error.Validation("User.Create.Birthday.Missing", "Birthday is required");
+            }
+            
             public static class Password
             {
                 public static Error Missing => Error.Validation("User.Create.Password.Missing", "Password is required");
