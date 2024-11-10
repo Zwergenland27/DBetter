@@ -1,4 +1,5 @@
 using DBetter.Application.Abstractions.Persistence;
+using DBetter.Application.Users;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.Authentication;
 using DBetter.Infrastructure.Postgres;
@@ -22,6 +23,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserQueryRepository, UserQueryRepository>();
         return services;
     }
 }
