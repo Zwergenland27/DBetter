@@ -1,6 +1,6 @@
 namespace DBetter.Contracts.Users;
 
-public class UserResult
+public interface IUserResult
 {
     /// <summary>
     /// Id of the user

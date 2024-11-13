@@ -41,4 +41,4 @@ public record EditPersonalDataCommand(
     Firstname? Firstname,
     Lastname? Lastname,
     Email? Email,
-    Birthday? Birthday) : ICommand<UserResult>;
+    Birthday? Birthday) : ICommand<EditPersonalDataResult>;
