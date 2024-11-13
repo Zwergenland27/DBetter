@@ -43,20 +43,8 @@ public static class AuthenticationModule
                 
                 var result = await mediator.Send(command.Value);
                 if(result.HasFailed) return Results.BadRequest();
-
-                var jwtToken = result.Value.Item1;
-                var refreshToken = result.Value.Item2;
                 
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    Expires = refreshToken.Expires
-                };
-                
-                context.Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
-                
-                return Results.Ok(jwtToken);
+                return Results.Ok(result.Value);
             })
             .WithName("Login")
             .WithOpenApi();
@@ -80,19 +68,7 @@ public static class AuthenticationModule
             var result = await mediator.Send(command.Value);
             if (result.HasFailed) return Results.BadRequest();
 
-            var jwtToken = result.Value.Item1;
-            var newRefreshToken = result.Value.Item2;
-
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Expires = newRefreshToken.Expires
-            };
-
-            context.Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
-
-            return Results.Ok(jwtToken);
+            return Results.Ok(result.Value);
         })
             .WithName("Refresh")
             .WithOpenApi();

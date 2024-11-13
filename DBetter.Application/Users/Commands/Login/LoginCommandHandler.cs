@@ -1,18 +1,17 @@
 using CleanDomainValidation.Domain;
-using DBetter.Application.Abstractions;
 using DBetter.Application.Abstractions.Authentication;
 using DBetter.Application.Abstractions.Messaging;
+using DBetter.Contracts.Users.Commands.Login;
 using DBetter.Domain.Errors;
 using DBetter.Domain.Users;
-using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Application.Users.Commands.Login;
 
 public class LoginCommandHandler(
     IUserRepository repository,
-    ITokenGenerator tokenGenerator) : ICommandHandler<LoginCommand, Tuple<string, RefreshToken>>
+    ITokenGenerator tokenGenerator) : ICommandHandler<LoginCommand, LoginResult>
 {
-    public async Task<CanFail<Tuple<string, RefreshToken>>> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<CanFail<LoginResult>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var user = await repository.GetByEmailAsync(request.Email);
         
@@ -24,7 +23,13 @@ public class LoginCommandHandler(
         var refreshToken = tokenGenerator.GenerateRefreshToken();
         
         user.SetRefreshToken(refreshToken);
-        
-        return new Tuple<string, RefreshToken>(token, refreshToken);
+
+        return new LoginResult
+        {
+            TokenType = "Bearer",
+            AccessToken = token,
+            RefreshToken = refreshToken.Token,
+            Expires = refreshToken.Expires
+        };
     }
 }

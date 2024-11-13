@@ -41,4 +41,4 @@ public record RegisterCommand(
     Lastname Lastname,
     Email Email,
     Password Password,
-    Birthday Birthday) : ICommand<UserResult>;
+    Birthday Birthday) : ICommand<IUserResult>;

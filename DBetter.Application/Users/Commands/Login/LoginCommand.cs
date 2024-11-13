@@ -25,4 +25,4 @@ public class LoginRequestBuilder : IRequestBuilder<LoginParameters, LoginCommand
 
 public record LoginCommand(
     Email Email,
-    Password Password) : ICommand<Tuple<string, RefreshToken>>;
+    Password Password) : ICommand<LoginResult>;
