@@ -10,6 +10,7 @@ namespace DBetter.Api;
 
 public static class AuthenticationModule
 {
+    private static String RefreshTokenCookieName => "refreshToken";
     public static void AddAuthenticationEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("register", async (
@@ -44,17 +45,26 @@ public static class AuthenticationModule
                 var result = await mediator.Send(command.Value);
                 if(result.HasFailed) return Results.BadRequest();
                 
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    Expires = result.Value.Expires
+                };
+                
+                context.Response.Cookies.Append(RefreshTokenCookieName, result.Value.RefreshToken, cookieOptions);
+                
                 return Results.Ok(result.Value);
             })
             .WithName("Login")
             .WithOpenApi();
 
-        app.MapPost("/users/{id}/refresh", async (
+        app.MapPost("users/{id}/refresh", async (
             HttpContext context,
             IMediator mediator,
             string id) =>
         {
-            var refreshToken = context.Request.Cookies["refreshToken"];
+            var refreshToken = context.Request.Cookies[RefreshTokenCookieName];
             if (string.IsNullOrWhiteSpace(refreshToken)) return Results.Unauthorized();
 
             var command = Builder<RefreshJwtTokenCommand>
@@ -67,7 +77,7 @@ public static class AuthenticationModule
 
             var result = await mediator.Send(command.Value);
             if (result.HasFailed) return Results.BadRequest();
-
+            
             return Results.Ok(result.Value);
         })
             .WithName("Refresh")
