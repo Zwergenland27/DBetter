@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DBetter.Frontend.Components {
+namespace DBetter.Frontend.Pages {
     using System;
     
     
@@ -21,14 +21,14 @@ namespace DBetter.Frontend.Components {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Sidebar {
+    internal class ConnectionLanguage {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Sidebar() {
+        internal ConnectionLanguage() {
         }
         
         /// <summary>
@@ -38,7 +38,7 @@ namespace DBetter.Frontend.Components {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DBetter.Frontend.Layout.Sidebar", typeof(Sidebar).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DBetter.Frontend.Pages.ConnectionLanguage", typeof(ConnectionLanguage).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -60,7 +60,16 @@ namespace DBetter.Frontend.Components {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Find connection.
+        ///   Looks up a localized string similar to Add passenger.
+        /// </summary>
+        internal static string AddPassenger {
+            get {
+                return ResourceManager.GetString("AddPassenger", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection.
         /// </summary>
         internal static string Connection {
             get {
@@ -69,20 +78,29 @@ namespace DBetter.Frontend.Components {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Home.
+        ///   Looks up a localized string similar to One passenger is required.
         /// </summary>
-        internal static string Home {
+        internal static string PassengerNeeded {
             get {
-                return ResourceManager.GetString("Home", resourceCulture);
+                return ResourceManager.GetString("PassengerNeeded", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to My trips.
+        ///   Looks up a localized string similar to Route.
         /// </summary>
-        internal static string Trips {
+        internal static string Route {
             get {
-                return ResourceManager.GetString("Trips", resourceCulture);
+                return ResourceManager.GetString("Route", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Who is traveling?.
+        /// </summary>
+        internal static string Who {
+            get {
+                return ResourceManager.GetString("Who", resourceCulture);
             }
         }
     }

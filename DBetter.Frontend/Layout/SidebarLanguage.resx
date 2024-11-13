@@ -19,12 +19,18 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="Connection" xml:space="preserve">
-        <value>Verbindung suchen</value>
+        <value>Find connection</value>
     </data>
     <data name="Home" xml:space="preserve">
-        <value>Startseite</value>
+        <value>Home</value>
     </data>
     <data name="Trips" xml:space="preserve">
-        <value>Meine Reisen</value>
+        <value>My trips</value>
+    </data>
+    <data name="Login" xml:space="preserve">
+        <value>Login</value>
+    </data>
+    <data name="Register" xml:space="preserve">
+        <value>Register</value>
     </data>
 </root>
