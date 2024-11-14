@@ -19,7 +19,7 @@ public class LoginCommandHandler(
         
         if(!user.IsValidPassword(request.Password)) return DomainErrors.User.InvalidCredentials;
         
-        var token = tokenGenerator.GenerateJwtToken(user.Id, user.Email);
+        var token = tokenGenerator.GenerateJwtToken(user);
         var refreshToken = tokenGenerator.GenerateRefreshToken();
         
         user.SetRefreshToken(refreshToken);

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using DBetter.Application.Abstractions.Authentication;
+using DBetter.Domain.Users;
 using DBetter.Domain.Users.ValueObjects;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -12,13 +13,15 @@ namespace DBetter.Infrastructure.Authentication;
 public class TokenGenerator(IOptions<JwtSettings> options) : ITokenGenerator
 {
     private readonly JwtSettings _jwtSettings = options.Value;
-    public string GenerateJwtToken(UserId userId, Email email)
+    public string GenerateJwtToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         List<Claim> claims =
         [
-            new (ClaimTypes.NameIdentifier, userId.Value.ToString()),
-            new (ClaimTypes.Email, email.Value),
+            new (ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
+            new (ClaimTypes.Email, user.Email.Value),
+            new (ClaimTypes.GivenName, user.Firstname.Value),
+            new (ClaimTypes.Surname, user.Lastname.Value),
         ];
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));

@@ -18,7 +18,7 @@ public class RefreshJwtTokenCommandHandler(
 
         if (!user.IsValidRefreshToken(request.RefreshToken)) return DomainErrors.User.InvalidCredentials;
         
-        var token = tokenGenerator.GenerateJwtToken(user.Id, user.Email);
+        var token = tokenGenerator.GenerateJwtToken(user);
 
         return new RefreshJwtTokenResult
         {
