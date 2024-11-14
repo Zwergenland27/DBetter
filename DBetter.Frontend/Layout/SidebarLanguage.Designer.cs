@@ -78,20 +78,20 @@ namespace DBetter.Frontend.Layout {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Login.
+        ///   Looks up a localized string similar to Login / Register.
         /// </summary>
-        internal static string Login {
+        internal static string LoginRegister {
             get {
-                return ResourceManager.GetString("Login", resourceCulture);
+                return ResourceManager.GetString("LoginRegister", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Register.
+        ///   Looks up a localized string similar to My Account.
         /// </summary>
-        internal static string Register {
+        internal static string MyAccount {
             get {
-                return ResourceManager.GetString("Register", resourceCulture);
+                return ResourceManager.GetString("MyAccount", resourceCulture);
             }
         }
         

@@ -18,19 +18,24 @@
             </NavLink>
         </div>
     </nav>
-    <div class="dropdown border-top">
-        <a href="#" class="d-flex align-items-center justify-content-center p-3 link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="material-icons">person</i>
-        </a>
-        <ul class="dropdown-menu text-small shadow">
-            <li>
-                <a class="dropdown-item" href="#">@SidebarLanguage.Login</a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="#">@SidebarLanguage.Register</a>
-            </li>
-        </ul>
-    </div>
+    <nav class="nav nav-pills nav-flush flex-column text-center">
+        <AuthorizeView>
+            <NotAuthorized>
+                <div class="nav-item">
+                    <NavLink class="nav-link py-3 border-bottom rounded-0" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="right" data-bs-content="@SidebarLanguage.LoginRegister" href="Account">
+                        <i class="material-icons">person</i>
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+            <Authorized>
+                <div class="nav-item">
+                    <NavLink class="nav-link py-3 border-bottom rounded-0" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="right" data-bs-content="@SidebarLanguage.MyAccount" href="Account">
+                        <i class="material-icons">person</i>
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
 </div>
 
 <script>
@@ -44,9 +49,6 @@
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            await Js.InvokeVoidAsync("addTooltips");
-        }
+        await Js.InvokeVoidAsync("addTooltips");
     }
 }

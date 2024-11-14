@@ -8,9 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.10"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.10" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.0-rc.2.24474.3" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -19,7 +22,6 @@
 
     <ItemGroup>
       <Folder Include="Components\" />
-      <Folder Include="Services\" />
     </ItemGroup>
 
     <ItemGroup>

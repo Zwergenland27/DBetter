@@ -27,10 +27,10 @@
     <data name="Trips" xml:space="preserve">
         <value>My trips</value>
     </data>
-    <data name="Login" xml:space="preserve">
-        <value>Login</value>
+    <data name="LoginRegister" xml:space="preserve">
+        <value>Login / Register</value>
     </data>
-    <data name="Register" xml:space="preserve">
-        <value>Register</value>
+    <data name="MyAccount" xml:space="preserve">
+        <value>My Account</value>
     </data>
 </root>

@@ -1,5 +1,15 @@
 ﻿@page "/"
+@using System.Security.Claims
 
 <PageTitle>Home</PageTitle>
 
 <h1>Homepage</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <p>Hallo, @context.User.FindFirst("given_name")!.Value @context.User.FindFirst("family_name")!.Value</p>
+    </Authorized>
+    <NotAuthorized>
+    <p>Sorry, but you're not authorized to view this page :(</p>
+    </NotAuthorized>
+</AuthorizeView>

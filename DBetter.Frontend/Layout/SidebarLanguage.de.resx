@@ -20,10 +20,10 @@
     <data name="Trips" xml:space="preserve">
         <value>Meine Reisen</value>
     </data>
-    <data name="Login" xml:space="preserve">
-        <value>Login</value>
+    <data name="LoginRegister" xml:space="preserve">
+        <value>Anmelden / Registrieren</value>
     </data>
-    <data name="Register" xml:space="preserve">
-        <value>Registrieren</value>
+    <data name="MyAccount" xml:space="preserve">
+        <value>Mein Konto</value>
     </data>
 </root>
