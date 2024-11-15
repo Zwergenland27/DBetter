@@ -15,6 +15,6 @@ public class RefreshJwtTokenParameters : IParameters
     /// <summary>
     /// Refresh token to refresh the jwt token
     /// </summary>
-    [Required]
+    [JsonIgnore]
     public string? RefreshToken { get; set; }
 }

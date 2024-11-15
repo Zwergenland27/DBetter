@@ -4,21 +4,23 @@ using System.Security.Claims;
 using Blazored.LocalStorage;
 using DBetter.Contracts.Users.Commands;
 using DBetter.Contracts.Users.Commands.Login;
+using DBetter.Contracts.Users.Commands.RefreshJwtTokenParameters;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace DBetter.Frontend;
 
 public class AuthenticationService : AuthenticationStateProvider
 {
+    public static string JwtTokenKey => "jwt_token";
+    public static string HttpClientName => "DBetter.Authentication";
     private readonly HttpClient _http;
     private readonly ILocalStorageService _localStorage;
-    
+
     public AuthenticationService(IHttpClientFactory httpFactory, ILocalStorageService localStorage)
     {
-        _http =httpFactory.CreateClient("DBetter.Api");
+        _http =httpFactory.CreateClient(HttpClientName);
         _localStorage = localStorage;
     }
-    public static string JwtTokenKey => "jwt_token";
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var token = await _localStorage.GetItemAsync<string>(JwtTokenKey);
@@ -81,5 +83,46 @@ public class AuthenticationService : AuthenticationStateProvider
     {
         await _localStorage.RemoveItemAsync(JwtTokenKey);
         await GetAuthenticationStateAsync();
+    }
+    
+    private async Task<string> _refreshToken(string userId)
+    {
+        var response = await _http.PostAsync($"users/{userId}/refresh", null);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception("TODO: proper error handling");
+        }
+
+        var authData = await response.Content.ReadFromJsonAsync<RefreshJwtTokenResult>();
+        
+        if (authData is null)
+        {
+            throw new Exception("TODO: proper error handling");
+        }
+
+        return authData.AccessToken;
+    }
+
+    public async Task<string?> GetToken()
+    {
+        var token = await _localStorage.GetItemAsync<string>(JwtTokenKey);
+        if (token is null)
+        {
+            return null;
+        }
+        
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+        
+        if (jwtToken.ValidTo > DateTime.UtcNow)
+        {
+            await Logout();
+            var id = jwtToken.Claims.First(claim => claim.Type == "nameid").Value;
+            token = await _refreshToken(jwtToken.Subject);
+            await _localStorage.SetItemAsync(JwtTokenKey, token);
+            await GetAuthenticationStateAsync();
+        }
+        
+        return token;
     }
 }

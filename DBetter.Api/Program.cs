@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using DBetter.Api;
 using DBetter.Application;
 using DBetter.Infrastructure;
@@ -58,5 +59,20 @@ app.UseCors();
 app.AddStationEndpoints();
 app.AddUserEndpoints();
 app.AddAuthenticationEndpoints();
+
+app.MapGet("quak", (ClaimsPrincipal user) =>
+    {
+        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        return Results.Ok(userIdClaim.Value);
+    })
+    .RequireAuthorization()
+    .WithName("Quak")
+    .WithOpenApi();
 
 app.Run();

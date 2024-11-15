@@ -1,15 +1,30 @@
 ﻿@page "/"
 @using System.Security.Claims
+@inject IHttpClientFactory httpFactory;
 
 <PageTitle>Home</PageTitle>
 
 <h1>Homepage</h1>
+
+<button @onclick="HandleClick"></button>
 
 <AuthorizeView>
     <Authorized>
         <p>Hallo, @context.User.FindFirst("given_name")!.Value @context.User.FindFirst("family_name")!.Value</p>
     </Authorized>
     <NotAuthorized>
-    <p>Sorry, but you're not authorized to view this page :(</p>
+        <p>Sorry, but you're not authorized to view this page :(</p>
     </NotAuthorized>
 </AuthorizeView>
+
+@code{
+
+    Task HandleClick()
+    {
+        var http = httpFactory.CreateClient("DBetter.Api");
+        var result = http.GetAsync("quak");
+        Console.WriteLine(result);
+        return Task.CompletedTask;
+    }
+
+}
