@@ -46,8 +46,7 @@ public class UserMapping : IEntityTypeConfiguration<User>
             .HasColumnName("PasswordSalt")
             .IsRequired();
 
-        builder.ComplexProperty<RefreshToken>("_refreshToken")
-            .IsRequired();
+        builder.OwnsOne<RefreshToken>("_refreshToken");
 
         builder.Ignore(user => user.Discounts);
         builder.Ignore(user => user.CurrentDiscounts);
