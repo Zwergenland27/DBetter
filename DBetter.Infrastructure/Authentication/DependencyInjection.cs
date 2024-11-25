@@ -29,7 +29,8 @@ public static class DependencyInjection
                     ValidateIssuer = true,
                     ValidIssuer = jwtSettings.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = jwtSettings.Audience
+                    ValidAudience = jwtSettings.Audience,
+                    ClockSkew = TimeSpan.FromSeconds(15)
                 };
             });
         
