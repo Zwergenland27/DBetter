@@ -23,4 +23,4 @@ public class RefreshJwtTokenRequestBuilder : IRequestBuilder<RefreshJwtTokenPara
     }
 }
 
-public record RefreshJwtTokenCommand(UserId Id, string RefreshToken) : ICommand<RefreshJwtTokenResult>;
+public record RefreshJwtTokenCommand(UserId Id, string RefreshToken) : ICommand<Tuple<String, RefreshToken>>;

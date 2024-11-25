@@ -9,12 +9,12 @@ public class RefreshJwtTokenParameters : IParameters
     /// <summary>
     /// Id of the user
     /// </summary>
-    [JsonIgnore]
+    [Required]
     public string? Id { get; set; }
     
     /// <summary>
     /// Refresh token to refresh the jwt token
     /// </summary>
-    [Required]
+    [JsonIgnore]
     public string? RefreshToken { get; set; }
 }
