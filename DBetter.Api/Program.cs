@@ -33,7 +33,8 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policyBuilder =>
     {
-        policyBuilder.AllowAnyOrigin()
+        policyBuilder.WithOrigins("https://localhost:4200")
+            .AllowCredentials()
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
@@ -50,10 +51,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors();
 
 app.AddStationEndpoints();
 app.AddUserEndpoints();
