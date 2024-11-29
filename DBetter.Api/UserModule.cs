@@ -8,6 +8,8 @@ using DBetter.Contracts.Users.Commands.AddDiscount;
 using DBetter.Contracts.Users.Commands.EditPersonalData;
 using DBetter.Contracts.Users.Queries.GetMyPassengers;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace DBetter.Api;
@@ -34,12 +36,10 @@ public static class UserModule
                     .MapParameter(p => p.Id, id)
                     .BuildUsing<EditPersonalDataRequestBuilder>();
 
-                if (command.HasFailed) return Results.BadRequest();
-
-                var result = await mediator.Send(command.Value);
-                if (result.HasFailed) return Results.BadRequest();
-
-                return Results.Ok(result.Value);
+                return await mediator.HandleCommandAsync(command, (EditPersonalDataResult user) =>
+                {
+                    return Results.Ok(user);
+                });
             })
                 .RequireAuthorization()
                 .WithName("EditPersonalData")
@@ -63,12 +63,10 @@ public static class UserModule
                 .MapParameter(p => p.UserId, id)
                 .BuildUsing<AddDiscountRequestBuilder>();
 
-            if (command.HasFailed) return Results.BadRequest();
-
-            var result = await mediator.Send(command.Value);
-            if (result.HasFailed) return Results.BadRequest();
-
-            return Results.Ok();
+            return await mediator.HandleCommandAsync(command, () =>
+            {
+                return Results.Ok();
+            });
         })
             .RequireAuthorization()
             .WithName("AddDiscount")
@@ -91,12 +89,10 @@ public static class UserModule
                 .MapParameter(p => p.UserId, id)
                 .BuildUsing<GetMyPassengersRequestBuilder>();
 
-            if (query.HasFailed) return Results.BadRequest();
-
-            var result = await mediator.Send(query.Value);
-            if (result.HasFailed) return Results.BadRequest();
-
-            return Results.Ok(result.Value);
+            return await mediator.HandleQueryAsync(query, (MyPassengersResult passengersResult) =>
+            {
+                return Results.Ok(passengersResult);
+            });
         })
             .RequireAuthorization()
             .WithName("GetMyPassengers")

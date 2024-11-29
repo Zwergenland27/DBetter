@@ -23,13 +23,11 @@ public static class AuthenticationModule
                 var command = Builder<RegisterCommand>
                     .BindParameters(parameters)
                     .BuildUsing<RegisterRequestBuilder>();
-
-                if (command.HasFailed) return Results.BadRequest(command.Errors);
                 
-                var user = await mediator.Send(command.Value);
-                if(user.HasFailed) return Results.BadRequest(user.Errors);
-                
-                return Results.Created($"/users/{user.Value.Id}", user.Value);
+                return await mediator.HandleCommandAsync(command, (IUserResult user) =>
+                {
+                    return Results.Created($"/users/{user.Id}", user);
+                });
             })
             .WithName("Register")
             .WithOpenApi();
@@ -43,17 +41,15 @@ public static class AuthenticationModule
                     .BindParameters(parameters)
                     .BuildUsing<LoginRequestBuilder>();
 
-                if (command.HasFailed) return Results.BadRequest();
-                
-                var result = await mediator.Send(command.Value);
-                if(result.HasFailed) return Results.BadRequest();
-                
-                context.AppendRefreshTokenCookie(result.Value.Item2);
-                
-                return Results.Ok(new AuthenticationDto()
+                return await mediator.HandleCommandAsync(command, (Tuple<String, RefreshToken> authData) =>
                 {
-                    Token = result.Value.Item1,
-                    RefreshTokenExpiration = result.Value.Item2.Expires
+                    context.AppendRefreshTokenCookie(authData.Item2);
+                    
+                    return Results.Ok(new AuthenticationDto()
+                    {
+                        Token = authData.Item1,
+                        RefreshTokenExpiration = authData.Item2.Expires
+                    });
                 });
             })
             .WithName("Login")
@@ -72,17 +68,15 @@ public static class AuthenticationModule
                 .MapParameter(p => p.RefreshToken, refreshToken)
                 .BuildUsing<RefreshJwtTokenRequestBuilder>();
 
-            if (command.HasFailed) return Results.BadRequest();
-
-            var result = await mediator.Send(command.Value);
-            if (result.HasFailed) return Results.BadRequest();
-            
-            context.AppendRefreshTokenCookie(result.Value.Item2);
-            
-            return Results.Ok(new AuthenticationDto
+            return await mediator.HandleCommandAsync(command, (Tuple<String, RefreshToken> authData) =>
             {
-                Token = result.Value.Item1,
-                RefreshTokenExpiration = result.Value.Item2.Expires
+                context.AppendRefreshTokenCookie(authData.Item2);
+                    
+                return Results.Ok(new AuthenticationDto()
+                {
+                    Token = authData.Item1,
+                    RefreshTokenExpiration = authData.Item2.Expires
+                });
             });
         })
             .WithName("Refresh")
