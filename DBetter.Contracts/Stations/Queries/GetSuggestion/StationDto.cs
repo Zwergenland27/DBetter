@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace DBetter.Contracts;
 
-public class Station
+public class StationDto
 {
     public String Id { get; set; } = null!;
 

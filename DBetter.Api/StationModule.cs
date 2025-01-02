@@ -9,7 +9,7 @@ public static class StationModule
     {
         app.MapGet("/stations", async (HttpClient http, [FromQuery(Name = "search")] string? search) =>
             {
-                var stations = await http.GetFromJsonAsync<List<Station>>($"reiseloesung/orte?suchbegriff={search}");
+                var stations = await http.GetFromJsonAsync<List<StationDto>>($"reiseloesung/orte?suchbegriff={search}");
                 return Results.Ok(stations);
             })
             .WithName("SearchStations")
