@@ -72,6 +72,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.AddStationEndpoints();
+app.AddSearchEndpoints();
 app.AddUserEndpoints();
 app.AddAuthenticationEndpoints();
 

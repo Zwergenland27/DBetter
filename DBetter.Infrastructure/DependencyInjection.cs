@@ -2,6 +2,7 @@ using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Users;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.Authentication;
+using DBetter.Infrastructure.BahnApi;
 using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ public static class DependencyInjection
         services.AddRepositories();
         services.AddPostgres("Host=localhost;Database=DBetter;Username=user;Password=password");
         services.AddJwtAuthentication(configuration);
+        services.AddBahnApi();
         return services;
     }
     
