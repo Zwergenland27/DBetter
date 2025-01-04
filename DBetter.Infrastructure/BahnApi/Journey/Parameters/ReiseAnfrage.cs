@@ -20,4 +20,6 @@ public class ReiseAnfrage
     public bool NurDeutschlandTicketVerbindungen { get; set; }
     public bool DeutschlandTicketVorhanden { get; set; }
     public List<Zwischenhalt> Zwischenhalte { get; set; }
+    
+    public string? PagingReference { get; set; }
 }

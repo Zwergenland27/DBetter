@@ -9,12 +9,13 @@ using DBetter.Domain.Users.ValueObjects;
 using DBetter.Infrastructure.BahnApi.Journey.Parameters;
 using DBetter.Infrastructure.BahnApi.Journey.Responses;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 
 namespace DBetter.Infrastructure.BahnApi.Journey;
 
 public class JourneyRepository(HttpClient http)
 {
-    public async Task<List<ConnectionDto>> GetRoutes(RequestParameters parameters)
+    public async Task<ConnectionsDto?> GetRoutes(RequestParameters parameters, string? page)
     {
         TimeZoneInfo germanTimeZone = TimeZoneInfo.Local;
         DateTime germanRequestTime = TimeZoneInfo.ConvertTimeFromUtc(parameters.Time!, germanTimeZone);
@@ -35,11 +36,12 @@ public class JourneyRepository(HttpClient http)
             DeutschlandTicketVorhanden = false,
             Zwischenhalte = parameters.Route.ToZwischenhalte(),
             MinUmstiegszeit = parameters.Options.MinTransferTime,
-            MaxUmstiege = parameters.Options.MaxTransfers
+            MaxUmstiege = parameters.Options.MaxTransfers,
+            PagingReference = page
         };
 
         var response = await http.PostAsJsonAsync("angebote/fahrplan", request);
-        if (!response.IsSuccessStatusCode) return [];
+        if (!response.IsSuccessStatusCode) return null!;
         
         var responseString = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Fahrplan>(responseString, new JsonSerializerOptions
@@ -47,9 +49,14 @@ public class JourneyRepository(HttpClient http)
             PropertyNameCaseInsensitive = true
         });
 
-        if (result is null) return [];
-        
-        return result.Verbindungen.Select(connection => Map(connection)).ToList();
+        if (result is null) return null!;
+
+        return new ConnectionsDto
+        {
+            Connections = result.Verbindungen.Select(connection => Map(connection)).ToList(),
+            PageEarlier = result.VerbindungReference.Earlier,
+            PageLater = result.VerbindungReference.Later,
+        };
     }
 
     private ConnectionDto Map(Verbindung connection)
@@ -99,6 +106,11 @@ public class JourneyRepository(HttpClient http)
         if (vehicle.ZugAttribute.Any(a => a.Key == "BR"))
         {
             return CheckPartial("Restaurant", section, vehicle.ZugAttribute.First(a => a.Key == "BR"));
+        }
+
+        if (vehicle.ZugAttribute.Any(a => a.Key == "QP"))
+        {
+            return "Bistro";
         }
 
         if (vehicle.ZugAttribute.Any(a => a.Key == "MP"))
