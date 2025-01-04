@@ -9,6 +9,10 @@ public class ReiseAnfrage
     public string AnkunftSuche { get; set; }
     public List<string> Produktgattungen { get; set; }
     public List<Reisender> Reisende { get; set; }
+    
+    public int MaxUmstiege { get; set; }
+    
+    public int MinUmstiegszeit { get; set; }
     public bool SchnelleVerbindungen { get; set; }
     public bool SitzplatzOnly { get; set; }
     public bool BikeCarriage { get; set; }

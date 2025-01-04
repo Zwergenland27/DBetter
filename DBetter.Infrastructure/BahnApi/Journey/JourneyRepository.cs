@@ -25,14 +25,17 @@ public class JourneyRepository(HttpClient http)
             AnfrageZeitpunkt = germanRequestTime.ToString("yyyy-MM-ddTHH:mm:ss"),
             Klasse = parameters.Options.Class == "First" ? "KLASSE_1" : "KLASSE_2",
             AnkunftSuche = parameters.TimeType == "Departure" ? "ABFAHRT" : "ANKUNFT",
-            Produktgattungen = GenerateAllowedTransport(parameters.Route.RouteOptions[0]),
+            Produktgattungen = parameters.Route.RouteOptions[0].GetAllowedTransport(),
             Reisende = generatePassengers(parameters.Passengers),
             SchnelleVerbindungen = false,
             SitzplatzOnly = false,
             BikeCarriage = false,
             ReservierungsKontingenteVorhanden = false,
             NurDeutschlandTicketVerbindungen = false,
-            DeutschlandTicketVorhanden = false
+            DeutschlandTicketVorhanden = false,
+            Zwischenhalte = parameters.Route.ToZwischenhalte(),
+            MinUmstiegszeit = parameters.Options.MinTransferTime,
+            MaxUmstiege = parameters.Options.MaxTransfers
         };
 
         var response = await http.PostAsJsonAsync("angebote/fahrplan", request);
@@ -60,7 +63,7 @@ public class JourneyRepository(HttpClient http)
                 Catering = GetCateringInformation(section),
                 Bike = GetBikeInformation(section),
                 Accessibility = GetAccessibilityInformation(section),
-                Demand = 0,
+                Demand = section.AuslastungsMeldungen.ToDto(),
                 Information = CollectInformation(section.RisNotizen, section.HimMeldungen,
                     section.PriorisierteMeldungen),
                 Vehicle = null,
@@ -74,14 +77,16 @@ public class JourneyRepository(HttpClient http)
                     RealTimeArrival = ConvertToDateTime(stop.EzAnkunftsZeitpunkt),
                     Departure = ConvertToDateTime(stop.AbfahrtsZeitpunkt),
                     RealTimeDeparture = ConvertToDateTime(stop.EzAnkunftsZeitpunkt),
-                    Information = CollectInformation(stop.RisNotizen, stop.HimMeldungen, stop.PriorisierteMeldungen)
+                    Information = CollectInformation(stop.RisNotizen, stop.HimMeldungen, stop.PriorisierteMeldungen),
+                    Demand = stop.AuslastungsMeldungen.ToDto(),
 
                 }).ToList()
             }).ToList(),
-            Price = connection.AngebotsPreis?.Betrag,
+            Price = connection.AngebotsPreis.GetPrice(connection.HasTeilpreis),
             Information = CollectInformation(connection.RisNotizen, connection.HimMeldungen,
                 connection.PriorisierteMeldungen),
             Bike = GetGlobalBikeInformation(connection.FahrradmitnahmeMoeglich),
+            Demand = connection.AuslastungsMeldungen.ToDto(),
         };
     }
 
@@ -194,39 +199,6 @@ public class JourneyRepository(HttpClient http)
         List<PriorisierteMeldung> prioritizedInfos)
     {
         return risInfos.Select(info => info.ToDto()).ToList();
-    }
-    
-    private List<string> GenerateAllowedTransport(RouteOptionParameters options)
-    {
-        List<string> allowedTransport = [];
-
-        if (options.AllowHighSpeedTrains)
-        {
-            allowedTransport.Add("ICE");
-        }
-
-        if (options.AllowIntercityTrains)
-        {
-            allowedTransport.Add("EC_IC");
-            allowedTransport.Add("IR");
-        }
-
-        if (options.AllowRegionalTrains)
-        {
-            allowedTransport.Add("REGIONAL");
-        }
-
-        if (options.AllowPublicTransport)
-        {
-            allowedTransport.Add("SBAHN");
-            allowedTransport.Add("BUS");
-            allowedTransport.Add("SCHIFF");
-            allowedTransport.Add("UBAHN");
-            allowedTransport.Add("TRAM");
-        }
-
-
-        return allowedTransport;
     }
 
     private List<Reisender> generatePassengers(List<PassengerParameters> passengers)

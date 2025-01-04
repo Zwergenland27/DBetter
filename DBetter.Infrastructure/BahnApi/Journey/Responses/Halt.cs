@@ -23,4 +23,6 @@ public class Halt
     public List<RisNotiz> RisNotizen  { get; set; }
     
     public List<PriorisierteMeldung> PriorisierteMeldungen { get; set; }
+    
+    public List<AuslastungsMeldung> AuslastungsMeldungen { get; set; }
 }

@@ -2,7 +2,7 @@ namespace DBetter.Contracts.Journeys.DTOs;
 
 public class DemandDto
 {
-    public int FirstClass { get; set; }
+    public string FirstClass { get; set; }
     
-    public int SecondClass { get; set; }
+    public string SecondClass { get; set; }
 }

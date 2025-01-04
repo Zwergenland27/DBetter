@@ -13,4 +13,6 @@ public class Verbindungsabschnitt
     public Verkehrsmittel? Verkehrsmittel { get; set; }
     
     public List<Halt> Halte { get; set; }
+    
+    public List<AuslastungsMeldung> AuslastungsMeldungen { get; set; }
 }

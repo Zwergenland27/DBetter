@@ -12,9 +12,13 @@ public class Verbindung
     
     public PreisAngebot? AngebotsPreis { get; set; }
     
+    public bool HasTeilpreis { get; set; }
+    
     public List<HimMeldung> HimMeldungen { get; set; }
     
     public List<RisNotiz> RisNotizen  { get; set; }
     
     public List<PriorisierteMeldung> PriorisierteMeldungen { get; set; }
+    
+    public List<AuslastungsMeldung> AuslastungsMeldungen { get; set; }
 }
