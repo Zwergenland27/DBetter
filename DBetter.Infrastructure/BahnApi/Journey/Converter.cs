@@ -19,6 +19,7 @@ public static class Converter
         {"text.realtime.stop.entry.disabled", new InformationDto{Priority = 0, Code = "Ris.Stop.ExitOnly"}},
         {"text.realtime.stop.exit.disabled", new InformationDto{Priority = 0, Code = "Ris.Stop.EntryOnly"}},
         {"text.realtime.stop.cancelled", new InformationDto{Priority = 2, Code = "Ris.Stop.Cancelled"}},
+        {"text.realtime.stop.additional", new InformationDto{Priority = 1, Code = "Ris.Stop.Additional"}},
         
     };
     public static InformationDto ToDto(this RisNotiz info)
@@ -26,6 +27,8 @@ public static class Converter
         //TODO: Map all FT messages (Always the reason behind the train delay)
         //TODO: Check PriorisierteMeldungen, sometimes it contains information that appear nowhere else and are important
         //Example: Zug aktuell nicht reservierbar
+        //TODO: Map all QF messages (always information about vehicle change)
+        //Example: Schienenersatzverkehr, Es verkehrt nur NJ40490
         if (_risMapping.TryGetValue(info.Key, out InformationDto? foundInfo))
         {
             return foundInfo!;

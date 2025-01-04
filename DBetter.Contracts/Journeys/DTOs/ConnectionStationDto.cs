@@ -12,5 +12,7 @@ public class ConnectionStationDto : StationDto
     
     public DemandDto Demand { get; set; }
     
+    public string Platform { get; set; }
+    
     public List<InformationDto> Information { get; set; }
 }

@@ -86,6 +86,7 @@ public class JourneyRepository(HttpClient http)
                     RealTimeDeparture = ConvertToDateTime(stop.EzAnkunftsZeitpunkt),
                     Information = CollectInformation(stop.RisNotizen, stop.HimMeldungen, stop.PriorisierteMeldungen),
                     Demand = stop.AuslastungsMeldungen.ToDto(),
+                    Platform = stop.Gleis
 
                 }).ToList()
             }).ToList(),
