@@ -4,6 +4,8 @@ public class RisNotiz
 {
     public string Key { get; set; }
     
+    public string Value { get; set; }
+    
     public int RouteIdxFrom { get; set; }
     
     public int RouteIdxTo { get; set; }

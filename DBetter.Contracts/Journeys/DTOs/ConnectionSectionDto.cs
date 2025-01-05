@@ -2,7 +2,13 @@ namespace DBetter.Contracts.Journeys.DTOs;
 
 public class ConnectionSectionDto
 {
-    public string LineNr { get; set; }
+    public string LineNameShort { get; set; }
+    
+    public string LineNameMedium { get; set; }
+    
+    public string LineNameFull { get; set; }
+    
+    public string Direction { get; set; }
     public List<VehicleDto>? Vehicle { get; set; }
     public float Percentage { get; set; }
     public string Catering { get; set; }
@@ -10,5 +16,7 @@ public class ConnectionSectionDto
     public string Accessibility { get; set; }
     public DemandDto Demand { get; set; }
     public List<InformationDto> Information { get; set; }
+    
+    public bool ReservationRequired { get; set; }
     public List<ConnectionStationDto> Stops { get; set; }
 }

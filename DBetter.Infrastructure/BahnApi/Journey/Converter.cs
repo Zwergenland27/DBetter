@@ -7,37 +7,52 @@ namespace DBetter.Infrastructure.BahnApi.Journey;
 
 public static class Converter
 {
-    private static Dictionary<string, InformationDto?> _risMapping = new()
+    private static Dictionary<string, Tuple<int, string>> _codeMapping = new()
     {
-        {"FT", new InformationDto{Priority = 1, Code = "Ris.DelayReason"}},
-        {"QF", new InformationDto{Priority = 2, Code = "Ris.Connection.BusReplacement"}},
-        {"DR", new InformationDto{Priority = 1, Code = "Ris.Connection.ControlCenterUnderManned"}},
-        {"text.realtime.connection.platform.change", new InformationDto{Priority = 1, Code = "Ris.Platform.Change"}},
-        {"text.realtime.connection.cancelled", new InformationDto{Priority = 2, Code = "Ris.Connection.Cancelled"}},
-        {"text.realtime.connection.brokentrip", new InformationDto{Priority = 2, Code = "Ris.Connection.GoingToMiss"}},
-        {"text.realtime.journey.missed.connection", new InformationDto{Priority = 2, Code = "Ris.Connection.Missed"}},
-        {"text.realtime.stop.entry.disabled", new InformationDto{Priority = 0, Code = "Ris.Stop.ExitOnly"}},
-        {"text.realtime.stop.exit.disabled", new InformationDto{Priority = 0, Code = "Ris.Stop.EntryOnly"}},
-        {"text.realtime.stop.cancelled", new InformationDto{Priority = 2, Code = "Ris.Stop.Cancelled"}},
-        {"text.realtime.stop.additional", new InformationDto{Priority = 1, Code = "Ris.Stop.Additional"}},
-        
+        {"text.realtime.connection.platform.change", new Tuple<int, string>(1, "Ris.Platform.Change")},
+        {"text.realtime.connection.cancelled", new Tuple<int, string>(2, "Ris.Connection.Cancelled")},
+        {"text.realtime.connection.brokentrip", new Tuple<int, string>(2, "Ris.Connection.GoingToMiss")},
+        {"text.realtime.journey.missed.connection", new Tuple<int, string>(2, "Ris.Connection.Missed")},
+        {"text.realtime.stop.entry.disabled", new Tuple<int, string>(0, "Ris.Stop.ExitOnly")},
+        {"text.realtime.stop.exit.disabled", new Tuple<int, string>(0, "Ris.Stop.EntryOnly")},
+        {"text.realtime.stop.cancelled", new Tuple<int, string>(2, "Ris.Stop.Cancelled")},
+        {"text.realtime.stop.additional", new Tuple<int, string>(1, "Ris.Stop.Additional")},
     };
+
+    public static Dictionary<string, int> _priorityMapping = new()
+    {
+        { "FT", 1 },
+        { "QF", 2 },
+        { "DR", 1 },
+    };
+    
     public static InformationDto ToDto(this RisNotiz info)
     {
-        //TODO: Map all FT messages (Always the reason behind the train delay)
-        //TODO: Check PriorisierteMeldungen, sometimes it contains information that appear nowhere else and are important
-        //Example: Zug aktuell nicht reservierbar
-        //TODO: Map all QF messages (always information about vehicle change)
-        //Example: Schienenersatzverkehr, Es verkehrt nur NJ40490
-        if (_risMapping.TryGetValue(info.Key, out InformationDto? foundInfo))
+        if (_codeMapping.TryGetValue(info.Key, out var foundInfo))
         {
-            return foundInfo!;
+            return new InformationDto
+            {
+                Priority = foundInfo.Item1,
+                Code = foundInfo.Item2,
+                Text = info.Value
+            };
+        }
+
+        if (_priorityMapping.TryGetValue(info.Key, out var priority))
+        {
+            return new InformationDto
+            {
+                Priority = priority,
+                Code = info.Key,
+                Text = info.Value
+            };
         }
 
         return new InformationDto
         {
+            Priority = 2,
             Code = info.Key,
-            Priority = 2
+            Text = info.Value
         };
     }
 

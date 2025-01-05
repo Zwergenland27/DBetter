@@ -66,7 +66,10 @@ public class JourneyRepository(HttpClient http)
             Id = connection.TripId,
             Sections = connection.VerbindungsAbschnitte.Where(section => section.Halte.Count > 0).Select(section => new ConnectionSectionDto
             {
-                LineNr = section.Verkehrsmittel!.MittelText,
+                LineNameShort = section.Verkehrsmittel!.KurzText,
+                LineNameMedium = section.Verkehrsmittel!.MittelText,
+                LineNameFull = section.Verkehrsmittel!.LangText,
+                Direction = section.Verkehrsmittel!.Richtung,
                 Catering = GetCateringInformation(section),
                 Bike = GetBikeInformation(section),
                 Accessibility = GetAccessibilityInformation(section),
@@ -75,6 +78,7 @@ public class JourneyRepository(HttpClient http)
                     section.PriorisierteMeldungen),
                 Vehicle = null,
                 Percentage = section.AbschnittsAnteil,
+                ReservationRequired = section.ReservierungspflichtigNote == "Reservierungspflicht",
                 Stops = section.Halte.Select(stop => new ConnectionStationDto
                 {
                     Id = stop.Id,
