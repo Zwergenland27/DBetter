@@ -17,4 +17,6 @@ public class Verbindungsabschnitt
     public List<Halt> Halte { get; set; }
     
     public List<AuslastungsMeldung> AuslastungsMeldungen { get; set; }
+    
+    public string JourneyId { get; set; }
 }

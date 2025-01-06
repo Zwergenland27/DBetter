@@ -16,5 +16,14 @@ public static class SearchModule
             })
         .WithName("Search")
         .WithOpenApi();
+        
+        app.MapGet("/section", async (JourneyRepository repository, [FromQuery(Name = "journeyId")] string? journeyId) =>
+        {
+            var result = await repository.GetSection(journeyId);
+            if (result is null) return Results.StatusCode(500);
+            return Results.Ok(result);
+        })
+            .WithName("GetSection")
+            .WithOpenApi();
     }
 }

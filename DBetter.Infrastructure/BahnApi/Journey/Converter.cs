@@ -1,3 +1,5 @@
+using System.Globalization;
+using DBetter.Contracts;
 using DBetter.Contracts.Journeys.DTOs;
 using DBetter.Contracts.Journeys.Parameters;
 using DBetter.Infrastructure.BahnApi.Journey.Parameters;
@@ -19,12 +21,169 @@ public static class Converter
         {"text.realtime.stop.additional", new Tuple<int, string>(1, "Ris.Stop.Additional")},
     };
 
+    public static List<InformationDto> GetInformation(this Verbindung connection)
+    {
+        return CollectInformation(connection.RisNotizen, connection.HimMeldungen, connection.PriorisierteMeldungen);
+    }
+    
+    public static List<InformationDto> GetInformation(this Verbindungsabschnitt section)
+    {
+        return CollectInformation(section.RisNotizen, section.HimMeldungen, section.PriorisierteMeldungen);
+    }
+    
+    public static List<InformationDto> GetInformation(this Halt stop)
+    {
+        return CollectInformation(stop.RisNotizen, stop.HimMeldungen, stop.PriorisierteMeldungen);
+    }
+    
+    private static List<InformationDto> CollectInformation(List<RisNotiz> risInfos, List<HimMeldung> himInfos,
+        List<PriorisierteMeldung> prioritizedInfos)
+    {
+        return risInfos.Select(info => info.ToDto()).ToList();
+    }
+
     public static Dictionary<string, int> _priorityMapping = new()
     {
         { "FT", 1 },
         { "QF", 2 },
         { "DR", 1 },
     };
+
+    public static ConnectionSectionDto ToDto(this Verbindungsabschnitt section)
+    {
+        return new ConnectionSectionDto
+        {
+            LineNameShort = section.Verkehrsmittel!.KurzText,
+            LineNameMedium = section.Verkehrsmittel!.MittelText,
+            LineNameFull = section.Verkehrsmittel!.LangText,
+            Direction = section.Verkehrsmittel!.Richtung,
+            Catering = section.GetCateringInformation(),
+            Bike = section.GetBikeInformation(),
+            Accessibility = section.GetAccessibilityInformation(),
+            Demand = section.AuslastungsMeldungen.ToDto(),
+            Information = section.GetInformation(),
+            Vehicle = null,
+            Percentage = section.AbschnittsAnteil,
+            ReservationRequired = section.ReservierungspflichtigNote == "Reservierungspflicht",
+            JourneyId = section.JourneyId,
+            Stops = section.Halte.Select(stop => stop.ToDto()).ToList()
+        };
+    }
+
+    public static ConnectionStationDto ToDto(this Halt stop)
+    {
+        return new ConnectionStationDto
+        {
+            Id = stop.Id,
+            Name = stop.Name,
+            RouteIndex = stop.RouteIdx,
+            Arrival = stop.AnkunftsZeitpunkt.ConvertToDateTime(),
+            RealTimeArrival = stop.EzAnkunftsZeitpunkt.ConvertToDateTime(),
+            Departure = stop.AbfahrtsZeitpunkt.ConvertToDateTime(),
+            RealTimeDeparture = stop.EzAbfahrtsZeitpunkt.ConvertToDateTime(),
+            Information = stop.GetInformation(),
+            Demand = stop.AuslastungsMeldungen.ToDto(),
+            Platform = stop.Gleis
+
+        };
+    }
+    
+    private static string GetCateringInformation(this Verbindungsabschnitt section)
+    {
+        var vehicle = section.Verkehrsmittel!;
+
+        if (vehicle.ProduktGattung is not "ICE" and not "EC_IC" and not "IR") return "Unknown";
+        
+        if (vehicle.ZugAttribute.Any(a => a.Key == "BR"))
+        {
+            return CheckPartial("Restaurant", section, vehicle.ZugAttribute.First(a => a.Key == "BR"));
+        }
+
+        if (vehicle.ZugAttribute.Any(a => a.Key == "QP"))
+        {
+            return "Bistro";
+        }
+
+        if (vehicle.ZugAttribute.Any(a => a.Key == "MP"))
+        {
+            return "SnackService";
+        }
+
+        if (vehicle.ZugAttribute.Any(a => a.Key == "SN"))
+        {
+            return CheckPartial("Snack", section, vehicle.ZugAttribute.First(a => a.Key == "SN"));
+        }
+
+        return "None";
+    }
+    
+    private static string GetBikeInformation(this Verbindungsabschnitt section)
+    {
+        var vehicle = section.Verkehrsmittel!;
+
+        if (section.HimMeldungen.Any(info => info.Text is not null && info.Text.Contains("Die Mitnahme von Fahrrädern ist nicht möglich.")))
+        {
+            return "No";
+        }
+
+        if (vehicle.ZugAttribute.Any(a => a.Key == "FR"))
+        {
+            return "ReservationRequired";
+        }
+        
+        if (vehicle.ZugAttribute.Any(a => a.Key == "FB"))
+        {
+            return "Limited";
+        }
+        
+        return "Unknown";
+    }
+    
+    private static string GetAccessibilityInformation(this Verbindungsabschnitt section)
+    {
+        var vehicle = section.Verkehrsmittel!;
+        if (vehicle.ZugAttribute.Any(a => a.Key is "RZ"))
+        {
+            return CheckPartial("Accessible", section, vehicle.ZugAttribute.First(a => a.Key == "RZ"));
+        }
+        
+        if (vehicle.ZugAttribute.Any(a => a.Key is "EH"))
+        {
+            return CheckPartial("Accessible", section, vehicle.ZugAttribute.First(a => a.Key == "EH"));
+        }
+        return "Unknown";
+    }
+    
+    private static DateTime? ConvertToDateTime(this string? dateString)
+    {
+        CultureInfo germanCulture = CultureInfo.CurrentCulture;
+        if (dateString == null)
+        {
+            return null;
+        }
+
+        return DateTime.ParseExact(dateString, "yyyy-MM-ddTHH:mm:ss", germanCulture);
+    }
+    
+    private static string CheckPartial(string name, Verbindungsabschnitt section, ZugAttribut attribute)
+    {
+        var startStation = section.Halte[0].Name;
+        var endStation = section.Halte[^1].Name;
+        
+        var sectionPart = attribute.TeilstreckenHinweis;
+
+        if (sectionPart is null) return name;
+        
+        var bracesRemoved = sectionPart.Substring(1, sectionPart.Length - 2);
+        var stations = bracesRemoved.Split(" - ");
+
+        if (stations[0] == startStation && stations[1] == endStation)
+        {
+            return name;   
+        }
+
+        return $"Partial{name}";
+    }
     
     public static InformationDto ToDto(this RisNotiz info)
     {
