@@ -62,11 +62,21 @@ public static class Converter
             Accessibility = section.GetAccessibilityInformation(),
             Demand = section.AuslastungsMeldungen.ToDto(),
             Information = section.GetInformation(),
+            ConnectionPrediction = section.GetConnectionPrediction(),
             Vehicle = null,
             Percentage = section.AbschnittsAnteil,
             ReservationRequired = section.ReservierungspflichtigNote == "Reservierungspflicht",
             JourneyId = section.JourneyId,
             Stops = section.Halte.Select(stop => stop.ToDto()).ToList()
+        };
+    }
+
+    public static string GetConnectionPrediction(this Verbindungsabschnitt section)
+    {
+        return section.AnschlussBewertungCode switch
+        {
+            2 => "Reachable",
+            _ => "Unknown"
         };
     }
 
@@ -83,8 +93,8 @@ public static class Converter
             RealTimeDeparture = stop.EzAbfahrtsZeitpunkt.ConvertToDateTime(),
             Information = stop.GetInformation(),
             Demand = stop.AuslastungsMeldungen.ToDto(),
-            Platform = stop.Gleis
-
+            Platform = stop.Gleis,
+            ExternalId = stop.ExtId
         };
     }
     
@@ -154,15 +164,23 @@ public static class Converter
         return "Unknown";
     }
     
-    private static DateTime? ConvertToDateTime(this string? dateString)
+    public static DateTime? ConvertToDateTime(this string? dateString)
     {
+        //Something is wrong about the time format here!
         CultureInfo germanCulture = CultureInfo.CurrentCulture;
         if (dateString == null)
         {
             return null;
         }
+        
+        return DateTime.ParseExact(dateString, "yyyy-MM-ddTHH:mm:ss", germanCulture).ToUniversalTime();
+    }
 
-        return DateTime.ParseExact(dateString, "yyyy-MM-ddTHH:mm:ss", germanCulture);
+    public static string ConvertToBahnTime(this DateTime date)
+    {
+        TimeZoneInfo germanTimeZone = TimeZoneInfo.Local;
+        DateTime germanTime = TimeZoneInfo.ConvertTimeFromUtc(date, germanTimeZone);
+        return germanTime.ToString("yyyy-MM-ddTHH:mm:ss");
     }
     
     private static string CheckPartial(string name, Verbindungsabschnitt section, ZugAttribut attribute)

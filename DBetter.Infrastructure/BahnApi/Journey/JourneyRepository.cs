@@ -17,13 +17,11 @@ public class JourneyRepository(HttpClient http)
 {
     public async Task<ConnectionsDto?> GetRoutes(RequestParameters parameters, string? page)
     {
-        TimeZoneInfo germanTimeZone = TimeZoneInfo.Local;
-        DateTime germanRequestTime = TimeZoneInfo.ConvertTimeFromUtc(parameters.Time!, germanTimeZone);
         var request = new ReiseAnfrage
         {
             AbfahrtsHalt = parameters.Route.Origin!.Id,
             AnkunftsHalt = parameters.Route.Destination!.Id,
-            AnfrageZeitpunkt = germanRequestTime.ToString("yyyy-MM-ddTHH:mm:ss"),
+            AnfrageZeitpunkt = parameters.Time.ConvertToBahnTime(),
             Klasse = parameters.Options.Class == "First" ? "KLASSE_1" : "KLASSE_2",
             AnkunftSuche = parameters.TimeType == "Departure" ? "ABFAHRT" : "ANKUNFT",
             Produktgattungen = parameters.Route.RouteOptions[0].GetAllowedTransport(),
@@ -69,11 +67,58 @@ public class JourneyRepository(HttpClient http)
         throw new NotImplementedException();
     }
 
-    private ConnectionDto Map(Verbindung connection)
+    public async Task<ConnectionDto?> GetRoute(IncreaseTransferTimeRequestParameters parameters, string transferIncreaseType)
+    {
+        var request = new ReiseAnfrageTeilstrecke
+        {
+            OriginalCtxRecon = parameters.ContextId,
+            Klasse = parameters.Options.Class == "First" ? "KLASSE_1" : "KLASSE_2",
+            FixedTeilstrecke = new FixedTeilstrecke
+            {
+                Begin = new FixedTeilstreckeStation
+                {
+                    ExtId = parameters.Begin.ExternalId,
+                    Zeitpunkt = parameters.Begin.Time.ConvertToBahnTime()
+                },
+                End = new FixedTeilstreckeStation
+                {
+                    ExtId = parameters.End.ExternalId,
+                    Zeitpunkt = parameters.End.Time.ConvertToBahnTime()
+                },
+            },
+            AnkunftSuche = transferIncreaseType == "Later" ? "ABFAHRT" : "ANKUNFT",
+            Produktgattungen = parameters.Route.RouteOptions[0].GetAllowedTransport(),
+            Reisende = generatePassengers(parameters.Passengers),
+            SchnelleVerbindungen = false,
+            SitzplatzOnly = false,
+            BikeCarriage = false,
+            ReservierungsKontingenteVorhanden = false,
+            NurDeutschlandTicketVerbindungen = false,
+            DeutschlandTicketVorhanden = false,
+            Zwischenhalte = parameters.Route.ToZwischenhalte(),
+            MaxUmstiege = parameters.Options.MaxTransfers,
+        };
+
+        var response = await http.PostAsJsonAsync("angebote/teilstrecke", request);
+        if (!response.IsSuccessStatusCode) return null!;
+        
+        var responseString = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<Teilstrecke>(responseString, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (result is null) return null!;
+        return Map(result.Verbindung, true);
+    }
+
+    private ConnectionDto Map(Verbindung connection, bool transferTimeChanged = false)
     {
         return new ConnectionDto
         {
             Id = connection.TripId,
+            TransferTimeChanged = transferTimeChanged,
+            ContextId = connection.CtxRecon,
             Sections = connection.VerbindungsAbschnitte.Where(section => section.Halte.Count > 0).Select(section => section.ToDto()).ToList(),
             Price = connection.AngebotsPreis.GetPrice(connection.HasTeilpreis),
             Information = connection.GetInformation(),

@@ -18,6 +18,8 @@ public class Halt
     
     public string Gleis { get; set; }
     
+    public string ExtId { get; set; }
+    
     public List<HimMeldung> HimMeldungen { get; set; }
     
     public List<RisNotiz> RisNotizen  { get; set; }

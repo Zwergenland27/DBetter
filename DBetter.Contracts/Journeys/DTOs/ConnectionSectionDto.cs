@@ -20,5 +20,7 @@ public class ConnectionSectionDto
     public bool ReservationRequired { get; set; }
     public List<ConnectionStationDto> Stops { get; set; }
     
+    public string? ConnectionPrediction { get; set; }
+    
     public string JourneyId { get; set; }
 }
