@@ -15,6 +15,4 @@ public class ConnectionStationDto : StationDto
     public string Platform { get; set; }
     
     public List<InformationDto> Information { get; set; }
-    
-    public string ExternalId { get; set; }
 }

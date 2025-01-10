@@ -15,4 +15,6 @@ public class ConnectionDto
     
     public DemandDto Demand { get; set; }
     
+    public string BahnRequestUrl { get; set; }
+    
 }

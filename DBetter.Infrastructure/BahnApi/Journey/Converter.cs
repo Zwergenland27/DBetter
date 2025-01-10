@@ -94,7 +94,7 @@ public static class Converter
             Information = stop.GetInformation(),
             Demand = stop.AuslastungsMeldungen.ToDto(),
             Platform = stop.Gleis,
-            ExternalId = stop.ExtId
+            ExtId = stop.ExtId
         };
     }
     
@@ -284,6 +284,27 @@ public static class Converter
 
 
         return allowedTransport;
+    }
+
+    public static string GetAllowedTransportForUri(this RouteOptionParameters options)
+    {
+        var allowedTransport = options.GetAllowedTransport();
+        var transportString = "";
+        
+        if(allowedTransport.Contains("ICE")) transportString += "00,";
+        if(allowedTransport.Contains("EC_IC")) transportString += "01,";
+        if(allowedTransport.Contains("IR")) transportString += "02,";
+        if(allowedTransport.Contains("REGIONAL")) transportString += "03,";
+        if(allowedTransport.Contains("SBAHN")) transportString += "04,";
+        if(allowedTransport.Contains("BUS")) transportString += "05,";
+        if(allowedTransport.Contains("SCHIFF")) transportString += "06,";
+        if(allowedTransport.Contains("UBAHN")) transportString += "07,";
+        if(allowedTransport.Contains("TRAM")) transportString += "08,";
+        if (transportString[^1] == ',')
+        {
+            transportString = transportString[0..^1];
+        }
+        return transportString;
     }
 
     public static List<Zwischenhalt> ToZwischenhalte(this RouteParameters routeParameters)
