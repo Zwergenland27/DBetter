@@ -12,4 +12,7 @@ public class IncreaseTransferTimeRequestParameters
     public FixSectionStation Begin { get; set; }
     
     public FixSectionStation End { get; set; }
+    
+    public DateTime Time { get; set; }
+    public string TimeType { get; set; }
 }

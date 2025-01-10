@@ -78,12 +78,12 @@ public class JourneyRepository(HttpClient http)
             {
                 Begin = new FixedTeilstreckeStation
                 {
-                    ExtId = parameters.Begin.ExternalId,
+                    ExtId = parameters.Begin.ExtId,
                     Zeitpunkt = parameters.Begin.Time.ConvertToBahnTime()
                 },
                 End = new FixedTeilstreckeStation
                 {
-                    ExtId = parameters.End.ExternalId,
+                    ExtId = parameters.End.ExtId,
                     Zeitpunkt = parameters.End.Time.ConvertToBahnTime()
                 },
             },
@@ -110,7 +110,7 @@ public class JourneyRepository(HttpClient http)
         });
 
         if (result is null) return null!;
-        return Map(result.Verbindung, null!, true);
+        return Map2(result.Verbindung, parameters, true);
     }
 
     private ConnectionDto Map(Verbindung connection, RequestParameters parameters, bool transferTimeChanged = false)
@@ -159,7 +159,53 @@ public class JourneyRepository(HttpClient http)
 
         return
             $"https://www.bahn.de/buchung/fahrplan/suche#sts=true&so={so}&zo={zo}&kl={kl}&mud={mud}&r={r}&soid={soid}&zoid={zoid}&sot={sot}&zot={sot}&soei={soei}&zoei={zoei}&hd={hd}&hza={hza}&hz={hz}&ar={ar}&s={s}&d={d}&vm={vm}&fm={fm}&bp={bp}&dlt={dlt}&dltv={dltv}&gh={gh}&cbs=true";
+    }
+    
+    private ConnectionDto Map2(Verbindung connection, IncreaseTransferTimeRequestParameters parameters, bool transferTimeChanged = false)
+    {
+        return new ConnectionDto
+        {
+            Id = connection.TripId,
+            TransferTimeChanged = transferTimeChanged,
+            ContextId = connection.CtxRecon,
+            Sections = connection.VerbindungsAbschnitte.Where(section => section.Halte.Count > 0).Select(section => section.ToDto()).ToList(),
+            Price = connection.AngebotsPreis.GetPrice(connection.HasTeilpreis),
+            Information = connection.GetInformation(),
+            Bike = GetGlobalBikeInformation(connection.FahrradmitnahmeMoeglich),
+            Demand = connection.AuslastungsMeldungen.ToDto(),
+            BahnRequestUrl = GenerateRequestUrl2(parameters, connection.CtxRecon)
+        };
+    }
+    private static string GenerateRequestUrl2(IncreaseTransferTimeRequestParameters requestParameters, string id)
+    {
+        var so = requestParameters.Route.Origin!.Name;
+        var zo = requestParameters.Route.Destination!.Name;
         
+        var kl = requestParameters.Options.Class == "First" ? 1 : 2;
+        var r = generatePassengerForUrl(requestParameters.Passengers);
+        var soid = requestParameters.Route.Origin.Id;
+        var zoid = requestParameters.Route.Destination.Id;
+        var sot = "ST";
+        var zot = "ST";
+        var soei = requestParameters.Route.Origin.ExtId;
+        var zoei = requestParameters.Route.Destination.ExtId;
+        var hd = requestParameters.Time.ConvertToBahnTime();
+        var hza = requestParameters.TimeType == "Departure" ? "D" : "A";
+        var hz = generateViaUrl(requestParameters.Route);
+        var ar = "false";
+        var s = "false";
+        var d = "false";
+        var vm = requestParameters.Route.RouteOptions[0].GetAllowedTransportForUri();
+        var fm = "false";
+        var bp = "false";
+        var dlt = "false";
+        var dltv = "false";
+        var gh = id;
+        //This can be any time below or equal 46 minutes. The bahn.de trip request page will throw an error otherwise
+        var mud = requestParameters.Options.MinTransferTime.ToString();
+
+        return
+            $"https://www.bahn.de/buchung/fahrplan/suche#sts=true&so={so}&zo={zo}&kl={kl}&mud={mud}&r={r}&soid={soid}&zoid={zoid}&sot={sot}&zot={sot}&soei={soei}&zoei={zoei}&hd={hd}&hza={hza}&hz={hz}&ar={ar}&s={s}&d={d}&vm={vm}&fm={fm}&bp={bp}&dlt={dlt}&dltv={dltv}&gh={gh}&cbs=true";
     }
 
     private static string? GetGlobalBikeInformation(string? bikeData)
