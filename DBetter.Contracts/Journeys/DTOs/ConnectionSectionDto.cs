@@ -8,8 +8,11 @@ public class ConnectionSectionDto
     
     public string LineNameFull { get; set; }
     
+    public string Category { get; set; }
+    
+    public string LineNumber { get; set; }
+    
     public string Direction { get; set; }
-    public List<VehicleDto>? Vehicle { get; set; }
     public float Percentage { get; set; }
     public string Catering { get; set; }
     public string Bike { get; set; }

@@ -2,7 +2,7 @@ namespace DBetter.Contracts.Journeys.DTOs;
 
 public class VehicleDto
 {
-    private string? Name { get; set; }
+    public List<string> Coaches { get; set; }
     
-    private string? UicNumber { get; set; }
+    public bool RealTime { get; set; }
 }

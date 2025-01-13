@@ -9,6 +9,10 @@ public class Verkehrsmittel
     
     public string ProduktGattung { get; set; }
     
+    public string Kategorie { get; set; }
+    
+    public string Nummer { get; set; }
+    
     public string Richtung { get; set; }
     
     public List<ZugAttribut> ZugAttribute { get; set; }

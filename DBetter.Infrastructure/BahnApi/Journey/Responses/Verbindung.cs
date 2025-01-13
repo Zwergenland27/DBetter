@@ -21,4 +21,6 @@ public class Verbindung
     public List<PriorisierteMeldung> PriorisierteMeldungen { get; set; }
     
     public List<AuslastungsMeldung> AuslastungsMeldungen { get; set; }
+    
+    public string AngebotsPreisKlasse { get; set; } //KLASSE_1 -> will be displayed if 2nd class is overbooked or KLASSE_2
 }

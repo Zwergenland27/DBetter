@@ -9,12 +9,13 @@ using DBetter.Contracts.Journeys.Parameters;
 using DBetter.Domain.Users.ValueObjects;
 using DBetter.Infrastructure.BahnApi.Journey.Parameters;
 using DBetter.Infrastructure.BahnApi.Journey.Responses;
+using DBetter.Infrastructure.BahnApi.VehicleSequence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 
 namespace DBetter.Infrastructure.BahnApi.Journey;
 
-public class JourneyRepository(HttpClient http)
+public class JourneyRepository(HttpClient http, VehicleSequenceRepository repository)
 {
     public async Task<ConnectionsDto?> GetRoutes(RequestParameters parameters, string? page)
     {
@@ -49,7 +50,7 @@ public class JourneyRepository(HttpClient http)
         });
 
         if (result is null) return null!;
-
+        
         return new ConnectionsDto
         {
             Connections = result.Verbindungen.Select(connection => Map(connection, parameters)).ToList(),

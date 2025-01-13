@@ -1,5 +1,6 @@
 using DBetter.Contracts.Journeys.Parameters;
 using DBetter.Infrastructure.BahnApi.Journey;
+using DBetter.Infrastructure.BahnApi.VehicleSequence;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DBetter.Api;
@@ -34,6 +35,20 @@ public static class SearchModule
             return Results.Ok(result);
         })
             .WithName("GetSection")
+            .WithOpenApi();
+        
+        app.MapGet("/vehicle", async (
+                VehicleSequenceRepository repository,
+                [FromQuery(Name = "category")] string? category,
+                [FromQuery(Name = "lineNumber")] string? lineNumber,
+                [FromQuery(Name = "when")] DateTime? when,
+                [FromQuery(Name = "station")] string? station) =>
+            {
+                if (category is not "ICE" and not "IC") return Results.Ok();
+                var result = await repository.GetVehicles(category!, lineNumber!, when!.Value, station!);
+                return Results.Ok(result);
+            })
+            .WithName("GetCoachSequence")
             .WithOpenApi();
     }
 }
