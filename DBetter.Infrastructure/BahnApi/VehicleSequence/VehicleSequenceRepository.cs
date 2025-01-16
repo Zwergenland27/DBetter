@@ -1,57 +1,121 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Web;
 using DBetter.Contracts.Journeys.DTOs;
+using DBetter.Infrastructure.BahnApi.Journey;
+using DBetter.Infrastructure.BahnApi.VehicleSequence.Parameters;
 using DBetter.Infrastructure.BahnApi.VehicleSequence.Responses;
+using HtmlAgilityPack;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 
 namespace DBetter.Infrastructure.BahnApi.VehicleSequence;
 
 public class VehicleSequenceRepository(HttpClient http)
 {
-    public async Task<VehicleDto?> GetVehicles(string category, string lineNumber, DateTime when, string stationEva)
+    public async Task<VehicleDto?> GetPlannedVehiclesAsync(string lineNr, string startId, DateTime startTime, string endId, DateTime endTime)
     {
-        var now = DateTime.UtcNow;
-
-        bool realTime = true;
-        while (when > now.AddHours(24))
+        var request = new Root
         {
-            realTime = false;
-            when = when.AddDays(-7);
-        }
-        
-        var administrationId = 80;
-        var date = when.ToString("yyyy-MM-dd");
-        var time = when.ToString("yyyy-MM-ddTHH:mm:ssZ");
-        var url = $"administrationId={administrationId}&date={date}&time={time}&category={category}&number={lineNumber}&evaNumber={stationEva}";
-        VehicleSequenceResult? response = null;
-        try
-        {
-            response = await http.GetFromJsonAsync<VehicleSequenceResult>($"reisebegleitung/wagenreihung/vehicle-sequence?{url}");
-        }
-        catch (HttpRequestException e)
-        {
-            if (e.StatusCode == HttpStatusCode.InternalServerError)
+            Displayinformation = new(),
+            Buchungskontext = new()
             {
-                while (when > now.AddHours(24))
+                BuchungsKontextDaten = new()
                 {
-                    realTime = false;
-                    when = when.AddDays(-7);
-                    date = when.ToString("yyyy-MM-dd");
-                    time = when.ToString("yyyy-MM-ddTHH:mm:ssZ");
-                    url = $"administrationId={administrationId}&date={date}&time={time}&category={category}&number={lineNumber}&evaNumber={stationEva}";
-                    try
+                    Zugnummer = lineNr,
+                    AbfahrtHalt = new StartHalt
                     {
-                        response = await http.GetFromJsonAsync<VehicleSequenceResult>(url);
-                    }
-                    catch (HttpRequestException inner)
+                        LocationId = startId,
+                        AbfahrtZeit = startTime.ConvertToBahnTime(),
+                    },
+                    AnkunftHalt = new EndHalt()
                     {
-                        if (inner.StatusCode != HttpStatusCode.InternalServerError) throw;
+                        LocationId = endId,
+                        AnkunftZeit = endTime.ConvertToBahnTime(),
                     }
                 }
             }
-            else
+        };
+        
+        var requestJson = JsonSerializer.Serialize(request, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        
+        var uri = HttpUtility.UrlPathEncode(requestJson);
+        var response = await http.GetAsync($"gsd/gsd_v3?data={uri}");
+        if (response.IsSuccessStatusCode)
+        {
+            var html = await response.Content.ReadAsStringAsync();
+            var document = new HtmlDocument();
+            document.LoadHtml(html);
+            var scriptNode = document.DocumentNode.SelectSingleNode("//script[@type='application/json' and @id='ssr_data']");
+            if (scriptNode is not null)
             {
-                throw;
+                string json = scriptNode.InnerText;
+                var sequence = JsonSerializer.Deserialize<PlannedSequence>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                List<string> vehicles = [];
+                foreach (var zugteil in sequence!.Zugfahrt.Zugteile)
+                {
+                    var vehicle = GetData(zugteil.Wagen.Select(v => v.Wagentyp).ToList());
+                    vehicles.AddRange(vehicle);
+                }
+
+                return new VehicleDto
+                {
+                    Coaches = vehicles,
+                    RealTime = false
+                };
             }
+
+            return null;
+        }
+
+        return null;
+    }
+    public async Task<VehicleDto?> GetVehicles(
+        string category,
+        string lineNumber,
+        string departureStation,
+        DateTime departureTime,
+        string arrivalStation,
+        DateTime arrivalTime)
+    {
+        var now = DateTime.UtcNow;
+
+        if (departureTime < now.AddHours(-24))
+        {
+            return null;
+        }
+        
+        var inFuture = departureTime > now.AddHours(24);
+        
+        var administrationId = 80;
+        var date = departureTime.ToString("yyyy-MM-dd");
+        var time = departureTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var url = $"administrationId={administrationId}&date={date}&time={time}&category={category}&number={lineNumber}&evaNumber={departureStation}";
+        VehicleSequenceResult? response = null;
+        if (!inFuture)
+        {
+            try
+            {
+                response = await http.GetFromJsonAsync<VehicleSequenceResult>($"reisebegleitung/wagenreihung/vehicle-sequence?{url}");
+            }
+            catch (HttpRequestException e)
+            {
+                if (e.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    inFuture = true;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        if (inFuture)
+        {
+            return await GetPlannedVehiclesAsync(lineNumber, departureStation, departureTime, arrivalStation, arrivalTime);
         }
 
         if (response is null) return null;
@@ -74,9 +138,32 @@ public class VehicleSequenceRepository(HttpClient http)
         return new()
         {
             Coaches = vehicles,
-            RealTime = realTime,
+            RealTime = true
         };
     }
+
+    private static Dictionary<string, string> _typeFromPlanned = new()
+    {
+        { "EPA_4000|EPA_4001|EPA_4002|EPA_4003|EPA_4004|EPA_4005|EPA_4006|EPA_4007", "ICE 1" },
+        { "EPA_800|EPA_664|EPA_663|EPA_660|EPA_669|EPA_667", "ICE2" },
+        { "EPA_1600|EPA_1602|EPA_1603|EPA_1605|EPA_1608|EPA_1609|EPA_1612", "ICE 3" },
+        { "EPA_301|EPA_302|EPA_210|EPA_818|EPA_305|EPA_306|EPA_308|EPA_309", "ICE 3 Velaro" },
+        { "EPA_4081|EPA_4082|EPA_4083|EPA_4084|EPA_4085|EPA_5086|EPA_4088|EPA_4089", "ICE 3neo" },
+        { "EPA_480|EPA_44|EPA_909|EPA_482|EPA_484|EPA_49|EPA_487", "ICE T lang" },
+        { "EPA_935|EPA_934|EPA_930|EPA_911|EPA_903", "ICE T kurz" },
+        { "EPA_1111|EPA_1112|EPA_1113|EPA_1114|EPA_1115|EPA_1116|EPA_1117", "ICE 4 (7)" },
+        {
+            "EPA_292|EPA_353|EPA_353|EPA_854|EPA_854|EPA_357|EPA_853|EPA_342|EPA_222|EPA_358|EPA_863|EPA_208",
+            "ICE 4 (12)"
+        },
+        {
+            "EPA_292|EPA_353|EPA_353|EPA_854|EPA_854|EPA_357|EPA_853|EPA_345|EPA_342|EPA_222|EPA_358|EPA_863|EPA_208",
+            "ICE 4 (13)"
+        },
+        { "EPA_1200|EPA_1204|EPA_1205|EPA_1206", "IC 2 KISS kurz"},
+        { "EPA_1801|EPA_1802|EPA_1803|EPA_1804|EPA_1805|EPA_1806", "IC 2 KISS lang"},
+        { "EPA_977|EPA_975|EPA_972|EPA_979|EPA_981", "IC 2 Twindexx"}
+    };
 
     private static Dictionary<string, string> _typeFromSequence = new()
     {
@@ -117,10 +204,8 @@ public class VehicleSequenceRepository(HttpClient http)
         { "Apmzf|Apmz|BRpmz|Bpmbsz|Bpmz|Bpmz|Bpmz|Bpmdzf", "ICE 3neo"},
         
         //ICE T
-        { "Apmzf|ABpmz|WRmz|Bpmz|Bpmz|Bpmbz|Bpmzf", "ICE T lang, 1. Serie"},
-        { "Bpmzf|Bpmbz|Bpmz|Bpmz|WRmz|ABpmz|Apmzf", "ICE T lang, 1. Serie"},
-        { "Apmzf|ABpmz|WRmz|Bpmdz|Bpmz|Bpmbz|Bpmzf", "ICE T lang, 2. Serie"},
-        { "Bpmzf|Bpmbz|Bpmz|Bpmdz|WRmz|ABpmz|Apmzf", "ICE T lang, 2. Serie"},
+        { "Apmzf|ABpmz|WRmz|Bpmdz|Bpmz|Bpmbz|Bpmzf", "ICE T lang"},
+        { "Bpmzf|Bpmbz|Bpmz|Bpmz|WRmz|ABpmz|Apmzf", "ICE T lang"},
         { "Apmzf|Bpmkz|Bpmz|Bpmbz|Bpmzf", "ICE T kurz"},
         { "Bpmzf|Bpmbz|Bpmz|Bpmkz|Apmzf", "ICE T kurz"},
         { "Apmzf|BRpmz|Bpmz|Bpmbz|Bpmzf", "ICE T kurz"},
@@ -133,6 +218,30 @@ public class VehicleSequenceRepository(HttpClient http)
         { "Apmzf|ARmz|Bpmbsz|Bpmz|Bpmz|Bpmz|Bpmdzf", "ICE 4 kurz"},
         { "Bpmdzf|Bpmz|Bpmz|Bpmz|Bpmbsz|ARmz|Apmzf", "ICE 4 kurz"},
     };
+
+    private List<string> GetData(List<string> coaches)
+    {
+        List<string> vehicles = [];
+        var currentSequence = coaches[0];
+
+        for (var i = 1; i < coaches.Count; i++)
+        {
+            if (_typeFromPlanned.TryGetValue(currentSequence, out var name))
+            {
+                vehicles.Add(name);
+                currentSequence = coaches[i];
+                continue;
+            }
+            currentSequence += "|" + coaches[i]; 
+        }
+        
+        if (_typeFromPlanned.TryGetValue(currentSequence, out var lastName))
+        {
+            vehicles.Add(lastName);
+        }
+
+        return vehicles;
+    }
 
 
     private string? GetData(List<VehicleType> vehicles)

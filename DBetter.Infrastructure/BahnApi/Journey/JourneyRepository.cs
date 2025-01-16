@@ -258,6 +258,7 @@ public class JourneyRepository(HttpClient http, VehicleSequenceRepository reposi
         
         foreach (var passenger in passengers)
         {
+            //TODO: set age as it is required for international trips!
             convertedPassengers.Add(new Reisender{
                 Alter = [],
                 Anzahl = 1,
