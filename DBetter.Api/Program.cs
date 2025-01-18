@@ -2,6 +2,7 @@ using System.Net;
 using DBetter.Api;
 using DBetter.Application;
 using DBetter.Infrastructure;
+using DBetter.Infrastructure.Monitoring;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -10,6 +11,7 @@ using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddMonitoring();
 builder.Services.AddApplicationLayer();
 builder.Services.AddInfrastructureLayer(builder.Configuration);
 
@@ -35,7 +37,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policyBuilder =>
+    options.AddPolicy("dev", policyBuilder =>
     {
         policyBuilder.WithOrigins("http://localhost:4200")
             .AllowCredentials()
@@ -68,14 +70,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("dev");   
 }
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-
-app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -85,4 +81,5 @@ app.AddSearchEndpoints();
 app.AddUserEndpoints();
 app.AddAuthenticationEndpoints();
 
+app.UseMonitoring();
 app.Run();

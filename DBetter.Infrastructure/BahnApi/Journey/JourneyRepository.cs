@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -10,12 +11,13 @@ using DBetter.Domain.Users.ValueObjects;
 using DBetter.Infrastructure.BahnApi.Journey.Parameters;
 using DBetter.Infrastructure.BahnApi.Journey.Responses;
 using DBetter.Infrastructure.BahnApi.VehicleSequence;
+using DBetter.Infrastructure.Monitoring;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 
 namespace DBetter.Infrastructure.BahnApi.Journey;
 
-public class JourneyRepository(HttpClient http, VehicleSequenceRepository repository)
+public class JourneyRepository(HttpClient http, BahnApiMetrics metrics)
 {
     public async Task<ConnectionsDto?> GetRoutes(RequestParameters parameters, string? page)
     {
@@ -41,6 +43,7 @@ public class JourneyRepository(HttpClient http, VehicleSequenceRepository reposi
         };
 
         var response = await http.PostAsJsonAsync("angebote/fahrplan", request);
+        metrics.IncreaseTripRequestCount(response.StatusCode);
         if (!response.IsSuccessStatusCode) return null!;
         
         var responseString = await response.Content.ReadAsStringAsync();
@@ -49,8 +52,9 @@ public class JourneyRepository(HttpClient http, VehicleSequenceRepository reposi
             PropertyNameCaseInsensitive = true
         });
 
-        if (result is null) return null!;
-        
+        if (result is null){
+            throw new InvalidDataException("The trip result could not be deserialized.");
+        }
         return new ConnectionsDto
         {
             Connections = result.Verbindungen.Select(connection => Map(connection, parameters)).ToList(),
@@ -102,7 +106,8 @@ public class JourneyRepository(HttpClient http, VehicleSequenceRepository reposi
         };
 
         var response = await http.PostAsJsonAsync("angebote/teilstrecke", request);
-        if (!response.IsSuccessStatusCode) return null!;
+        metrics.IncreaseStationRequestCount(response.StatusCode);
+        if (!response.IsSuccessStatusCode) return null;
         
         var responseString = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Teilstrecke>(responseString, new JsonSerializerOptions
@@ -110,7 +115,10 @@ public class JourneyRepository(HttpClient http, VehicleSequenceRepository reposi
             PropertyNameCaseInsensitive = true
         });
 
-        if (result is null) return null!;
+        if (result is null){
+            throw new InvalidDataException("The trip result could not be deserialized.");
+        }
+        
         return Map2(result.Verbindung, parameters, true);
     }
 

@@ -7,12 +7,13 @@ using DBetter.Contracts.Journeys.DTOs;
 using DBetter.Infrastructure.BahnApi.Journey;
 using DBetter.Infrastructure.BahnApi.VehicleSequence.Parameters;
 using DBetter.Infrastructure.BahnApi.VehicleSequence.Responses;
+using DBetter.Infrastructure.Monitoring;
 using HtmlAgilityPack;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 
 namespace DBetter.Infrastructure.BahnApi.VehicleSequence;
 
-public class VehicleSequenceRepository(HttpClient http)
+public class VehicleSequenceRepository(HttpClient http, BahnApiMetrics metrics)
 {
     public async Task<VehicleDto?> GetPlannedVehiclesAsync(string lineNr, string startId, DateTime startTime, string endId, DateTime endTime)
     {
@@ -42,6 +43,7 @@ public class VehicleSequenceRepository(HttpClient http)
         
         var uri = HttpUtility.UrlPathEncode(requestJson);
         var response = await http.GetAsync($"gsd/gsd_v3?data={uri}");
+        metrics.IncreaseVehicleRequestCount(false, response.StatusCode);
         if (response.IsSuccessStatusCode)
         {
             var html = await response.Content.ReadAsStringAsync();
@@ -99,15 +101,18 @@ public class VehicleSequenceRepository(HttpClient http)
             try
             {
                 response = await http.GetFromJsonAsync<VehicleSequenceResult>($"reisebegleitung/wagenreihung/vehicle-sequence?{url}");
+                metrics.IncreaseVehicleRequestCount(true, HttpStatusCode.OK);
             }
             catch (HttpRequestException e)
             {
                 if (e.StatusCode == HttpStatusCode.InternalServerError)
                 {
+                    metrics.IncreaseVehicleRequestCount(true, HttpStatusCode.NotFound);
                     inFuture = true;
                 }
                 else
                 {
+                    metrics.IncreaseVehicleRequestCount(true, e.StatusCode!.Value);
                     throw;
                 }
             }
