@@ -1,9 +1,5 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -15,7 +11,8 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddMonitoring(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<BahnApiMetrics>();
-        builder.Logging.ClearProviders();
+        //builder.Logging.ClearProviders();
+        
         var otel = builder.Services.AddOpenTelemetry();
             
         otel.ConfigureResource(resource => resource.AddService("DBetter.Api"));
