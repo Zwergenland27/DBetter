@@ -4,6 +4,7 @@ using DBetter.Contracts.Journeys.DTOs;
 using DBetter.Contracts.Journeys.Parameters;
 using DBetter.Infrastructure.BahnApi.Journey.Parameters;
 using DBetter.Infrastructure.BahnApi.Journey.Responses;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace DBetter.Infrastructure.BahnApi.Journey;
 
@@ -167,21 +168,17 @@ public static class Converter
     
     public static DateTime? ConvertToDateTime(this string? dateString)
     {
-        //Something is wrong about the time format here!
-        CultureInfo germanCulture = CultureInfo.CurrentCulture;
-        if (dateString == null)
-        {
-            return null;
-        }
+        if (dateString is null) return null;
+        var germanTime = DateTime.Parse(dateString);
         
-        return DateTime.ParseExact(dateString, "yyyy-MM-ddTHH:mm:ss", germanCulture).ToUniversalTime();
+        TimeZoneInfo germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+        return TimeZoneInfo.ConvertTimeToUtc(germanTime, germanTimeZone);
     }
 
     public static string ConvertToBahnTime(this DateTime date)
     {
-        TimeZoneInfo germanTimeZone = TimeZoneInfo.Local;
-        DateTime germanTime = TimeZoneInfo.ConvertTimeFromUtc(date, germanTimeZone);
-        return germanTime.ToString("yyyy-MM-ddTHH:mm:ss");
+        TimeZoneInfo germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+        return TimeZoneInfo.ConvertTimeFromUtc(date, germanTimeZone).ToString("yyyy-MM-ddTHH:mm:ss");
     }
     
     private static string CheckPartial(string name, Verbindungsabschnitt section, ZugAttribut attribute)
