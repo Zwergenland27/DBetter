@@ -1,8 +1,9 @@
 using DBetter.Application.Abstractions.Persistence;
+using DBetter.Application.Stations;
 using DBetter.Application.Users;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.Authentication;
-using DBetter.Infrastructure.BahnApi;
+using DBetter.Infrastructure.BahnDe;
 using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
+        services.AddScoped<IStationQueryRepository, StationQueryRepository>();
         return services;
     }
 }
