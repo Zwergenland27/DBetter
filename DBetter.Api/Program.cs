@@ -1,9 +1,7 @@
-using System.Net;
 using DBetter.Api;
 using DBetter.Application;
 using DBetter.Infrastructure;
 using DBetter.Infrastructure.Monitoring;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi.Models;
@@ -14,8 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddMonitoring();
 builder.Services.AddApplicationLayer();
 builder.Services.AddInfrastructureLayer(builder.Configuration);
-
-builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri("https://www.bahn.de/web/api/") });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -77,7 +73,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.AddStationEndpoints();
-app.AddSearchEndpoints();
 app.AddUserEndpoints();
 app.AddAuthenticationEndpoints();
 
