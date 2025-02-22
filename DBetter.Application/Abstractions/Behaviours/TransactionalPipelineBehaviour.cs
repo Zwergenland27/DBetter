@@ -6,7 +6,7 @@ namespace DBetter.Application.Abstractions.Behaviours;
 
 internal class TransactionalPipelineBehaviour<TRequest, TResponse>(
     IUnitOfWork unitOfWork) : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : CleanDomainValidation.Application.IRequest
+    where TRequest : ITransactionRequired
     where TResponse : ICanFail
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
