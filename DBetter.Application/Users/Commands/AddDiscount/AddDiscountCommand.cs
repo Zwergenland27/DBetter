@@ -3,6 +3,7 @@ using CleanDomainValidation.Application.Extensions;
 using DBetter.Application.Abstractions.Messaging;
 using DBetter.Application.Errors;
 using DBetter.Contracts.Users.Commands.AddDiscount;
+using DBetter.Domain.Errors;
 using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Application.Users.Commands.AddDiscount;
@@ -17,11 +18,11 @@ public class AddDiscountRequestBuilder : IRequestBuilder<AddDiscountParameters, 
 
         var type = builder.EnumProperty(r => r.Type)
             .Required(ApplicationErrors.User.AddDiscount.Type.Missing)
-            .Map(p => p.Type, ApplicationErrors.User.AddDiscount.Type.Invalid);
+            .Map(p => p.Type, DomainErrors.Shared.DiscountType.Invalid);
         
         var @class = builder.EnumProperty(r => r.Class)
             .Required(ApplicationErrors.User.AddDiscount.Class.Missing)
-            .Map(p => p.Class, ApplicationErrors.User.AddDiscount.Class.Invalid);
+            .Map(p => p.Class, DomainErrors.Shared.Class.Invalid);
 
         var boughtAtUtc = builder.StructProperty(r => r.BoughtAtUtc)
             .Required(ApplicationErrors.User.AddDiscount.BoughtAtUtc.Missing)

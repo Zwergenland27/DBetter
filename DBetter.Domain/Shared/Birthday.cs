@@ -14,7 +14,7 @@ public record Birthday
     
     public static CanFail<Birthday> Create(DateTime utc)
     {
-        if (utc >= DateTime.UtcNow) return DomainErrors.User.Birthday.InFuture;
+        if (utc >= DateTime.UtcNow) return DomainErrors.Shared.Birthday.InFuture;
         
         return new Birthday(utc);
     }
