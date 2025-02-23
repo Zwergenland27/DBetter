@@ -28,7 +28,7 @@ public record StationName
 
     private static bool IsMetaStation(string value)
     {
-        return value.All(char.IsUpper);
+        return value.Where(char.IsLetter).All(char.IsUpper);
     }
 
     private static string Normalize(string value)

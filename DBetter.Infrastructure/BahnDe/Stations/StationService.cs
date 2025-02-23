@@ -30,14 +30,14 @@ public class StationService(HttpClient http)
                 }
 
                 var name = StationName.Create(station.Name);
-                if (evaNumber.HasFailed)
+                if (name.HasFailed)
                 {
                     continue;
                 }
 
                 var coordinates = new Coordinates(station.Lat, station.Lon);
 
-                results.Add(new Station(evaNumber.Value, name.Value, coordinates));
+                results.Add(new Station(StationId.CreateNew(), evaNumber.Value, name.Value, coordinates));
             }
 
             return results;

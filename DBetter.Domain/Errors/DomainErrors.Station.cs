@@ -6,6 +6,10 @@ public static partial class DomainErrors
 {
     public static class Station
     {
+        public static class Id
+        {
+            public static Error Invalid(string value) => Error.Validation("Station.Id.Invalid", $"{value} is no valid guid.");
+        }
         public static class EvaNumber
         {
             public static Error NotNumeric(string value) => Error.Validation(
