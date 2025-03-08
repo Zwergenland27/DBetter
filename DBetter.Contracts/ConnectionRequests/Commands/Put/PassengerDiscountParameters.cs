@@ -1,0 +1,23 @@
+using CleanDomainValidation.Application;
+
+namespace DBetter.Contracts.ConnectionRequests.Commands.Put;
+
+public class PassengerDiscountParameters : IParameters
+{
+    /// <summary>
+    /// Type of the Discount
+    /// </summary>
+    /// <example>BahnCard25</example>
+    public string? Type { get; set; }
+    
+    /// <summary>
+    /// Class where the discount is valid
+    /// </summary>
+    /// <example>Second</example>
+    public string? Class { get; set; }
+    
+    /// <summary>
+    /// Utc date of expiration
+    /// </summary>
+    public DateTime? ValidUntil { get; set; }
+}

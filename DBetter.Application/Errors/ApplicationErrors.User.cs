@@ -77,16 +77,12 @@ public static partial class ApplicationErrors
             
             public static class Type
             {
-                public static Error Missing => Error.Validation("User.AddDiscount.Type.Missing", "Discount type is required");
-                
-                public static Error Invalid => Error.Validation("User.AddDiscount.Type.Invalid", "Discount type is invalid");
+                public static Error Missing => Error.Validation("User.AddDiscount.Type.Missing", "Discount type is required"); 
             }
             
             public static class Class
             {
                 public static Error Missing => Error.Validation("User.AddDiscount.Class.Missing", "Class is required");
-                
-                public static Error Invalid => Error.Validation("User.AddDiscount.Class.Invalid", "Class is invalid");
             }
 
             public static class BoughtAtUtc
