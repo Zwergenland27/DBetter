@@ -11,7 +11,7 @@ internal class TransactionalPipelineBehaviour<TRequest, TResponse>(
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        await unitOfWork.BeginTransaction();
+        await unitOfWork.BeginTransaction(cancellationToken);
         try
         {
             var result = await next();

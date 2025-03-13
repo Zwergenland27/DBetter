@@ -24,22 +24,11 @@ public class UnitOfWork(DBetterContext context) : IUnitOfWork, IAsyncDisposable
         {
             throw new InvalidOperationException("Cannot commit a transaction that has not been started.");
         }
-
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-            await _transaction.CommitAsync(cancellationToken);
-        }
-        catch
-        {
-            await _transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
-        finally
-        {
-            await _transaction.DisposeAsync();
-            _transaction = null;
-        }
+        
+        await context.SaveChangesAsync(cancellationToken);
+        await _transaction.CommitAsync(cancellationToken);
+        await _transaction.DisposeAsync();
+        _transaction = null;
     }
 
     public async Task AbortAsync(CancellationToken cancellationToken = default)
