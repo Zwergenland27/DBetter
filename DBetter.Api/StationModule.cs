@@ -13,6 +13,7 @@ public static class StationModule
         app.MapGet("/stations", async (IMediator mediator, [FromQuery(Name = "query")] string? query) =>
             {
                 var command = Builder<FindStationsQuery>
+                    .WithName("Stations.Find")
                     .BindParameters(new FindStationParameters())
                     .MapParameter(p => p.Query, query)
                     .BuildUsing<FindStationsRequestBuilder>();

@@ -21,6 +21,7 @@ public static class AuthenticationModule
             RegisterParameters parameters) =>
             {
                 var command = Builder<RegisterCommand>
+                    .WithName("Register")
                     .BindParameters(parameters)
                     .BuildUsing<RegisterRequestBuilder>();
                 
@@ -38,6 +39,7 @@ public static class AuthenticationModule
                 LoginParameters parameters) =>
             {
                 var command = Builder<LoginCommand>
+                    .WithName("Login")
                     .BindParameters(parameters)
                     .BuildUsing<LoginRequestBuilder>();
 
@@ -64,6 +66,7 @@ public static class AuthenticationModule
             if (string.IsNullOrWhiteSpace(refreshToken)) return Results.Unauthorized();
 
             var command = Builder<RefreshJwtTokenCommand>
+                .WithName("RefreshToken")
                 .BindParameters(parameters)
                 .MapParameter(p => p.RefreshToken, refreshToken)
                 .BuildUsing<RefreshJwtTokenRequestBuilder>();

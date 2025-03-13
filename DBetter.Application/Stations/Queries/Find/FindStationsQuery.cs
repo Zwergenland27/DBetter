@@ -1,7 +1,6 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
 using DBetter.Application.Abstractions.Messaging;
-using DBetter.Application.Errors;
 using DBetter.Contracts.Stations.Queries.Find;
 
 namespace DBetter.Application.Stations.Queries.Find;
@@ -11,7 +10,7 @@ public class FindStationsRequestBuilder : IRequestBuilder<FindStationParameters,
     public ValidatedRequiredProperty<FindStationsQuery> Configure(RequiredPropertyBuilder<FindStationParameters, FindStationsQuery> builder)
     {
         var userId = builder.ClassProperty(r => r.Query)
-            .Required(ApplicationErrors.Station.Find.SearchTerm.Missing)
+            .Required()
             .Map(p => p.Query);
         
         return builder.Build(() => new FindStationsQuery(userId));

@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using CleanDomainValidation.Application;
-using DBetter.Application.Errors;
 using DBetter.Application.Users.Commands.AddDiscount;
 using DBetter.Application.Users.Commands.EditPersonalData;
 using DBetter.Application.Users.Queries.GetMyPassengers;
@@ -8,9 +7,6 @@ using DBetter.Contracts.Users.Commands.AddDiscount;
 using DBetter.Contracts.Users.Commands.EditPersonalData;
 using DBetter.Contracts.Users.Queries.GetMyPassengers;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace DBetter.Api;
 
@@ -32,6 +28,7 @@ public static class UserModule
                 }
                 
                 var command = Builder<EditPersonalDataCommand>
+                    .WithName("Users.EditPersonalData")
                     .BindParameters(parameters)
                     .MapParameter(p => p.Id, id)
                     .BuildUsing<EditPersonalDataRequestBuilder>();
@@ -59,6 +56,7 @@ public static class UserModule
             }
                 
             var command = Builder<AddDiscountCommand>
+                .WithName("Users.AddDiscount")
                 .BindParameters(parameters)
                 .MapParameter(p => p.UserId, id)
                 .BuildUsing<AddDiscountRequestBuilder>();
@@ -85,6 +83,7 @@ public static class UserModule
             }
                 
             var query = Builder<GetMyPassengersQuery>
+                .WithName("Users.GetMyPassengers")
                 .BindParameters(new GetMyPassengersParameters())
                 .MapParameter(p => p.UserId, id)
                 .BuildUsing<GetMyPassengersRequestBuilder>();

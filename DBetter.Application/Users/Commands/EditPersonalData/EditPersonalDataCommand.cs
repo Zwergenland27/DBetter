@@ -1,8 +1,6 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
 using DBetter.Application.Abstractions.Messaging;
-using DBetter.Application.Errors;
-using DBetter.Contracts.Users;
 using DBetter.Contracts.Users.Commands.EditPersonalData;
 using DBetter.Domain.Users.ValueObjects;
 
@@ -13,7 +11,7 @@ public class EditPersonalDataRequestBuilder : IRequestBuilder<EditPersonalDataPa
     public ValidatedRequiredProperty<EditPersonalDataCommand> Configure(RequiredPropertyBuilder<EditPersonalDataParameters, EditPersonalDataCommand> builder)
     {
         var id = builder.ClassProperty(r => r.Id)
-            .Required(ApplicationErrors.User.EditPersonalData.Id.Missing)
+            .Required()
             .Map(p => p.Id, UserId.Create);
         
         var firstname = builder.ClassProperty(r => r.Firstname)
