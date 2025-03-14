@@ -22,6 +22,8 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     public ConnectionOptions Options { get; private set; }
     
     public Route Route { get; private set; }
+
+    private ConnectionRequest() : base(null!){}
     
     private ConnectionRequest(
         ConnectionRequestId id,

@@ -22,6 +22,8 @@ public class Passenger : Entity<PassengerId>
     
     public IReadOnlyList<PassengerDiscount> Discounts => _discounts.AsReadOnly();
 
+    private Passenger() : base(null!){}
+    
     private Passenger(
         PassengerId id,
         UserId? userId,

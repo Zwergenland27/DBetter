@@ -1,6 +1,7 @@
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Stations;
 using DBetter.Application.Users;
+using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.Authentication;
 using DBetter.Infrastructure.BahnDe;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
         services.AddScoped<IStationQueryRepository, StationQueryRepository>();
+        services.AddScoped<IConnectionRequestRepository, ConnectionRequestRepository>();
         return services;
     }
 }
