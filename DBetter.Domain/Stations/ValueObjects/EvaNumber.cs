@@ -30,4 +30,9 @@ public record EvaNumber
 
         return DomainErrors.Station.EvaNumber.NotNumeric(value);
     }
+
+    public string AsFuzzy()
+    {
+        return $"@L={Value}";
+    }
 }

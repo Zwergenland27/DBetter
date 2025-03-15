@@ -7,10 +7,10 @@ public class ConnectionRouteParameters : IParameters
     /// <summary>
     /// List of the stops eva numbers 
     /// </summary>
-    public List<string>? Stops;
+    public List<string>? Stops { get; set; }
     
     /// <summary>
     /// Allowed vehicle for every section
     /// </summary>
-    public List<AllowedVehiclesParameters>? AllowedVehicles;
+    public List<AllowedVehiclesParameters>? AllowedVehicles { get; set; }
 }

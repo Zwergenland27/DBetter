@@ -1,4 +1,5 @@
 using DBetter.Application.Abstractions.Persistence;
+using DBetter.Application.Connections;
 using DBetter.Application.Stations;
 using DBetter.Application.Users;
 using DBetter.Domain.ConnectionRequests;
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
         services.AddScoped<IStationQueryRepository, StationQueryRepository>();
         services.AddScoped<IConnectionRequestRepository, ConnectionRequestRepository>();
+        services.AddScoped<IConnectionsQueryRepository, ConnectionsQueryRepository>();
         return services;
     }
 }

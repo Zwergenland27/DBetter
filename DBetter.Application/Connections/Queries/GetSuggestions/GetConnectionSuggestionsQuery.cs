@@ -1,5 +1,6 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
+using DBetter.Application.Abstractions.Messaging;
 using DBetter.Contracts.ConnectionRequests.Commands.Put;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
@@ -8,10 +9,10 @@ using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
 using ICommand = DBetter.Application.Abstractions.Messaging.ICommand;
 
-namespace DBetter.Application.ConnectionRequests.Commands.Put;
+namespace DBetter.Application.Connections.Queries.GetSuggestions;
 
-public class PutConnectionRequestRequestBuilder : IRequestBuilder<ConnectionRequestParameters, PutConnectionRequestCommand>{
-    public ValidatedRequiredProperty<PutConnectionRequestCommand> Configure(RequiredPropertyBuilder<ConnectionRequestParameters, PutConnectionRequestCommand> builder)
+public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRequestParameters, GetConnectionSuggestionsQuery>{
+    public ValidatedRequiredProperty<GetConnectionSuggestionsQuery> Configure(RequiredPropertyBuilder<ConnectionRequestParameters, GetConnectionSuggestionsQuery> builder)
     {
         var id = builder.ClassProperty(r => r.Id)
             .Required()
@@ -40,15 +41,20 @@ public class PutConnectionRequestRequestBuilder : IRequestBuilder<ConnectionRequ
         var route = builder.ClassProperty(r => r.Route)
             .Required()
             .MapComplex(p => p.Route, MapRoute);
+
+        var page = builder.ClassProperty(r => r.Page)
+            .Optional()
+            .Map(p => p.Page);
         
-        return builder.Build(() => new PutConnectionRequestCommand(
+        return builder.Build(() => new GetConnectionSuggestionsQuery(
             id,
             ownerId,
             departureTime,
             arrivalTime,
             passengers.ToList(),
             options,
-            route));
+            route,
+            page));
     }
     
     private ValidatedRequiredProperty<Passenger> MapPassenger(RequiredPropertyBuilder<PassengerParameters, Passenger> builder)
@@ -139,11 +145,11 @@ public class PutConnectionRequestRequestBuilder : IRequestBuilder<ConnectionRequ
     private ValidatedRequiredProperty<Route> MapRoute(
         RequiredPropertyBuilder<ConnectionRouteParameters, Route> builder)
     {
-        var stops = builder.ListProperty(r => r.Stops)
+        var stops = builder.ListProperty<EvaNumber>("Stops")
             .Required()
             .MapEach(p => p.Stops, EvaNumber.Create);
 
-        var allowedVehicles = builder.ListProperty(r => r.AllowedVehicles)
+        var allowedVehicles = builder.ListProperty<AllowedVehicles>("AllowedVehicles")
             .Required()
             .MapEachComplex(p => p.AllowedVehicles, vBuilder =>
             {
@@ -170,11 +176,12 @@ public class PutConnectionRequestRequestBuilder : IRequestBuilder<ConnectionRequ
     }
 }
 
-public record PutConnectionRequestCommand(
+public record GetConnectionSuggestionsQuery(
     ConnectionRequestId Id,
     UserId? OwnerId,
     DateTime? DepartureTime,
     DateTime? ArrivalTime,
     List<Passenger> Passengers,
     ConnectionOptions Options,
-    Route Route) : ICommand;
+    Route Route,
+    string? Page) : IQuery<string>;

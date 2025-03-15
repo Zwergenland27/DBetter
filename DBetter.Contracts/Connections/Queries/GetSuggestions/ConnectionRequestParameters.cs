@@ -8,16 +8,13 @@ public class ConnectionRequestParameters : IParameters
     /// <summary>
     /// Identifier of the request
     /// </summary>
-    [JsonIgnore]
-    public string? Id;
+    public string? Id { get; set; }
 
     /// <summary>
     /// Identifier of the user that created the request
     /// </summary>
-    /// <remarks>
-    /// Can be left empty if no user is logged in
-    /// </remarks>
-    public string? OwnerId;
+    [JsonIgnore]
+    public string? OwnerId { get; set; }
 
     /// <summary>
     /// UTC Time of departure
@@ -25,7 +22,7 @@ public class ConnectionRequestParameters : IParameters
     /// <remarks>
     /// For setting arrival time, please use <see cref="ArrivalTime"/>
     /// </remarks>
-    public DateTime? DepartureTime;
+    public DateTime? DepartureTime { get; set; }
     
     /// <summary>
     /// UTC Time of arrival
@@ -33,20 +30,26 @@ public class ConnectionRequestParameters : IParameters
     /// <remarks>
     /// For setting departure time, please use <see cref="DepartureTime"/>
     /// </remarks>
-    public DateTime? ArrivalTime;
+    public DateTime? ArrivalTime { get; set; }
     
     /// <summary>
     /// List of the passengers
     /// </summary>
-    public List<PassengerParameters>? Passengers;
+    public List<PassengerParameters>? Passengers { get; set; }
 
     /// <summary>
     /// Options for the connection
     /// </summary>
-    public ConnectionOptionsParameters? Options;
+    public ConnectionOptionsParameters? Options { get; set; }
     
     /// <summary>
     /// Requested route of the connection
     /// </summary>
-    public ConnectionRouteParameters? Route;
+    public ConnectionRouteParameters? Route { get; set; }
+    
+    /// <summary>
+    /// Pagination reference
+    /// </summary>
+    [JsonIgnore]
+    public string? Page { get; set; }
 }

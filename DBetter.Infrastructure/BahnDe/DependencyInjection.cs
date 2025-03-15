@@ -1,3 +1,5 @@
+using System.Net;
+using DBetter.Infrastructure.BahnDe.ConnectionSuggestions;
 using DBetter.Infrastructure.BahnDe.Stations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,7 +10,18 @@ public static class DependencyInjection
     public static IServiceCollection AddBahnApi(this IServiceCollection services)
     {
         services.AddHttpClient<StationService>(
-            client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"));
+                client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip
+            });
+        
+        services.AddHttpClient<ConnectionSuggestionService>(
+                client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip
+            });
         return services;
     }
 }

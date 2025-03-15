@@ -8,17 +8,17 @@ public class ConnectionOptionsParameters : IParameters
     /// Class of the trip
     /// </summary>
     /// <example>Second</example>
-    public string? Class;
+    public string? Class { get; set; }
 
     /// <summary>
     /// Maximum number of transfers on the connection
     /// </summary>
     /// <example>5</example>
-    public int? MaxTransfers;
+    public int? MaxTransfers { get; set; }
 
     /// <summary>
     /// Minimum transfer time for every transfer in minutes
     /// </summary>
     /// <example>10</example>
-    public int? MinTransferMinutes;
+    public int? MinTransferMinutes { get; set; }
 }

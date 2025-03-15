@@ -1,0 +1,40 @@
+using System.Security.Claims;
+using CleanDomainValidation.Application;
+using DBetter.Application.Connections.Queries.GetSuggestions;
+using DBetter.Contracts.ConnectionRequests.Commands.Put;
+using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DBetter.Api;
+
+public static class ConnectionsModule
+{
+    public static void AddConnectionEndpoints(this IEndpointRouteBuilder app)
+    {
+        app.MapPost("connections/suggestions", async (
+                ClaimsPrincipal user,
+                IMediator mediator,
+                [FromQuery(Name = "page")] string? page,
+                ConnectionRequestParameters parameters) =>
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+
+                var ownerId = userIdClaim?.Value;
+                
+                var command = Builder<GetConnectionSuggestionsQuery>
+                    .WithName("Connections.Suggestions")
+                    .BindParameters(parameters)
+                    .MapParameter(r => r.OwnerId, ownerId)
+                    .MapParameter(r => r.Page, page)
+                    .BuildUsing<GetConnectionSuggestionsQueryBuilder>();
+
+                return await mediator.HandleQueryAsync(command, (string result) =>
+                {
+                    return Results.Ok(result);
+                });
+            })
+            .WithName("GetConnectionSuggestions")
+            .WithOpenApi();
+    }
+}

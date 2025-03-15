@@ -7,12 +7,12 @@ public class AllowedVehiclesParameters : IParameters
     /// <summary>
     /// Indicates that high speed trains are allowed on the section
     /// </summary>
-    public bool? HighSpeed;
+    public bool? HighSpeed { get; set; }
     
     /// <summary>
     /// Indicates that intercity like trains are allowed on the section
     /// </summary>
-    public bool? Intercity;
+    public bool? Intercity { get; set; }
     
     /// <summary>
     /// Indicates that regional trains are allowed on the section
@@ -20,7 +20,7 @@ public class AllowedVehiclesParameters : IParameters
     /// <remarks>
     /// This contains REs and RBs
     /// </remarks>
-    public bool? Regional;
+    public bool? Regional { get; set; }
     
     /// <summary>
     /// Indicates that public transportation is allowed on the section
@@ -28,5 +28,5 @@ public class AllowedVehiclesParameters : IParameters
     /// <remarks>
     /// This contains S-Bahnen, Trams, Buses and Ferries.
     /// </remarks>
-    public bool? PublicTransport;
+    public bool? PublicTransport { get; set; }
 }
