@@ -5,7 +5,7 @@ namespace DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
 /// <summary>
 /// A connection result
 /// </summary>
-public class Verbindung
+public class Verbindung : IHasMessage
 {
     /// <summary>
     /// Id of the connection
@@ -50,6 +50,11 @@ public class Verbindung
     /// Demand
     /// </summary>
     public List<AuslastungsMeldung> Auslastungsmeldungen { get; set; }
+    
+    /// <summary>
+    /// Information about bike carriage
+    /// </summary>
+    public Fahrradmitnahme? FahrradmitnahmeMoeglich { get; set; }
     
     /// <summary>
     /// Messages from Hafas Information Manager

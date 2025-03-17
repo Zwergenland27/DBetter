@@ -16,6 +16,13 @@ public static partial class DomainErrors
                 "Station.EvaNumber.Invalid", 
                 $"{value} is not a numeric value.");
         }
+        
+        public static class InfoId
+        {
+            public static Error NotNumeric(string value) => Error.Validation(
+                "Station.InfoId.Invalid", 
+                $"{value} is not a numeric value.");
+        }
         public static class Name
         {
             public static Error MetaStation(string value) => Error.Conflict(

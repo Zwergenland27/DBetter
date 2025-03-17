@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CleanDomainValidation.Domain;
 using DBetter.Application.Abstractions.Persistence;
 using MediatR;
@@ -21,7 +22,10 @@ internal class TransactionalPipelineBehaviour<TRequest, TResponse>(
             }
             else
             {
+                var sw = Stopwatch.StartNew();
                 await unitOfWork.CommitAsync(cancellationToken);
+                sw.Stop();
+                Console.WriteLine($"Transaction: {sw.ElapsedMilliseconds}ms");
             }
             return result;
         }

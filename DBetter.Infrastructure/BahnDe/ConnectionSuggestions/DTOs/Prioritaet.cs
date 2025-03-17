@@ -5,6 +5,6 @@ namespace DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
 /// </summary>
 public enum Prioritaet
 {
-    GERING,
+    NIEDRIG,
     HOCH
 }

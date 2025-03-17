@@ -6,6 +6,11 @@ namespace DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
 public class HimMeldung
 {
     /// <summary>
+    /// Priority of the message
+    /// </summary>
+    public Prioritaet Priority { get; set; }
+    
+    /// <summary>
     /// Title
     /// </summary>
     public string Ueberschrift { get; set; }
@@ -14,4 +19,13 @@ public class HimMeldung
     /// Text
     /// </summary>
     public string? Text { get; set; }
+    
+    /// <summary>
+    /// Time of last information update
+    /// </summary>
+    /// <remarks>
+    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
+    /// </remarks>
+    /// <example>2025-03-15T19:08:00</example>
+    public string ModDateTime { get; set; }
 }

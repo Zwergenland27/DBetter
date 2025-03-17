@@ -4,6 +4,7 @@ using DBetter.Application.Abstractions.Messaging;
 using DBetter.Contracts.ConnectionRequests.Commands.Put;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Connections;
 using DBetter.Domain.Errors;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
@@ -184,4 +185,4 @@ public record GetConnectionSuggestionsQuery(
     List<Passenger> Passengers,
     ConnectionOptions Options,
     Route Route,
-    string? Page) : IQuery<string>;
+    string? Page) : IQuery<List<Connection>>;

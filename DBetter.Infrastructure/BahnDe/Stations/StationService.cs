@@ -37,7 +37,7 @@ public class StationService(HttpClient http)
 
                 var coordinates = new Coordinates(station.Lat, station.Lon);
 
-                results.Add(new Station(StationId.CreateNew(), evaNumber.Value, name.Value, coordinates));
+                results.Add(new Station(StationId.CreateNew(), evaNumber.Value, name.Value, coordinates, null));
             }
 
             return results;

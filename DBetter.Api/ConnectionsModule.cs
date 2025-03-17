@@ -2,6 +2,7 @@ using System.Security.Claims;
 using CleanDomainValidation.Application;
 using DBetter.Application.Connections.Queries.GetSuggestions;
 using DBetter.Contracts.ConnectionRequests.Commands.Put;
+using DBetter.Domain.Connections;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ public static class ConnectionsModule
                     .MapParameter(r => r.Page, page)
                     .BuildUsing<GetConnectionSuggestionsQueryBuilder>();
 
-                return await mediator.HandleQueryAsync(command, (string result) =>
+                return await mediator.HandleQueryAsync(command, (List<Connection> result) =>
                 {
                     return Results.Ok(result);
                 });

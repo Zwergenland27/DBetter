@@ -1,12 +1,13 @@
 using CleanDomainValidation.Domain;
 using DBetter.Application.Abstractions.Messaging;
 using DBetter.Domain.ConnectionRequests;
+using DBetter.Domain.Connections;
 
 namespace DBetter.Application.Connections.Queries.GetSuggestions;
 
-public class GetConnectionSuggestionsQueryHandler(IConnectionsQueryRepository repository) : IQueryHandler<GetConnectionSuggestionsQuery, string>
+public class GetConnectionSuggestionsQueryHandler(IConnectionsQueryRepository repository) : IQueryHandler<GetConnectionSuggestionsQuery, List<Connection>>
 {
-    public async Task<CanFail<string>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
+    public async Task<CanFail<List<Connection>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
         var result = ConnectionRequest.Create(
             request.Id,

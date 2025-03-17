@@ -22,4 +22,13 @@ public class Zugattribut
     /// </summary>
     /// <example>trilex - Die Länderbahn GmbH DLB</example>
     public string Value { get; set; }
+    
+    /// <summary>
+    /// Contains information about the section where the attribute is valid
+    /// </summary>
+    /// <remarks>
+    /// This always contains only stations that are stops in the section.
+    /// </remarks>
+    /// <example>(Hannover Messe/Laatzen - Bennemühlen)</example>
+    public string? Teilstreckenhinweis { get; set; }
 }

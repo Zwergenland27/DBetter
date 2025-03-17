@@ -2,6 +2,8 @@ namespace DBetter.Contracts.Stations.Queries.Find;
 
 public class StationDto
 {
+    //TODO: Do not return evaNumber to the user. Instead always use custom generated StationId.
+    
     /// <summary>
     /// EVA number of the station
     /// </summary>

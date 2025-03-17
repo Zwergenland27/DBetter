@@ -3,7 +3,7 @@ namespace DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
 /// <summary>
 /// Stop
 /// </summary>
-public class Halt
+public class Halt : IHasMessage
 {
     /// <summary>
     /// Fuzzy station id
@@ -57,10 +57,16 @@ public class Halt
     public List<AuslastungsMeldung> Auslastungsmeldungen { get; set; }
     
     /// <summary>
-    /// Platform
+    /// Planned Platform
     /// </summary>
     /// <example>12</example>
-    public string Gleis { get; set; }
+    public string? Gleis { get; set; }
+    
+    /// <summary>
+    /// Real Platform
+    /// </summary>
+    /// <example>12</example>
+    public string? EzGleis { get; set; }
     
     /// <summary>
     /// Type of the platform
@@ -92,7 +98,7 @@ public class Halt
     /// Id for information about the station
     /// </summary>
     /// <example>1343</example>
-    public string BahnhofsInfoId { get; set; }
+    public string? BahnhofsInfoId { get; set; }
     
     /// <summary>
     /// Eva number of the station

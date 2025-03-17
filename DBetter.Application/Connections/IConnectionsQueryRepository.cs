@@ -1,8 +1,9 @@
 using DBetter.Domain.ConnectionRequests;
+using DBetter.Domain.Connections;
 
 namespace DBetter.Application.Connections;
 
 public interface IConnectionsQueryRepository
 {
-    Task<string> GetConnectionSuggestionsAsync(ConnectionRequest request, string? page);
+    Task<List<Connection>> GetConnectionSuggestionsAsync(ConnectionRequest request, string? page);
 }

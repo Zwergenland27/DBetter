@@ -27,6 +27,12 @@ public class StationMapping : IEntityTypeConfiguration<Station>
                 evaNumber => evaNumber.Value,
                 value => EvaNumber.Create(value).Value);
         
+        builder.Property(station => station.InfoId)
+            .HasConversion(
+                infoId => infoId != null ? infoId.Value : (int?) null,
+                value => value.HasValue ? StationInfoId.Create(value.Value).Value : null)
+            .IsRequired(false);
+        
         builder.Property(station => station.Name)
             .HasConversion(
                 name => name.Value,

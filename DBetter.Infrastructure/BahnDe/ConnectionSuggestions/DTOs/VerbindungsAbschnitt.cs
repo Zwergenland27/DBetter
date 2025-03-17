@@ -3,7 +3,7 @@ namespace DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
 /// <summary>
 /// Connection section
 /// </summary>
-public class VerbindungsAbschnitt
+public class VerbindungsAbschnitt : IHasMessage
 {
     /// <summary>
     /// Messages from Hafas Information Manager
@@ -24,13 +24,13 @@ public class VerbindungsAbschnitt
     /// Id for information about the first station
     /// </summary>
     /// <example>1343</example>
-    public string ExterneBahnhofsinfoIdOrigin { get; set; }
+    public string? ExterneBahnhofsinfoIdOrigin { get; set; }
     
     /// <summary>
     /// Id for information about the last station
     /// </summary>
     /// <example>1866</example>
-    public string ExterneBahnhofsinfoIdDestination { get; set; }
+    public string? ExterneBahnhofsinfoIdDestination { get; set; }
     
     /// <summary>
     /// Planned start time
@@ -135,7 +135,10 @@ public class VerbindungsAbschnitt
     /// Id of the full journey
     /// </summary>
     /// <example>2|#VN#1#ST#1741866428#PI#0#ZI#350936#TA#4#DA#150325#1S#8010085#1T#1653#LS#8010026#LT#1755#PU#80#RT#1#CA#DPN#ZE#52973#ZB#TL 52973#PC#3#FR#8010085#FT#1653#TO#8010026#TT#1755#</example>
-    public string JourneyId { get; set; }
+    /// <remarks>
+    /// Null, if section is of type walking
+    /// </remarks>
+    public string? JourneyId { get; set; }
     
     /// <summary>
     /// Information about transport method
