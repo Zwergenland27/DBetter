@@ -3,6 +3,7 @@ using CleanDomainValidation.Application.Extensions;
 using DBetter.Application.Abstractions.Messaging;
 using DBetter.Contracts.Users;
 using DBetter.Contracts.Users.Commands;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Application.Users.Commands.Register;

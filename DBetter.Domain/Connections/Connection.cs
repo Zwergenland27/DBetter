@@ -1,21 +1,25 @@
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections.Entities;
 using DBetter.Domain.Connections.ValueObjects;
+using DBetter.Domain.Shared;
 
 namespace DBetter.Domain.Connections;
 
 public class Connection : AggregateRoot<ConnectionId>
 {
-    private readonly List<Message> _messages = [];
+    private readonly List<PassengerInfo> _messages = [];
 
     private readonly List<Section> _sections = [];
+    
+    public ConnectionRequestId RequestId { get; private set; }
     
     public TripId TripId { get; private set; }
     
     public ContextId ContextId { get; private set; }
     public Offer? Offer { get; private set; }
     
-    public IReadOnlyList<Message> Messages => _messages.AsReadOnly();
+    public IReadOnlyList<PassengerInfo> Messages => _messages.AsReadOnly();
     
     public IReadOnlyList<Section> Sections => _sections.AsReadOnly();
     
@@ -27,14 +31,16 @@ public class Connection : AggregateRoot<ConnectionId>
     
     public Connection(
         ConnectionId id,
+        ConnectionRequestId requestId,
         TripId tripId,
         ContextId contextId,
         Offer? offer,
-        List<Message> messages,
+        List<PassengerInfo> messages,
         Demand demand,
         bool? bikeCarriage,
         List<Section> sections) : base(id)
     {
+        RequestId = requestId;
         TripId = tripId;
         ContextId = contextId;
         Offer = offer;

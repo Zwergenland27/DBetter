@@ -1,4 +1,4 @@
-namespace DBetter.Domain.Journey.ValueObjects;
+namespace DBetter.Domain.TrainRun.ValueObjects;
 
 public enum CateringType
 {

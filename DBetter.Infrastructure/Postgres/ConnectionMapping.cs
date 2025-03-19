@@ -14,52 +14,28 @@ public class ConnectionMapping : IEntityTypeConfiguration<Connection>
         
         builder.HasKey(x => x.Id);
 
-        builder.HasIndex(x => x.TripId)
-            .IsUnique();
-
         builder.Property(x => x.Id)
             .HasConversion(
                 id => id.Value,
                 value => new ConnectionId(value));
-        
-        builder.Property(x => x.TripId)
-            .HasConversion(
-                id => id.Value,
-                value => new TripId(value));
+
+        builder.Ignore(x => x.TripId);
         
         builder.Property(x => x.ContextId)
             .HasConversion(
                 id => id.Value,
                 value => new ContextId(value));
 
-        builder.OwnsOne(x => x.Offer);
+        builder.Ignore(x => x.Offer);
 
-        builder.OwnsOne(x => x.Demand);
-        
-        builder.Property(x => x.BikeCarriage)
-            .IsRequired(false);
+        builder.Ignore(x => x.Demand);
 
-        builder.OwnsMany(x => x.Messages, mb =>
-            {
-                mb.ToTable("ConnectionMessages");
-                
-                mb.WithOwner().HasForeignKey("ConnectionId");
-                
-                mb.Property<Guid>("Id");
-                
-                mb.HasKey("Id", "ConnectionId");
+        builder.Ignore(x => x.BikeCarriage);
 
-                mb.Property(x => x.Code);
+        builder.Ignore(x => x.Messages);
 
-                mb.Property(x => x.DefaultText);
-            })
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Ignore(x => x.Sections);
 
-        builder.HasMany(x => x.Sections)
-            .WithOne()
-            .HasForeignKey("ConnectionId");
-
-        builder.Navigation(x => x.Sections)
-            .HasField("_sections");
+        builder.Ignore(x => x.RequestId);
     }
 }

@@ -2,19 +2,18 @@ using DBetter.Domain.Connections.ValueObjects;
 
 namespace DBetter.Domain.Connections.Entities;
 
-public class WalkTransferSection : Section
+public class WalkSection : Section
 {
     public int Distance { get; private init; }
     
     public int WalkingMinutes { get; private init; }
 
-    private WalkTransferSection(){}
+    private WalkSection() {}
 
-    public WalkTransferSection(
+    public WalkSection(
         SectionId id,
-        SectionIndex sectionIndex,
         int distance,
-        int walkingMinutes) : base(id, sectionIndex)
+        int walkingMinutes) : base(id)
     {
         Distance = distance;
         WalkingMinutes = walkingMinutes;

@@ -1,7 +1,7 @@
 using CleanDomainValidation.Domain;
 using DBetter.Domain.Errors;
 
-namespace DBetter.Domain.Users.ValueObjects;
+namespace DBetter.Domain.Shared;
 
 public record Birthday
 {

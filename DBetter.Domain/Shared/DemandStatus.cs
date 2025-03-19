@@ -1,4 +1,4 @@
-namespace DBetter.Domain.Connections.ValueObjects;
+namespace DBetter.Domain.Shared;
 
 public enum DemandStatus
 {

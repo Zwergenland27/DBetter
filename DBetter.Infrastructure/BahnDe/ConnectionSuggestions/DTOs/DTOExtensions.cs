@@ -1,9 +1,11 @@
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.Entities;
 using DBetter.Domain.Connections.ValueObjects;
-using DBetter.Domain.Journey.ValueObjects;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
 using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Parameters;
 using JourneyId = DBetter.Domain.Connections.ValueObjects.JourneyId;
@@ -12,7 +14,7 @@ namespace DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
 
 public static class DTOExtensions
 {
-    public static Connection ToDomain(this Verbindung verbindung, List<Station> stations)
+    public static Connection ToDomain(this Verbindung verbindung, ConnectionRequestId requestId)
     {
         Offer? offer = null;
         if (verbindung.AngebotsPreis is not null)
@@ -27,29 +29,23 @@ public static class DTOExtensions
 
         List<Section> sections = [];
 
-        for (int i = 0; i < verbindung.VerbindungsAbschnitte.Count; i++)
+        foreach (var abschnitt in verbindung.VerbindungsAbschnitte)
         {
-            var abschnitt =  verbindung.VerbindungsAbschnitte[i];
             if (abschnitt.Verkehrsmittel.Typ is VerkehrsmittelTyp.WALK)
             {
-                sections.Add(new WalkTransferSection(
+                sections.Add(new WalkSection(
                     SectionId.CreateNew(),
-                    new SectionIndex(abschnitt.Idx),
                     abschnitt.Distanz!.Value,
                     abschnitt.AbschnittsDauer));
                 continue;
             }
             
-            sections.Add(abschnitt.ToDomain(stations));
-
-            if (i != verbindung.VerbindungsAbschnitte.Count - 1)
-            {
-                sections.Add(new TransferSection(SectionId.CreateNew()));   
-            }
+            sections.Add(abschnitt.ToDomain());
         }
         
         return new Connection(
             ConnectionId.CreateNew(),
+            requestId,
             new TripId(verbindung.TripId),
             new ContextId(verbindung.CtxRecon),
             offer,
@@ -59,13 +55,13 @@ public static class DTOExtensions
             sections);
     }
 
-    private static Class ToDomainClass(this Klasse @class)
+    private static ComfortClass ToDomainClass(this Klasse klasse)
     {
-        return @class switch
+        return klasse switch
         {
-            Klasse.KLASSE_1 => Class.First,
-            Klasse.KLASSE_2 => Class.Second,
-            _ => throw new BahnDeException("ConnectionSuggestion", $"Unknown class {@class}")
+            Klasse.KLASSE_1 => ComfortClass.First,
+            Klasse.KLASSE_2 => ComfortClass.Second,
+            _ => throw new BahnDeException("ConnectionSuggestion", $"Unknown class {klasse}")
         };
     }
 
@@ -78,7 +74,7 @@ public static class DTOExtensions
         };
     }
 
-    private static List<Message> GetDomainMessages(this IHasMessage obj)
+    private static List<PassengerInfo> GetDomainMessages(this IHasMessage obj)
     {
         return [];
     }
@@ -127,53 +123,34 @@ public static class DTOExtensions
         };
     }
 
-    private static TransportSection ToDomain(this VerbindungsAbschnitt abschnitt, List<Station> stations)
+    private static TransportSection ToDomain(this VerbindungsAbschnitt abschnitt)
     {
-        return new TransportSection(
-            SectionId.CreateNew(),
-            new SectionIndex(abschnitt.Idx),
+        StationName? destination = null;
+
+        if (abschnitt.Verkehrsmittel.Richtung is not null)
+        {
+            var destinationResult = StationName.Create(abschnitt.Verkehrsmittel.Richtung);
+            if (!destinationResult.HasFailed)
+            {
+                destination = destinationResult.Value;
+            }
+        }
+        
+        return TransportSection.Create(
             abschnitt.Auslastungsmeldungen.GetDomainDemand(),
             abschnitt.GetDomainSectionMessages(),
-            new JourneyId(abschnitt.JourneyId!),
-            abschnitt.GetJourneyInformation(),
-            abschnitt.Halte.Select(h => h.ToDomain(stations)).ToList());
+            new BahnJourneyId(abschnitt.JourneyId!),
+            abschnitt.Verkehrsmittel.MittelText!,
+            abschnitt.Verkehrsmittel.LangText!,
+            destination,
+            abschnitt.GetCateringInformation(),
+            abschnitt.GetBikeCarriageInformation(),
+            abschnitt.Halte.Select(h => h.ToDomain()).ToList());
     }
     
-    private static List<SectionMessage> GetDomainSectionMessages(this IHasMessage obj)
+    private static List<RoutePassengerInfo> GetDomainSectionMessages(this IHasMessage obj)
     {
         return [];
-    }
-
-    private static JourneyInformation GetJourneyInformation(this VerbindungsAbschnitt abschnitt)
-    {
-        var verkehrsmittel =  abschnitt.Verkehrsmittel;
-        var trainName = new TrainName(
-            verkehrsmittel.KurzText!,
-            verkehrsmittel.MittelText!,
-            verkehrsmittel.LangText!);
-        return new JourneyInformation(
-            verkehrsmittel.ProduktGattung!.Value.ToDomainMeansOfTransport(),
-            trainName,
-            abschnitt.GetCateringInformation(),
-            abschnitt.GetBikeCarriageInformation());
-    }
-
-    private static MeansOfTransport ToDomainMeansOfTransport(this Produktgattung gattung)
-    {
-        return gattung switch
-        {
-            Produktgattung.ICE => MeansOfTransport.Ice,
-            Produktgattung.EC_IC => MeansOfTransport.EcIc,
-            Produktgattung.IR => MeansOfTransport.Ir,
-            Produktgattung.REGIONAL => MeansOfTransport.Regional,
-            Produktgattung.SBAHN => MeansOfTransport.Suburban,
-            Produktgattung.BUS => MeansOfTransport.Bus,
-            Produktgattung.SCHIFF => MeansOfTransport.Ship,
-            Produktgattung.UBAHN => MeansOfTransport.Underground,
-            Produktgattung.TRAM => MeansOfTransport.Tram,
-            Produktgattung.ANRUFPFLICHTIG => MeansOfTransport.Taxi,
-            _ => throw new BahnDeException("ConnectionSuggestion", $"Unknown means of transport: {gattung}")
-        };
     }
 
     private static CateringInformation GetCateringInformation(this VerbindungsAbschnitt abschnitt)
@@ -226,33 +203,33 @@ public static class DTOExtensions
             partialSectionIndices.Item2);
     }
 
-    private static BikeInformation GetBikeCarriageInformation(this VerbindungsAbschnitt abschnitt)
+    private static BikeCarriage GetBikeCarriageInformation(this VerbindungsAbschnitt abschnitt)
     {
         var verkehrsmittel = abschnitt.Verkehrsmittel;
 
         string? validityText = null;
-        BikeTransport status = BikeTransport.NoInfo;
+        BikeStatus status = BikeStatus.NoInfo;
         
         if (abschnitt.HimMeldungen.Any(m => m.Text != null && m.Text.Contains("Die Mitnahme von Fahrrädern ist nicht möglich.")))
         {
-            status = BikeTransport.NotPossible;
+            status = BikeStatus.NotPossible;
         }
         
         if (verkehrsmittel.Zugattribute.Any(a => a.Key is "FB"))
         {
-            status = BikeTransport.Limited;
+            status = BikeStatus.Limited;
             validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "FB").Teilstreckenhinweis;
         }
 
         if (verkehrsmittel.Zugattribute.Any(a => a.Key is "FR"))
         {
-            status = BikeTransport.ReservationRequired;
+            status = BikeStatus.ReservationRequired;
             validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "FR").Teilstreckenhinweis;
         }
         
         var partialSectionIndices = GetPartialSectionValidityInfos(validityText, abschnitt.Halte);
         
-        return new BikeInformation(
+        return new BikeCarriage(
             status,
             partialSectionIndices.Item1,
             partialSectionIndices.Item2);
@@ -317,13 +294,15 @@ public static class DTOExtensions
         return new(firstStopIndex, lastStopIndex);
     }
 
-    private static Stop ToDomain(this Halt halt, List<Station> stations)
+    private static Stop ToDomain(this Halt halt)
     {
-        var stationEva = EvaNumber.Create(halt.ExtId).Value;
-        var stationId = stations.First(s => s.EvaNumber == stationEva).Id;
+        StationInfoId? infoId = null;
+        if (halt.BahnhofsInfoId is not null)
+        {
+            infoId = StationInfoId.Create(halt.BahnhofsInfoId).Value;
+        }
         
         Platform? platform = null;
-
         if (halt.Gleis is not null)
         {
             var planned =  halt.Gleis!;
@@ -358,7 +337,9 @@ public static class DTOExtensions
         }
         
         return new Stop(
-            stationId,
+            StationName.Create(halt.Name).Value,
+            EvaNumber.Create(halt.ExtId).Value,
+            infoId,
             new StopIndex(halt.RouteIdx),
             platform,
             halt.Auslastungsmeldungen.GetDomainDemand(),

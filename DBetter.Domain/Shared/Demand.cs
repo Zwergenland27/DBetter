@@ -1,4 +1,6 @@
-namespace DBetter.Domain.Connections.ValueObjects;
+using DBetter.Domain.Connections.ValueObjects;
+
+namespace DBetter.Domain.Shared;
 
 /// <summary>
 /// Demand for first and second class

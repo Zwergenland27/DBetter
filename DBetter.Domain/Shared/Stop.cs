@@ -1,12 +1,17 @@
+using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Connections.ValueObjects;
+namespace DBetter.Domain.Shared;
 
 public record Stop
 {
-    private readonly List<Message> _messages = [];
+    private readonly List<PassengerInfo> _messages = [];
     
-    public StationId StationId { get; private init; }
+    public StationName Name { get; private init; }
+    
+    public EvaNumber EvaNumber { get; private init; }
+    
+    public StationInfoId? InfoId { get; private init; }
     
     public StopIndex StopIndex { get; private init; }
     
@@ -26,12 +31,14 @@ public record Stop
     
     public ArrivalTime? ArrivalTime { get; private init; }
     
-    public IReadOnlyList<Message> Messages => _messages.AsReadOnly();
+    public IReadOnlyList<PassengerInfo> Messages => _messages.AsReadOnly();
 
     private Stop(){}
     
     public Stop(
-        StationId stationId,
+        StationName name,
+        EvaNumber evaNumber,
+        StationInfoId? infoId,
         StopIndex stopIndex,
         Platform? platform,
         Demand demand,
@@ -41,9 +48,11 @@ public record Stop
         bool isEntryOnly,
         DepartureTime? departureTime,
         ArrivalTime? arrivalTime,
-        List<Message> messages)
+        List<PassengerInfo> messages)
     {
-        StationId = stationId;
+        Name  = name;
+        EvaNumber = evaNumber;
+        InfoId = infoId;
         StopIndex = stopIndex;
         Platform = platform;
         Demand = demand;

@@ -15,7 +15,7 @@ public class AddDiscountCommandHandler(IUserRepository repository) : ICommandHan
         
         var discount = Discount.Create(
             request.Type,
-            request.Class,
+            request.ComfortClass,
             request.BoughtAtUtc,
             request.ValidUntilUtc);
         

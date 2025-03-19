@@ -1,5 +1,6 @@
 using CleanDomainValidation.Domain;
 using DBetter.Domain.Errors;
+using DBetter.Domain.Shared;
 
 namespace DBetter.Domain.Users.ValueObjects;
 
@@ -7,23 +8,23 @@ public record Discount
 {
     public DiscountType Type { get; private init; }
     
-    public Class Class { get; private init; }
+    public ComfortClass ComfortClass { get; private init; }
     
     public DateTime BoughtAtUtc { get; private init; }
     
     public DateTime? ValidUntilUtc { get; private init; }
     
-    private Discount(DiscountType type, Class @class, DateTime boughtAtUtc, DateTime? validUntilUtc)
+    private Discount(DiscountType type, ComfortClass comfortClass, DateTime boughtAtUtc, DateTime? validUntilUtc)
     {
         Type = type;
-        Class = @class;
+        ComfortClass = comfortClass;
         BoughtAtUtc = boughtAtUtc;
         ValidUntilUtc = validUntilUtc;
     }
     
-    public static CanFail<Discount> Create(DiscountType type, Class @class, DateTime boughtAtUtc, DateTime? validUntilUtc)
+    public static CanFail<Discount> Create(DiscountType type, ComfortClass comfortClass, DateTime boughtAtUtc, DateTime? validUntilUtc)
     {
-        return new Discount(type, @class, boughtAtUtc, validUntilUtc);
+        return new Discount(type, comfortClass, boughtAtUtc, validUntilUtc);
     }
     
     /// <summary>
@@ -34,7 +35,7 @@ public record Discount
     {
         if (other.Type != Type) return CanFail.Success;
         
-        if (other.Class != Class) return CanFail.Success;
+        if (other.ComfortClass != ComfortClass) return CanFail.Success;
         
         if (ValidUntilUtc is not null && other.BoughtAtUtc >= ValidUntilUtc) return CanFail.Success;
 

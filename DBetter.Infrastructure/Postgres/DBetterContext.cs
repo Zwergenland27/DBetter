@@ -17,11 +17,9 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     
     public DbSet<ConnectionRequest> ConnectionRequests { get; set; }
     
-    public DbSet<EmptyJourney> EmptyJourneys { get; set; }
+    public DbSet<TrainRun> TrainRuns { get; set; }
     
     public DbSet<Connection> Connections { get; set; }
-    
-    public DbSet<Section> Sections { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

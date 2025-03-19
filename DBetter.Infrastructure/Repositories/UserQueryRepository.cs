@@ -27,7 +27,7 @@ public class UserQueryRepository(DBetterContext context) : IUserQueryRepository
                 Discounts = user.Discounts.Select(discount => new DiscountResult
                 {
                     Type = discount.Type.ToString(),
-                    Class = discount.Class.ToString(),
+                    Class = discount.ComfortClass.ToString(),
                     ValidUntil = discount.ValidUntilUtc
                 }).ToList()
             },

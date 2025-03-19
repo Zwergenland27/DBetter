@@ -1,3 +1,4 @@
+using DBetter.Domain.Shared;
 using DBetter.Domain.Users;
 using DBetter.Domain.Users.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -61,7 +62,7 @@ public class UserMapping : IEntityTypeConfiguration<User>
             discountBuilder.HasKey("Id");
 
             discountBuilder.Property(discount => discount.Type);
-            discountBuilder.Property(discount => discount.Class);
+            discountBuilder.Property(discount => discount.ComfortClass);
             discountBuilder.Property(discount => discount.BoughtAtUtc);
             discountBuilder.Property(discount => discount.ValidUntilUtc);
         });

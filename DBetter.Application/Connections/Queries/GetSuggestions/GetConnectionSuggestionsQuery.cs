@@ -2,10 +2,12 @@ using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
 using DBetter.Application.Abstractions.Messaging;
 using DBetter.Contracts.ConnectionRequests.Commands.Put;
+using DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Errors;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
 using ICommand = DBetter.Application.Abstractions.Messaging.ICommand;
@@ -15,10 +17,6 @@ namespace DBetter.Application.Connections.Queries.GetSuggestions;
 public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRequestParameters, GetConnectionSuggestionsQuery>{
     public ValidatedRequiredProperty<GetConnectionSuggestionsQuery> Configure(RequiredPropertyBuilder<ConnectionRequestParameters, GetConnectionSuggestionsQuery> builder)
     {
-        var id = builder.ClassProperty(r => r.Id)
-            .Required()
-            .Map(p => p.Id, ConnectionRequestId.Create);
-        
         var ownerId = builder.ClassProperty(r => r.OwnerId)
             .Optional()
             .Map(p => p.OwnerId, UserId.Create);
@@ -48,7 +46,6 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
             .Map(p => p.Page);
         
         return builder.Build(() => new GetConnectionSuggestionsQuery(
-            id,
             ownerId,
             departureTime,
             arrivalTime,
@@ -111,7 +108,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
                     .Required()
                     .Map(r => r.Type, DomainErrors.Shared.DiscountType.Invalid);
                 
-                var @class = dBuilder.EnumProperty(r => r.Class)
+                var comfortClass = dBuilder.EnumProperty(r => r.ComfortClass)
                     .Required()
                     .Map(r => r.Class, DomainErrors.Shared.Class.Invalid);
                 
@@ -119,7 +116,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
                     .Optional()
                     .Map(r => r.ValidUntil);
                 
-                return dBuilder.Build(() => new PassengerDiscount(type, @class, validUntil));
+                return dBuilder.Build(() => new PassengerDiscount(type, comfortClass, validUntil));
             });
 
         return builder.Build(() => Passenger.Create(id, userId, name, birthday, age, options, discounts.ToList()));
@@ -128,7 +125,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
     private ValidatedRequiredProperty<ConnectionOptions> MapOptions(
         RequiredPropertyBuilder<ConnectionOptionsParameters, ConnectionOptions> builder)
     {
-        var @class = builder.EnumProperty(r => r.Class)
+        var comfortClass = builder.EnumProperty(r => r.ComfortClass)
             .Required()
             .Map(r => r.Class, DomainErrors.Shared.Class.Invalid);
         
@@ -140,7 +137,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
             .Required()
             .Map(r => r.MinTransferMinutes);
         
-        return builder.Build(() => new ConnectionOptions(@class, maxTransfers, minTransferMinutes));
+        return builder.Build(() => new ConnectionOptions(comfortClass, maxTransfers, minTransferMinutes));
     }
 
     private ValidatedRequiredProperty<Route> MapRoute(
@@ -178,11 +175,10 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
 }
 
 public record GetConnectionSuggestionsQuery(
-    ConnectionRequestId Id,
     UserId? OwnerId,
     DateTime? DepartureTime,
     DateTime? ArrivalTime,
     List<Passenger> Passengers,
     ConnectionOptions Options,
     Route Route,
-    string? Page) : IQuery<List<Connection>>;
+    string? Page) : ICommand<List<Connection>>;

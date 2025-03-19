@@ -1,15 +1,11 @@
 using System.Text.Json.Serialization;
 using CleanDomainValidation.Application;
+using DBetter.Contracts.ConnectionRequests.Commands.Put;
 
-namespace DBetter.Contracts.ConnectionRequests.Commands.Put;
+namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 
 public class ConnectionRequestParameters : IParameters
 {
-    /// <summary>
-    /// Identifier of the request
-    /// </summary>
-    public string? Id { get; set; }
-
     /// <summary>
     /// Identifier of the user that created the request
     /// </summary>

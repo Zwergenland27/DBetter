@@ -1,6 +1,7 @@
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -86,7 +87,7 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
                 db.HasKey("Id", "PassengerId", "ConnectionRequestId");
                 
                 db.Property(discount => discount.Type);
-                db.Property(discount => discount.Class);
+                db.Property(discount => discount.ComfortClass);
                 db.Property(discount => discount.ValidUntil);
                 
             }).UsePropertyAccessMode(PropertyAccessMode.Field);
@@ -95,7 +96,7 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
 
         builder.OwnsOne(cr => cr.Options, ob =>
         {
-            ob.Property(o => o.Class);
+            ob.Property(o => o.ComfortClass);
             ob.Property(o => o.MaxTransfers);
             ob.Property(o => o.MinTransferMinutes);
         });

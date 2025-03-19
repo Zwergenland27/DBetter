@@ -2,10 +2,14 @@ using System.Security.Claims;
 using CleanDomainValidation.Application;
 using DBetter.Application.Connections.Queries.GetSuggestions;
 using DBetter.Contracts.ConnectionRequests.Commands.Put;
+using DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 using DBetter.Domain.Connections;
+using DBetter.Domain.Connections.ValueObjects;
+using DBetter.Infrastructure.Postgres;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DBetter.Api;
 
@@ -30,12 +34,13 @@ public static class ConnectionsModule
                     .MapParameter(r => r.Page, page)
                     .BuildUsing<GetConnectionSuggestionsQueryBuilder>();
 
-                return await mediator.HandleQueryAsync(command, (List<Connection> result) =>
+                return await mediator.HandleCommandAsync(command, (List<Connection> result) =>
                 {
                     return Results.Ok(result);
                 });
             })
             .WithName("GetConnectionSuggestions")
+            .Produces<List<Connection>>()
             .WithOpenApi();
     }
 }

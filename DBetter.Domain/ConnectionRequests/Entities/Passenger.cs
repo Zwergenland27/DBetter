@@ -2,6 +2,7 @@ using CleanDomainValidation.Domain;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Errors;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Domain.ConnectionRequests.Entities;

@@ -1,12 +1,12 @@
-namespace DBetter.Domain.Connections.ValueObjects;
+namespace DBetter.Domain.Shared;
 
-public class SectionMessage : Message
+public class RoutePassengerInfo : PassengerInfo
 {
     public StopIndex? FromStopIndex { get; set; }
     
     public StopIndex? ToStopIndex { get; set; }
 
-    private SectionMessage(
+    private RoutePassengerInfo(
         string code,
         string defaultText,
         StopIndex? fromStopIndex,

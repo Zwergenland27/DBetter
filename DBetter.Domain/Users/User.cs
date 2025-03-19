@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using CleanDomainValidation.Domain;
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Domain.Users;

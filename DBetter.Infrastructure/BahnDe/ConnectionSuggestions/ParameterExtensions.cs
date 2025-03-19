@@ -1,6 +1,7 @@
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Users.ValueObjects;
 using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Parameters;
 
@@ -59,10 +60,10 @@ public static class ParameterExtensions
 
     private static Klasse GetKlasse(this ConnectionRequest request)
     {
-        return request.Options.Class switch
+        return request.Options.ComfortClass switch
         {
-            Class.First => Klasse.KLASSE_1,
-            Class.Second => Klasse.KLASSE_2,
+            ComfortClass.First => Klasse.KLASSE_1,
+            ComfortClass.Second => Klasse.KLASSE_2,
             _ => throw new BahnDeException("JourneySuggestion", "Unknown comfort class")
         };
     }
@@ -175,10 +176,10 @@ public static class ParameterExtensions
             _ => throw new BahnDeException("ConnectionSuggestion", "Unknown discount type")
         };
 
-        KlasseErmaessigung klasse = discount.Class switch
+        KlasseErmaessigung klasse = discount.ComfortClass switch
         {
-            Class.First => KlasseErmaessigung.KLASSE_1,
-            Class.Second => KlasseErmaessigung.KLASSE_2,
+            ComfortClass.First => KlasseErmaessigung.KLASSE_1,
+            ComfortClass.Second => KlasseErmaessigung.KLASSE_2,
             _ => throw new BahnDeException("ConnectionSuggestion", "Unknown comfort class")
         };
 

@@ -1,9 +1,9 @@
-namespace DBetter.Domain.Connections.ValueObjects;
+namespace DBetter.Domain.Shared;
 
 /// <summary>
 /// Customer message
 /// </summary>
-public class Message
+public class PassengerInfo
 {
     /// <summary>
     /// Custom mapped code
@@ -19,9 +19,9 @@ public class Message
     /// </example>
     public string DefaultText { get; private init; }
     
-    private Message(){}
+    private PassengerInfo(){}
 
-    protected Message(
+    protected PassengerInfo(
         string code,
         string defaultText)
     {

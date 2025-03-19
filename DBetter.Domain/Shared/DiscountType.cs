@@ -1,4 +1,4 @@
-namespace DBetter.Domain.Users.ValueObjects;
+namespace DBetter.Domain.Shared;
 
 public enum DiscountType
 {

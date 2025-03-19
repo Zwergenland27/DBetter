@@ -36,9 +36,6 @@ public class Verkehrsmittel
     /// <summary>
     /// Direction of the train
     /// </summary>
-    /// <remarks>
-    /// Null if <see cref="Typ"/> is <see cref="VerkehrsmittelTyp.WALK"/>
-    /// </remarks>
     /// <example>Bautzen</example>
     public string? Richtung { get; set; }
     

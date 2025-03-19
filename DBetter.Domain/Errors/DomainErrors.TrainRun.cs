@@ -4,11 +4,11 @@ namespace DBetter.Domain.Errors;
 
 public static partial class DomainErrors
 {
-    public static class Journey
+    public static class TrainRun
     {
         public static class Id
         {
-            public static Error Invalid(string value) => Error.Validation("Journey.Id.Invalid", $"{value} is no valid guid.");
+            public static Error Invalid(string value) => Error.Validation("TrainRun.Id.Invalid", $"{value} is no valid guid.");
         }
     }
 }
