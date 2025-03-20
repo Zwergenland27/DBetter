@@ -2,11 +2,13 @@ using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.Entities;
 using DBetter.Domain.Connections.ValueObjects;
+using DBetter.Domain.Journey;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
+using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Entities;
 using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Parameters;
 using JourneyId = DBetter.Domain.Connections.ValueObjects.JourneyId;
 
@@ -14,7 +16,11 @@ namespace DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
 
 public static class DTOExtensions
 {
-    public static Connection ToDomain(this Verbindung verbindung, ConnectionRequestId requestId)
+    public static Connection ToDomain(
+        this Verbindung verbindung,
+        ConnectionRequestId requestId,
+        Dictionary<string, TrainRunEntity> trainRunMapping,
+        out List<TrainRunEntity> newTrainRuns)
     {
         Offer? offer = null;
         if (verbindung.AngebotsPreis is not null)
@@ -28,6 +34,7 @@ public static class DTOExtensions
         }
 
         List<Section> sections = [];
+        newTrainRuns = [];
 
         foreach (var abschnitt in verbindung.VerbindungsAbschnitte)
         {
@@ -40,7 +47,12 @@ public static class DTOExtensions
                 continue;
             }
             
-            sections.Add(abschnitt.ToDomain());
+            sections.Add(abschnitt.ToDomain(trainRunMapping, out var newTrainRun));
+
+            if (newTrainRun is not null)
+            {
+                newTrainRuns.Add(newTrainRun);
+            }
         }
         
         return new Connection(
@@ -123,8 +135,20 @@ public static class DTOExtensions
         };
     }
 
-    private static TransportSection ToDomain(this VerbindungsAbschnitt abschnitt)
+    private static TransportSection ToDomain(
+        this VerbindungsAbschnitt abschnitt, 
+        Dictionary<string, TrainRunEntity> trainRunMapping,
+        out TrainRunEntity? newTrainRun)
     {
+        var trains = TrainInformation.CreateTraction(
+            abschnitt.Verkehrsmittel.MittelText!, 
+            abschnitt.Verkehrsmittel.LangText!);
+
+        newTrainRun = null;
+        var trainRunExists = trainRunMapping.TryGetValue(abschnitt.JourneyId!, out var trainRun);
+
+        var trainRunId = trainRun?.Id;
+        
         StationName? destination = null;
 
         if (abschnitt.Verkehrsmittel.Richtung is not null)
@@ -135,13 +159,36 @@ public static class DTOExtensions
                 destination = destinationResult.Value;
             }
         }
+
+        if (destination is null && trainRunExists && trainRun!.DestinationName is not null)
+        {
+            destination = trainRun.DestinationName;
+        }
+        
+        if (!trainRunExists)
+        {
+            trainRunId = TrainRunId.CreateNew();
+            var bahnId = new BahnJourneyId(abschnitt.JourneyId!);
+            
+            var creationResult = TrainRunEntity.Create(trainRunId, bahnId, trains[0], destination);
+            if (creationResult.HasFailed)
+            {
+                throw new BahnDeException("ConnectionSuggestions", $"Could not create train run");
+            }
+            
+            newTrainRun = creationResult.Value;
+            trainRunMapping.Add(abschnitt.JourneyId!, newTrainRun);
+        }
+        else if(trains[0].Number is null && trainRun!.TrainInfos.Number is not null)
+        {
+            trains[0] = trains[0].UpdateTrainNumber(trainRun.TrainInfos.Number);
+        }
         
         return TransportSection.Create(
             abschnitt.Auslastungsmeldungen.GetDomainDemand(),
             abschnitt.GetDomainSectionMessages(),
-            new BahnJourneyId(abschnitt.JourneyId!),
-            abschnitt.Verkehrsmittel.MittelText!,
-            abschnitt.Verkehrsmittel.LangText!,
+            trainRunId!,
+            trains,
             destination,
             abschnitt.GetCateringInformation(),
             abschnitt.GetBikeCarriageInformation(),

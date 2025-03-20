@@ -1,5 +1,7 @@
+using CleanDomainValidation.Domain;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.Shared;
+using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun.ValueObjects;
 
 namespace DBetter.Domain.Journey;
@@ -16,7 +18,9 @@ public class TrainRun : AggregateRoot<TrainRunId>
     
     private readonly List<Stop> _stops = [];
     
-    public BahnJourneyId BahnId { get; private init; }
+    public BahnJourneyId BahnId { get; private set; }
+    
+    public TrainRunDate Date { get; private set; }
     
     public IReadOnlyList<RoutePassengerInfo> Messages => _messages.AsReadOnly();
     
@@ -24,7 +28,9 @@ public class TrainRun : AggregateRoot<TrainRunId>
     
     public BikeCarriage BikeCarriage { get; private init; }
     
-    public TrainInformation Train { get; private init; }
+    public TrainInformation TrainInfos { get; private init; }
+    
+    public StationName? DestinationName { get; private set; }
     
     public IReadOnlyList<Stop> Stops => _stops.AsReadOnly();
     
@@ -33,17 +39,21 @@ public class TrainRun : AggregateRoot<TrainRunId>
     private TrainRun(
         TrainRunId id,
         BahnJourneyId bahnId,
+        TrainRunDate date,
         List<RoutePassengerInfo> messages,
-        TrainInformation train,
+        TrainInformation trainInfos,
         CateringInformation catering,
         BikeCarriage bikeCarriage,
-        List<Stop> stops) : base(id)
+        List<Stop> stops,
+        StationName? destinationName) : base(id)
     {
         BahnId = bahnId;
         _messages = messages;
-        Train = train;
+        TrainInfos = trainInfos;
+        Date = date;
         Catering = catering;
         BikeCarriage = bikeCarriage;
         _stops = stops;
+        DestinationName = destinationName;
     }
 }

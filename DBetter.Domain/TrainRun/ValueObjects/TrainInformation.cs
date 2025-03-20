@@ -83,6 +83,22 @@ public record TrainInformation
         
         return new TrainInformation(product.Product, trainLine, trainNumber);
     }
+
+    public static List<TrainInformation> CreateTraction(string leadingVehicleName, string fullName)
+    {
+        var fullNames = fullName.Split(" / ")
+            .OrderBy(n => !n.Contains(leadingVehicleName))
+            .ToList();
+        return fullNames.Select(TrainInformation.Create).ToList();
+    }
+
+    public TrainInformation UpdateTrainNumber(TrainNumber number)
+    {
+        return new TrainInformation(
+            Product,
+            Line,
+            number);
+    }
     
     private static TransportInfo GetTransportProduct(string info)
     {

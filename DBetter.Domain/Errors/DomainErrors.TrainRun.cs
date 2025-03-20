@@ -10,5 +10,10 @@ public static partial class DomainErrors
         {
             public static Error Invalid(string value) => Error.Validation("TrainRun.Id.Invalid", $"{value} is no valid guid.");
         }
+
+        public static class TrainRunDate
+        {
+            public static Error Invalid(string value) => Error.Validation("TrainRun.Date.Invalid", $"{value} is no valid date.");
+        }
     }
 }

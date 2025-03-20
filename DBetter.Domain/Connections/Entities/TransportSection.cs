@@ -18,7 +18,7 @@ public class TransportSection : Section
     
     public IReadOnlyList<RoutePassengerInfo> Messages => _messages.AsReadOnly();
     
-    public BahnJourneyId JourneyId { get; private init; }
+    public TrainRunId TrainRunId { get; private init; }
     
     public IReadOnlyList<TrainInformation> TrainParts => _trainParts.AsReadOnly();
     
@@ -36,7 +36,7 @@ public class TransportSection : Section
         SectionId id,
         Demand demand,
         List<RoutePassengerInfo> messages,
-        BahnJourneyId journeyId,
+        TrainRunId trainRunId,
         List<TrainInformation> trainParts,
         StationName? destination,
         CateringInformation catering,
@@ -45,7 +45,7 @@ public class TransportSection : Section
     {
         Demand = demand;
         _messages = messages;
-        JourneyId = journeyId;
+        TrainRunId = trainRunId;
         _trainParts = trainParts;
         Destination = destination;
         Catering = catering;
@@ -56,9 +56,8 @@ public class TransportSection : Section
     public static TransportSection Create(
         Demand demand,
         List<RoutePassengerInfo> messages,
-        BahnJourneyId journeyId,
-        string leadingVehicleName,
-        string fullName,
+        TrainRunId trainRunId,
+        List<TrainInformation> trains,
         StationName? destination,
         CateringInformation catering,
         BikeCarriage bikeCarriage,
@@ -68,19 +67,11 @@ public class TransportSection : Section
             SectionId.CreateNew(),
             demand,
             messages,
-            journeyId,
-            GetTrainRunInformation(leadingVehicleName, fullName),
+            trainRunId,
+            trains,
             destination,
             catering,
             bikeCarriage,
             stops);
-    }
-
-    private static List<TrainInformation> GetTrainRunInformation(string leadingVehicleName, string fullName)
-    {
-        var fullNames = fullName.Split(" / ")
-            .OrderBy(n => !n.Contains(leadingVehicleName))
-            .ToList();
-        return fullNames.Select(TrainInformation.Create).ToList();
     }
 }

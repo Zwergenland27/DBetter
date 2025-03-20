@@ -1,14 +1,16 @@
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.ValueObjects;
+using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
+using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DBetter.Infrastructure.Postgres;
 
-public class ConnectionMapping : IEntityTypeConfiguration<Connection>
+public class ConnectionMapping : IEntityTypeConfiguration<ConnectionEntity>
 {
-    public void Configure(EntityTypeBuilder<Connection> builder)
+    public void Configure(EntityTypeBuilder<ConnectionEntity> builder)
     {
         builder.ToTable("Connections");
         
@@ -18,24 +20,10 @@ public class ConnectionMapping : IEntityTypeConfiguration<Connection>
             .HasConversion(
                 id => id.Value,
                 value => new ConnectionId(value));
-
-        builder.Ignore(x => x.TripId);
         
         builder.Property(x => x.ContextId)
             .HasConversion(
                 id => id.Value,
                 value => new ContextId(value));
-
-        builder.Ignore(x => x.Offer);
-
-        builder.Ignore(x => x.Demand);
-
-        builder.Ignore(x => x.BikeCarriage);
-
-        builder.Ignore(x => x.Messages);
-
-        builder.Ignore(x => x.Sections);
-
-        builder.Ignore(x => x.RequestId);
     }
 }
