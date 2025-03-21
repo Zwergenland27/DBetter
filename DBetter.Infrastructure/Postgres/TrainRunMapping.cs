@@ -1,7 +1,7 @@
 using DBetter.Domain.Journey;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun.ValueObjects;
-using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Entities;
+using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

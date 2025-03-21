@@ -5,7 +5,7 @@ using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Journey;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
-using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Entities;
+using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DBetter.Infrastructure.Postgres;
@@ -17,6 +17,8 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     public DbSet<Station> Stations { get; set; }
     
     public DbSet<ConnectionRequest> ConnectionRequests { get; set; }
+    
+    public DbSet<BahnConnectionRequestEntity> BahnConnectionRequests { get; set; }
     
     public DbSet<TrainRunEntity> TrainRuns { get; set; }
     

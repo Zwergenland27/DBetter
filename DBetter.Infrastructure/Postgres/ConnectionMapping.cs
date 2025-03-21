@@ -1,8 +1,8 @@
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.TrainRun.ValueObjects;
-using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.DTOs;
-using DBetter.Infrastructure.BahnDe.ConnectionSuggestions.Entities;
+using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,9 +21,11 @@ public class ConnectionMapping : IEntityTypeConfiguration<ConnectionEntity>
                 id => id.Value,
                 value => new ConnectionId(value));
         
-        builder.Property(x => x.ContextId)
+        builder.Property(x => x.RequestId)
             .HasConversion(
                 id => id.Value,
-                value => new ContextId(value));
+                value => new ConnectionRequestId(value));
+
+        builder.Property(x => x.ContextId);
     }
 }

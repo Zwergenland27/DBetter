@@ -15,8 +15,7 @@ public class Connection : AggregateRoot<ConnectionId>
     public ConnectionRequestId RequestId { get; private set; }
     
     public TripId TripId { get; private set; }
-    
-    public ContextId ContextId { get; private set; }
+
     public Offer? Offer { get; private set; }
     
     public IReadOnlyList<PassengerInfo> Messages => _messages.AsReadOnly();
@@ -33,7 +32,6 @@ public class Connection : AggregateRoot<ConnectionId>
         ConnectionId id,
         ConnectionRequestId requestId,
         TripId tripId,
-        ContextId contextId,
         Offer? offer,
         List<PassengerInfo> messages,
         Demand demand,
@@ -42,26 +40,10 @@ public class Connection : AggregateRoot<ConnectionId>
     {
         RequestId = requestId;
         TripId = tripId;
-        ContextId = contextId;
         Offer = offer;
         _messages = messages;
         Demand = demand;
         BikeCarriage = bikeCarriage;
         _sections = sections;
-    }
-
-    public void BookOnBahnDe()
-    {
-        
-    }
-
-    public void ArriveEarlier()
-    {
-        
-    }
-
-    public void DepartLater()
-    {
-        
     }
 }

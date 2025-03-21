@@ -18,8 +18,6 @@ public class TrainRun : AggregateRoot<TrainRunId>
     
     private readonly List<Stop> _stops = [];
     
-    public BahnJourneyId BahnId { get; private set; }
-    
     public TrainRunDate Date { get; private set; }
     
     public IReadOnlyList<RoutePassengerInfo> Messages => _messages.AsReadOnly();
@@ -38,7 +36,6 @@ public class TrainRun : AggregateRoot<TrainRunId>
 
     private TrainRun(
         TrainRunId id,
-        BahnJourneyId bahnId,
         TrainRunDate date,
         List<RoutePassengerInfo> messages,
         TrainInformation trainInfos,
@@ -47,7 +44,6 @@ public class TrainRun : AggregateRoot<TrainRunId>
         List<Stop> stops,
         StationName? destinationName) : base(id)
     {
-        BahnId = bahnId;
         _messages = messages;
         TrainInfos = trainInfos;
         Date = date;
