@@ -1,4 +1,5 @@
 using DBetter.Domain.Shared;
+using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun;
 using DBetter.Domain.TrainRun.ValueObjects;
@@ -12,18 +13,33 @@ namespace DBetter.Infrastructure.BahnDe.TrainRuns;
 
 public static class DTOExtensions
 {
-    public static TrainRun ToDomain(this Fahrt fahrt, TrainRunEntity trainRun)
+    public static TrainRun ToDomain(this Fahrt fahrt, TrainRunEntity trainRunEntity, Dictionary<string, Station> stationMapping, out List<Station> newStations)
     {
-        return new TrainRun(
-            trainRun.Id,
+        List<Station> tmpNewStations = [];
+        
+        var trainRun = new TrainRun(
+            trainRunEntity.Id,
             fahrt.GetDomainSectionMessages(),
-            fahrt.GetTrainInfos(trainRun),
-            fahrt.GetCateringInformation(trainRun),
+            fahrt.GetTrainInfos(trainRunEntity),
+            fahrt.GetCateringInformation(trainRunEntity),
             fahrt.GetBikeCarriageInformation(),
-            fahrt.Halte.Select(ToDomain).ToList());
+            fahrt.Halte.Select(h =>
+            {
+                var stop = h.ToDomain(stationMapping, out var newStation);
+
+                if (newStation is not null)
+                {
+                    tmpNewStations.Add(newStation);
+                }
+                
+                return stop;
+            }).ToList());
+        
+        newStations = tmpNewStations;
+        return trainRun;
     }
 
-    private static TrainInformation GetTrainInfos(this Fahrt fahrt, TrainRunEntity trainRun)
+    private static TrainInformation GetTrainInfos(this Fahrt fahrt, TrainRunEntity trainRunEntity)
     {
         var nummer = fahrt.Halte
             .First()
@@ -31,15 +47,15 @@ public static class DTOExtensions
         
         var trainNumber = TrainInformationFactory.GetTrainNumber(nummer);
         
-        if (trainRun.TrainInfos.Number is null && trainNumber is not null)
+        if (trainRunEntity.TrainInfos.Number is null && trainNumber is not null)
         {
-            trainRun.UpdateTrainNumber(trainNumber);
+            trainRunEntity.UpdateTrainNumber(trainNumber);
         }
 
         return new TrainInformation(
-            trainRun.TrainInfos.Product,
-            trainRun.TrainInfos.Line,
-            trainRun.TrainInfos.Number);
+            trainRunEntity.TrainInfos.Product,
+            trainRunEntity.TrainInfos.Line,
+            trainRunEntity.TrainInfos.Number);
     }
 
     private static CateringInformation GetCateringInformation(this Fahrt fahrt, TrainRunEntity trainRun)
@@ -58,7 +74,7 @@ public static class DTOExtensions
             fahrt.Halte);
     }
 
-    private static Stop ToDomain(this Halt halt)
+    private static Stop ToDomain(this Halt halt, Dictionary<string, Station> stationMapping, out Station? newStation)
     {
         Platform? platform = null;
         if (halt.Gleis is not null)
@@ -93,9 +109,34 @@ public static class DTOExtensions
             
             arrivalTime = new ArrivalTime(planned, real);
         }
-        //TODO: get real station id from database
+        
+        newStation = null;
+        var stationExists =  stationMapping.TryGetValue(halt.ExtId, out var station);
+
+        var stationId = station?.Id;
+        
+        if (!stationExists)
+        {
+            stationId = StationId.CreateNew();
+            
+            StationInfoId?  stationInfoId = null;
+            if (halt.BahnhofsInfoId is not null)
+            {
+                stationInfoId = StationInfoId.Create(halt.BahnhofsInfoId).Value;
+            }
+            
+            newStation = new Station(
+                stationId,
+                EvaNumber.Create(halt.ExtId).Value,
+                StationName.Create(halt.Name).Value,
+                null,
+                stationInfoId);
+            
+            stationMapping.Add(halt.ExtId, newStation);
+        }
+        
         return new Stop(
-            StationId.CreateNew(),
+            stationId!,
             new StopIndex(halt.RouteIdx),
             platform,
             halt.Auslastungsmeldungen.GetDomainDemand(),

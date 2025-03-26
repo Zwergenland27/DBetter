@@ -1,3 +1,5 @@
+using DBetter.Domain.Stations.ValueObjects;
+
 namespace DBetter.Domain.TrainRun.ValueObjects;
 
 /// <summary>
@@ -8,7 +10,7 @@ namespace DBetter.Domain.TrainRun.ValueObjects;
 /// </remarks>
 public record JourneyId(string Value)
 {
-    public Dictionary<string, string> GetData()
+    private Dictionary<string, string> GetData()
     {
         Dictionary<string, string> data = [];
         string[] parts = Value.Split('#');
@@ -23,5 +25,21 @@ public record JourneyId(string Value)
         }
 
         return data;
+    }
+
+    public EvaNumber GetDestinationEvaNumber()
+    {
+        var data = GetData();
+        var evaNumber = data["LS"];
+        
+        return EvaNumber.Create(evaNumber).Value;
+    }
+
+    public EvaNumber GetOriginEvaNumber()
+    {
+        var data = GetData();
+        var evaNumber = data["1S"];
+        
+        return EvaNumber.Create(evaNumber).Value;
     }
 }

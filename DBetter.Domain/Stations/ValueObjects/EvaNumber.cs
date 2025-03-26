@@ -10,22 +10,17 @@ namespace DBetter.Domain.Stations.ValueObjects;
 /// <example>8010085</example>
 public record EvaNumber
 {
-    public int Value { get; init; }
-    private EvaNumber(int value)
+    public string Value { get; init; }
+    private EvaNumber(string value)
     {
         Value = value;
     }
 
-    public static CanFail<EvaNumber> Create(int value)
-    {
-        return new EvaNumber(value);
-    }
-
     public static CanFail<EvaNumber> Create(string value)
     {
-        if (int.TryParse(value, out int result))
+        if (int.TryParse(value, out _))
         {
-            return new EvaNumber(result);
+            return new EvaNumber(value);
         }
 
         return DomainErrors.Station.EvaNumber.NotNumeric(value);

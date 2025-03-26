@@ -29,8 +29,8 @@ public class StationMapping : IEntityTypeConfiguration<Station>
         
         builder.Property(station => station.InfoId)
             .HasConversion(
-                infoId => infoId != null ? infoId.Value : (int?) null,
-                value => value.HasValue ? StationInfoId.Create(value.Value).Value : null)
+                infoId => infoId != null ? infoId.Value : null,
+                value => value != null ? StationInfoId.Create(value).Value : null)
             .IsRequired(false);
         
         builder.Property(station => station.Name)

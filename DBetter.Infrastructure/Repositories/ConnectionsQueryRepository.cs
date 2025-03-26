@@ -3,9 +3,8 @@ using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Shared;
+using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
-using DBetter.Domain.TrainRun.ValueObjects;
-using DBetter.Infrastructure.BahnDe;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
@@ -32,27 +31,54 @@ public class ConnectionsQueryRepository(
             .Where(va => va.Verkehrsmittel.Typ is not VerkehrsmittelTyp.WALK)
             .Select(va => new JourneyId(va.JourneyId!))
             .Distinct();
+        
+        var stopEvas = response.Verbindungen
+            .SelectMany(v => v.VerbindungsAbschnitte)
+            .SelectMany(va => va.Halte)
+            .Select(h => EvaNumber.Create(h.ExtId).Value)
+            .Distinct();
+        
+        foreach (var journeyId in journeyIds)
+        {
+            //TODO: handle origin and destination station name
+            var originStationEva = journeyId.GetOriginEvaNumber();
+            var destinationStationEva = journeyId.GetDestinationEvaNumber();
+            Console.WriteLine($"{originStationEva} - {destinationStationEva}");
+        }
 
         var existingTrainRuns = await context.TrainRuns
             .Where(tr => journeyIds.Contains(tr.JourneyId))
             .ToDictionaryAsync(tr => tr.JourneyId.Value, tr => tr);
+        
+        var existingStations = await context.Stations
+            .Where(s => stopEvas.Contains(s.EvaNumber))
+            .ToDictionaryAsync(s => s.EvaNumber.Value, s => s);
 
+        List<Station> stationsToCreate = [];
         List<TrainRunEntity> trainRunsToCreate = [];
         List<ConnectionEntity> connectionsToCreate = [];
         
         var connections = response.Verbindungen.Select(v =>
         {
-            var connection = v.ToDomain(request.Id, existingTrainRuns, out var newTrainRuns);
+            var connection = v.ToDomain(
+                request.Id,
+                existingTrainRuns,
+                out var newTrainRuns,
+                existingStations,
+                out var newStations);
             
+            stationsToCreate.AddRange(newStations);
             trainRunsToCreate.AddRange(newTrainRuns);
+            
             connectionsToCreate.Add(new ConnectionEntity(connection.Id, bahnConnectionRequestEntity.Id, v.CtxRecon));
             
             return connection;
         }).ToList();
         
-        context.BahnConnectionRequests.Add(bahnConnectionRequestEntity);
-        context.TrainRuns.AddRange(trainRunsToCreate);
-        context.Connections.AddRange(connectionsToCreate);
+        await context.BahnConnectionRequests.AddAsync(bahnConnectionRequestEntity);
+        await context.Stations.AddRangeAsync(stationsToCreate);
+        await context.TrainRuns.AddRangeAsync(trainRunsToCreate);
+        await context.Connections.AddRangeAsync(connectionsToCreate);
         
         return connections;
     }
@@ -88,19 +114,40 @@ public class ConnectionsQueryRepository(
             .Select(va => new JourneyId(va.JourneyId!))
             .Distinct();
 
+        var stopEvas = response.Verbindung.VerbindungsAbschnitte
+            .SelectMany(va => va.Halte)
+            .Select(h => EvaNumber.Create(h.ExtId).Value)
+            .Distinct();
+
+        foreach (var journeyId in journeyIds)
+        {
+            //TODO: handle origin and destination station name
+            var originStationEva = journeyId.GetOriginEvaNumber();
+            var destinationStationEva = journeyId.GetDestinationEvaNumber();
+            Console.WriteLine($"{originStationEva} - {destinationStationEva}");
+        }
+
         var existingTrainRuns = await context.TrainRuns
             .Where(tr => journeyIds.Contains(tr.JourneyId))
             .ToDictionaryAsync(tr => tr.JourneyId.Value, tr => tr);
         
-        var connection = response.Verbindung.ToDomain(bahnRequest.Id, existingTrainRuns, out var trainRunsToCreate);
+        var existingStations = await context.Stations
+            .Where(s => stopEvas.Contains(s.EvaNumber))
+            .ToDictionaryAsync(s => s.EvaNumber.Value, s => s);
+        
+        var connection = response.Verbindung.ToDomain(
+            bahnRequest.Id,
+            existingTrainRuns,
+            out var trainRunsToCreate,
+            existingStations,
+            out var stationsToCreate);
 
         var connectionToCreate = new ConnectionEntity(connection.Id, bahnRequest.Id, response.Verbindung.CtxRecon);
         
-        context.TrainRuns.AddRange(trainRunsToCreate);
-        context.Connections.Add(connectionToCreate);
+        await context.Stations.AddRangeAsync(stationsToCreate);
+        await context.TrainRuns.AddRangeAsync(trainRunsToCreate);
+        await context.Connections.AddAsync(connectionToCreate);
         
         return connection;
     }
 }
-
-//TODO: Store all stations of all connections -> JourneyId LS Value is EVA id of last stop of the planned train run -> lookup in Database instead of rely on db information

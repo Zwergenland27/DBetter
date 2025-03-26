@@ -9,7 +9,7 @@ public class StationDto
     /// </summary>
     /// <remarks>Also known as ibnr number</remarks>
     /// <example>8010085</example>
-    public required int EvaNumber { get; set; }
+    public required string EvaNumber { get; set; }
     
     /// <summary>
     /// Name of the station

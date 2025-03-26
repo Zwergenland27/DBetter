@@ -3,10 +3,10 @@ using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.Entities;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Shared;
+using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
-using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Shared;
 using DBetter.Infrastructure.BahnDe.TrainRuns.Entities;
@@ -19,7 +19,9 @@ public static class DTOExtensions
         this Verbindung verbindung,
         ConnectionRequestId requestId,
         Dictionary<string, TrainRunEntity> trainRunMapping,
-        out List<TrainRunEntity> newTrainRuns)
+        out List<TrainRunEntity> newTrainRuns,
+        Dictionary<string, Station> stationMapping,
+        out List<Station> newStations)
     {
         Offer? offer = null;
         if (verbindung.AngebotsPreis is not null)
@@ -34,6 +36,7 @@ public static class DTOExtensions
 
         List<Section> sections = [];
         newTrainRuns = [];
+        newStations = [];
 
         foreach (var abschnitt in verbindung.VerbindungsAbschnitte)
         {
@@ -46,12 +49,14 @@ public static class DTOExtensions
                 continue;
             }
             
-            sections.Add(abschnitt.ToDomain(trainRunMapping, out var newTrainRun));
+            sections.Add(abschnitt.ToDomain(trainRunMapping, out var newTrainRun, stationMapping, out var newSectionStations));
 
             if (newTrainRun is not null)
             {
                 newTrainRuns.Add(newTrainRun);
             }
+            
+            newStations.AddRange(newSectionStations);
         }
         
         return new Connection(
@@ -100,7 +105,9 @@ public static class DTOExtensions
     private static TransportSection ToDomain(
         this VerbindungsAbschnitt abschnitt, 
         Dictionary<string, TrainRunEntity> trainRunMapping,
-        out TrainRunEntity? newTrainRun)
+        out TrainRunEntity? newTrainRun,
+        Dictionary<string, Station> stationMapping,
+        out List<Station> newStations)
     {
         var trains = TrainInformationFactory.Create(
             abschnitt.Verkehrsmittel.MittelText!, 
@@ -111,44 +118,42 @@ public static class DTOExtensions
 
         var trainRunId = trainRun?.Id;
         
-        StationName? destination = null;
-
-        if (abschnitt.Verkehrsmittel.Richtung is not null)
-        {
-            var destinationResult = StationName.Create(abschnitt.Verkehrsmittel.Richtung);
-            if (!destinationResult.HasFailed)
-            {
-                destination = destinationResult.Value;
-            }
-        }
-        
         if (!trainRunExists)
         {
             trainRunId = TrainRunId.CreateNew();
             var bahnId = new JourneyId(abschnitt.JourneyId!);
             
-            newTrainRun = new TrainRunEntity(trainRunId, bahnId, trains[0], destination);
+            newTrainRun = new TrainRunEntity(trainRunId, bahnId, trains[0]);
             trainRunMapping.Add(abschnitt.JourneyId!, newTrainRun);
         }
-        else if(trains[0].Number is null && trainRun!.TrainInfos.Number is not null)
-        {
-            trains[0] = trains[0].UpdateTrainNumber(trainRun.TrainInfos.Number);
-        }
+
+        List<Station> tmpNewStations = [];
         
-        return TransportSection.Create(
+        var section = TransportSection.Create(
             abschnitt.Auslastungsmeldungen.GetDomainDemand(),
             abschnitt.GetDomainSectionMessages(),
             trainRunId!,
             trains,
-            destination,
             abschnitt.GetCateringInformation(trains[0]),
             abschnitt.GetBikeCarriageInformation(),
-            abschnitt.Halte.Select(h => h.ToDomain()).ToList());
+            abschnitt.Halte.Select(h =>
+            {
+                var stop = h.ToDomain(stationMapping, out var newStation);
+
+                if (newStation is not null)
+                {
+                    tmpNewStations.Add(newStation);
+                }
+                
+                return stop;
+            }).ToList());
+        
+        newStations = tmpNewStations;
+        return section;
     }
 
     private static CateringInformation GetCateringInformation(this VerbindungsAbschnitt abschnitt, TrainInformation trainInformation)
     {
-        IPartialValidityStopInfos t = new Halt();
         return TrainInformationFactory.CreateCateringInformation(
             abschnitt.Verkehrsmittel.Zugattribute,
             trainInformation.Product,
@@ -163,7 +168,7 @@ public static class DTOExtensions
             abschnitt.Halte);
     }
     
-    private static Stop ToDomain(this Halt halt)
+    private static Stop ToDomain(this Halt halt, Dictionary<string, Station> stationMapping, out Station? newStation)
     {
         Platform? platform = null;
         if (halt.Gleis is not null)
@@ -198,9 +203,34 @@ public static class DTOExtensions
             
             arrivalTime = new ArrivalTime(planned, real);
         }
-        //TODO: get real station id from database
+        
+        newStation = null;
+        var stationExists =  stationMapping.TryGetValue(halt.ExtId, out var station);
+
+        var stationId = station?.Id;
+        
+        if (!stationExists)
+        {
+            stationId = StationId.CreateNew();
+            
+            StationInfoId?  stationInfoId = null;
+            if (halt.BahnhofsInfoId is not null)
+            {
+                stationInfoId = StationInfoId.Create(halt.BahnhofsInfoId).Value;
+            }
+            
+            newStation = new Station(
+                stationId,
+                EvaNumber.Create(halt.ExtId).Value,
+                StationName.Create(halt.Name).Value,
+                null,
+                stationInfoId);
+            
+            stationMapping.Add(halt.ExtId, newStation);
+        }
+        
         return new Stop(
-            StationId.CreateNew(),
+            stationId!,
             new StopIndex(halt.RouteIdx),
             platform,
             halt.Auslastungsmeldungen.GetDomainDemand(),

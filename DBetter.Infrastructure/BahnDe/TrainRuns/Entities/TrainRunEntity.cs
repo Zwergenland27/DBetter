@@ -17,8 +17,7 @@ public class TrainRunEntity
     public TrainRunEntity(
         TrainRunId id,
         JourneyId journeyId,
-        TrainInformation trainInfos,
-        StationName? destinationName)
+        TrainInformation trainInfos)
     {
         Id = id;
         JourneyId = journeyId;

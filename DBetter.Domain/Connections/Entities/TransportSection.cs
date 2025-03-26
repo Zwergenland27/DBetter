@@ -21,8 +21,6 @@ public class TransportSection : Section
     
     public IReadOnlyList<TrainInformation> TrainParts => _trainParts.AsReadOnly();
     
-    public StationName? Destination { get; private init; }
-    
     public CateringInformation Catering { get; private init; }
     
     public BikeCarriage BikeCarriage { get; private init; }
@@ -37,7 +35,6 @@ public class TransportSection : Section
         List<RoutePassengerInfo> messages,
         TrainRunId trainRunId,
         List<TrainInformation> trainParts,
-        StationName? destination,
         CateringInformation catering,
         BikeCarriage bikeCarriage,
         List<Stop> stops) : base(id)
@@ -46,7 +43,6 @@ public class TransportSection : Section
         _messages = messages;
         TrainRunId = trainRunId;
         _trainParts = trainParts;
-        Destination = destination;
         Catering = catering;
         BikeCarriage = bikeCarriage;
         _stops = stops;
@@ -57,7 +53,6 @@ public class TransportSection : Section
         List<RoutePassengerInfo> messages,
         TrainRunId trainRunId,
         List<TrainInformation> trains,
-        StationName? destination,
         CateringInformation catering,
         BikeCarriage bikeCarriage,
         List<Stop> stops)
@@ -68,7 +63,6 @@ public class TransportSection : Section
             messages,
             trainRunId,
             trains,
-            destination,
             catering,
             bikeCarriage,
             stops);
