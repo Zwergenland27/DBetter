@@ -1,4 +1,6 @@
-namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
+using DBetter.Infrastructure.BahnDe.Connections.DTOs;
+
+namespace DBetter.Infrastructure.BahnDe.Shared;
 
 /// <summary>
 /// Hafas Information Manager message

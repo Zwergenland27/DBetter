@@ -1,10 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
 
-namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
+namespace DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
-/// <summary>
-/// Stop
-/// </summary>
 public class Halt : IHasMessage, IPartialValidityStopInfos
 {
     /// <summary>
@@ -112,4 +111,21 @@ public class Halt : IHasMessage, IPartialValidityStopInfos
     /// Index of the station of the journey
     /// </summary>
     public int RouteIdx { get; set; }
+    
+    /// <summary>
+    /// Contains information about the service type.
+    /// This value is (when set) always <see cref="Verkehrsmittel.KurzText"/> and thus not really useful
+    /// </summary>
+    /// <example>TLX</example>
+    public string? Kategorie { get; set; }
+    
+    /// <summary>
+    /// Number of the train run
+    /// </summary>
+    /// <remarks>
+    /// Contains (sometimes) train number for most services. Useful for trains (like suburbans or trams) that do not
+    /// contain a tain number on initial request
+    /// </remarks>
+    /// <example>16518</example>
+    public string? Nummer { get; set; }
 }

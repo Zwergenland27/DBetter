@@ -1,6 +1,7 @@
 using System.Net;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Stations;
+using DBetter.Infrastructure.BahnDe.TrainRuns;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DBetter.Infrastructure.BahnDe;
@@ -17,6 +18,13 @@ public static class DependencyInjection
             });
         
         services.AddHttpClient<ConnectionService>(
+                client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip
+            });
+        
+        services.AddHttpClient<TrainRunService>(
                 client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {

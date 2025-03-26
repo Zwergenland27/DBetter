@@ -8,6 +8,8 @@ using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
+using DBetter.Infrastructure.BahnDe.Shared;
+using DBetter.Infrastructure.BahnDe.TrainRuns.Entities;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
@@ -82,42 +84,6 @@ public static class DTOExtensions
         };
     }
 
-    private static List<PassengerInfo> GetDomainMessages(this IHasMessage obj)
-    {
-        return [];
-    }
-
-    private static Demand GetDomainDemand(this List<AuslastungsMeldung> meldungen)
-    {
-        var firstClassDemand = meldungen
-            .Where(m => m.Klasse == Klasse.KLASSE_1)
-            .Select(a => a.Stufe)
-            .FirstOrDefault();
-        
-        var secondClassDemand = meldungen
-            .Where(m => m.Klasse == Klasse.KLASSE_2)
-            .Select(a => a.Stufe)
-            .FirstOrDefault();
-
-        return new Demand(
-            firstClassDemand.ToDomainDemandStatus(),
-            secondClassDemand.ToDomainDemandStatus());
-    }
-
-    private static DemandStatus ToDomainDemandStatus(this AuslastungsStufe stufe)
-    {
-        return stufe switch
-        {
-            AuslastungsStufe.Unknown => DemandStatus.Unknown,
-            AuslastungsStufe.Low => DemandStatus.Low,
-            AuslastungsStufe.Medium => DemandStatus.Medium,
-            AuslastungsStufe.High => DemandStatus.High,
-            AuslastungsStufe.Extreme => DemandStatus.Extreme,
-            AuslastungsStufe.Overbooked => DemandStatus.Overbooked,
-            _ => throw  new BahnDeException("ConnectionService.ToDemandStatus", $"Unknown demand {stufe}")
-        };
-    }
-
     private static bool? GetBikeCarriageInformation(this Fahrradmitnahme? status)
     {
         if (status is null) return null;
@@ -136,7 +102,7 @@ public static class DTOExtensions
         Dictionary<string, TrainRunEntity> trainRunMapping,
         out TrainRunEntity? newTrainRun)
     {
-        var trains = TrainInformation.CreateTraction(
+        var trains = TrainInformationFactory.Create(
             abschnitt.Verkehrsmittel.MittelText!, 
             abschnitt.Verkehrsmittel.LangText!);
 
@@ -155,24 +121,13 @@ public static class DTOExtensions
                 destination = destinationResult.Value;
             }
         }
-
-        if (destination is null && trainRunExists && trainRun!.DestinationName is not null)
-        {
-            destination = trainRun.DestinationName;
-        }
         
         if (!trainRunExists)
         {
             trainRunId = TrainRunId.CreateNew();
-            var bahnId = new BahnJourneyId(abschnitt.JourneyId!);
+            var bahnId = new JourneyId(abschnitt.JourneyId!);
             
-            var creationResult = TrainRunEntity.Create(trainRunId, bahnId, trains[0], destination);
-            if (creationResult.HasFailed)
-            {
-                throw new BahnDeException("ConnectionService.AbschnittToDomain", "Could not create train run");
-            }
-            
-            newTrainRun = creationResult.Value;
+            newTrainRun = new TrainRunEntity(trainRunId, bahnId, trains[0], destination);
             trainRunMapping.Add(abschnitt.JourneyId!, newTrainRun);
         }
         else if(trains[0].Number is null && trainRun!.TrainInfos.Number is not null)
@@ -186,165 +141,30 @@ public static class DTOExtensions
             trainRunId!,
             trains,
             destination,
-            abschnitt.GetCateringInformation(),
+            abschnitt.GetCateringInformation(trains[0]),
             abschnitt.GetBikeCarriageInformation(),
             abschnitt.Halte.Select(h => h.ToDomain()).ToList());
     }
+
+    private static CateringInformation GetCateringInformation(this VerbindungsAbschnitt abschnitt, TrainInformation trainInformation)
+    {
+        IPartialValidityStopInfos t = new Halt();
+        return TrainInformationFactory.CreateCateringInformation(
+            abschnitt.Verkehrsmittel.Zugattribute,
+            trainInformation.Product,
+            abschnitt.Halte);
+    }
     
-    private static List<RoutePassengerInfo> GetDomainSectionMessages(this IHasMessage obj)
-    {
-        return [];
-    }
-
-    private static CateringInformation GetCateringInformation(this VerbindungsAbschnitt abschnitt)
-    {
-        var verkehrsmittel = abschnitt.Verkehrsmittel;
-        
-        string? validityText = null;
-        CateringType type = CateringType.NoInfo;
-        
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "BR"))
-        {
-            type = CateringType.Restaurant;
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "BR").Teilstreckenhinweis;
-        }
-
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "QP"))
-        {
-            type = CateringType.Bistro;
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "QP").Teilstreckenhinweis;
-        }
-
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "MP"))
-        {
-            type = CateringType.SeatServed;
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "MP").Teilstreckenhinweis;
-        }
-
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "SN"))
-        {
-            type = CateringType.Snack;
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "SN").Teilstreckenhinweis;
-        }
-
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "KG"))
-        {
-            type = CateringType.None;
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "KG").Teilstreckenhinweis;
-        }
-
-        if (verkehrsmittel.ProduktGattung is not Produktgattung.ICE and not Produktgattung.EC_IC and not Produktgattung.IR)
-        {
-            type =  CateringType.None;
-        }
-
-        var partialSectionIndices = GetPartialSectionValidityInfos(validityText, abschnitt.Halte);
-        
-        return new CateringInformation(
-            type,
-            partialSectionIndices.Item1,
-            partialSectionIndices.Item2);
-    }
-
     private static BikeCarriage GetBikeCarriageInformation(this VerbindungsAbschnitt abschnitt)
     {
-        var verkehrsmittel = abschnitt.Verkehrsmittel;
-
-        string? validityText = null;
-        BikeStatus status = BikeStatus.NoInfo;
-        
-        if (abschnitt.HimMeldungen.Any(m => m.Text != null && m.Text.Contains("Die Mitnahme von Fahrrädern ist nicht möglich.")))
-        {
-            status = BikeStatus.NotPossible;
-        }
-        
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "FB"))
-        {
-            status = BikeStatus.Limited;
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "FB").Teilstreckenhinweis;
-        }
-
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "FR"))
-        {
-            status = BikeStatus.ReservationRequired;
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "FR").Teilstreckenhinweis;
-        }
-        
-        var partialSectionIndices = GetPartialSectionValidityInfos(validityText, abschnitt.Halte);
-        
-        return new BikeCarriage(
-            status,
-            partialSectionIndices.Item1,
-            partialSectionIndices.Item2);
+        return TrainInformationFactory.CreateBikeCarriageInformation(
+            abschnitt.Verkehrsmittel.Zugattribute,
+            abschnitt.HimMeldungen,
+            abschnitt.Halte);
     }
-
-    private static void GetAccessibilityInformation(this VerbindungsAbschnitt abschnitt)
-    {
-        var verkehrsmittel = abschnitt.Verkehrsmittel;
-        
-        string? validityText = null;
-        
-        if(verkehrsmittel.Zugattribute.Any(a => a.Key is "RZ"))
-        {
-            //Einstieg mit Rollstuhl stufenfrei
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "RZ").Teilstreckenhinweis;
-        }
-
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "RH"))
-        {
-            //Vehicle mounted access aid
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "RH").Teilstreckenhinweis;
-        }
-        
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "EA"))
-        {
-            //Behindertengerechte Ausstattung
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "EA").Teilstreckenhinweis;
-        }
-        
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "RG"))
-        {
-            //Rollstuhlgerechtes Fahrzeug
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "RG").Teilstreckenhinweis;
-        }
-        
-        if (verkehrsmittel.Zugattribute.Any(a => a.Key is "RO"))
-        {
-            //Space for wheelchair
-            validityText = verkehrsmittel.Zugattribute.First(a => a.Key is "RO").Teilstreckenhinweis;
-        }
-        
-        
-        var partialSectionIndices = GetPartialSectionValidityInfos(validityText, abschnitt.Halte);
-    }
-
-    private static Tuple<StopIndex, StopIndex> GetPartialSectionValidityInfos(string? text, List<Halt> halte)
-    {
-        var firstStopIndex = new StopIndex(halte.First().RouteIdx);
-        var lastStopIndex = new StopIndex(halte.Last().RouteIdx);
-        
-        if (text is null)
-        {
-            return new (firstStopIndex, lastStopIndex);
-        }
-        
-        var bracesRemoved = text.Substring(1, text.Length - 2);
-        var stationNames =  bracesRemoved.Split(" - ");
-        
-        firstStopIndex = new StopIndex(halte.First(h => h.Name == stationNames[0]).RouteIdx);
-        lastStopIndex = new StopIndex(halte.First(h => h.Name == stationNames[1]).RouteIdx);
-        
-        return new(firstStopIndex, lastStopIndex);
-    }
-
+    
     private static Stop ToDomain(this Halt halt)
     {
-        StationInfoId? infoId = null;
-        if (halt.BahnhofsInfoId is not null)
-        {
-            infoId = StationInfoId.Create(halt.BahnhofsInfoId).Value;
-        }
-        
         Platform? platform = null;
         if (halt.Gleis is not null)
         {
@@ -374,15 +194,13 @@ public static class DTOExtensions
         if (halt.AnkunftsZeitpunkt is not null)
         {
             var planned = halt.AnkunftsZeitpunkt.ConvertToDateTime()!.Value;
-            var real = halt.EzAnkunftssZeitpunkt.ConvertToDateTime();
+            var real = halt.EzAnkunftsZeitpunkt.ConvertToDateTime();
             
             arrivalTime = new ArrivalTime(planned, real);
         }
-        
+        //TODO: get real station id from database
         return new Stop(
-            StationName.Create(halt.Name).Value,
-            EvaNumber.Create(halt.ExtId).Value,
-            infoId,
+            StationId.CreateNew(),
             new StopIndex(halt.RouteIdx),
             platform,
             halt.Auslastungsmeldungen.GetDomainDemand(),
@@ -393,14 +211,5 @@ public static class DTOExtensions
             departureTime,
             arrivalTime,
             halt.GetDomainMessages());
-    }
-
-    public static DateTime? ConvertToDateTime(this string? bahnDateString)
-    {
-        if (bahnDateString is null) return null;
-        var germanTime = DateTime.Parse(bahnDateString);
-        
-        TimeZoneInfo germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
-        return TimeZoneInfo.ConvertTimeToUtc(germanTime, germanTimeZone);
     }
 }

@@ -2,10 +2,10 @@ using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.Entities;
 using DBetter.Domain.Connections.ValueObjects;
-using DBetter.Domain.Journey;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
+using DBetter.Infrastructure.BahnDe.TrainRuns.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DBetter.Infrastructure.Postgres;

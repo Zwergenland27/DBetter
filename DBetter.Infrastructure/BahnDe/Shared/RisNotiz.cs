@@ -1,4 +1,4 @@
-namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
+namespace DBetter.Infrastructure.BahnDe.Shared;
 
 /// <summary>
 /// Reisenden Informations System message

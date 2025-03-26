@@ -6,7 +6,7 @@ namespace DBetter.Domain.TrainRun.ValueObjects;
 /// <remarks>
 /// DA Flag can be set to any date where the train run is valid -> skip between days is possible
 /// </remarks>
-public record BahnJourneyId(string Value)
+public record JourneyId(string Value)
 {
     public Dictionary<string, string> GetData()
     {

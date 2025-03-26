@@ -2,7 +2,6 @@ using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun.ValueObjects;
-using JourneyId = DBetter.Domain.Connections.ValueObjects.JourneyId;
 
 namespace DBetter.Domain.Connections.Entities;
 

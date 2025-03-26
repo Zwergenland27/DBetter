@@ -1,4 +1,4 @@
-namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
+namespace DBetter.Infrastructure.BahnDe.Shared;
 
 /// <summary>
 /// Additional information about a train

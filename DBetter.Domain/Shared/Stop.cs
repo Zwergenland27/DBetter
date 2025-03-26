@@ -7,11 +7,7 @@ public record Stop
 {
     private readonly List<PassengerInfo> _messages = [];
     
-    public StationName Name { get; private init; }
-    
-    public EvaNumber EvaNumber { get; private init; }
-    
-    public StationInfoId? InfoId { get; private init; }
+    public StationId Id { get; private init; }
     
     public StopIndex StopIndex { get; private init; }
     
@@ -36,9 +32,7 @@ public record Stop
     private Stop(){}
     
     public Stop(
-        StationName name,
-        EvaNumber evaNumber,
-        StationInfoId? infoId,
+        StationId id,
         StopIndex stopIndex,
         Platform? platform,
         Demand demand,
@@ -50,9 +44,7 @@ public record Stop
         ArrivalTime? arrivalTime,
         List<PassengerInfo> messages)
     {
-        Name  = name;
-        EvaNumber = evaNumber;
-        InfoId = infoId;
+        Id = id;
         StopIndex = stopIndex;
         Platform = platform;
         Demand = demand;

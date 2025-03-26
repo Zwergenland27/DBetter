@@ -1,6 +1,7 @@
+using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
-namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
+namespace DBetter.Infrastructure.BahnDe.Shared;
 
 /// <summary>
 /// Occupancy information

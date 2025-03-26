@@ -1,7 +1,7 @@
-using DBetter.Domain.Journey;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
+using DBetter.Infrastructure.BahnDe.TrainRuns.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,7 +15,7 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRunEntity>
         
         builder.HasKey(x => x.Id);
         
-        builder.HasIndex(x => x.BahnId)
+        builder.HasIndex(x => x.JourneyId)
             .IsUnique();
         
         builder.Property(x => x.Id)
@@ -23,15 +23,10 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRunEntity>
                 id => id.Value,
                 value => new TrainRunId(value));
 
-        builder.Property(x => x.BahnId)
+        builder.Property(x => x.JourneyId)
             .HasConversion(
                 id => id.Value,
-                value => new BahnJourneyId(value));
-        
-        builder.Property(x => x.Date)
-            .HasConversion(
-                date => date.Value,
-                value => new  TrainRunDate(value));
+                value => new JourneyId(value));
         
         builder.OwnsOne(x => x.TrainInfos, tib =>
         {
@@ -49,12 +44,5 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRunEntity>
                     value => value.HasValue ? new TrainNumber(value.Value) : null)
                 .IsRequired(false);
         });
-        
-        builder.Property(x => x.DestinationName)
-            .HasConversion(
-                name => name != null ? name.Value : null,
-                value => value != null ? StationName.Create(value).Value : null)
-            .IsRequired(false);
-
     }
 }

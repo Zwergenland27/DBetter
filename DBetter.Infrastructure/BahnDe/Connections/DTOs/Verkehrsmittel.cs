@@ -1,4 +1,5 @@
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
+using DBetter.Infrastructure.BahnDe.Shared;
 
 namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
 

@@ -76,6 +76,7 @@ app.AddStationEndpoints();
 app.AddUserEndpoints();
 app.AddAuthenticationEndpoints();
 app.AddConnectionEndpoints();
+app.AddTrainRunEndpoints();
 
 app.UseMonitoring();
 app.Run();

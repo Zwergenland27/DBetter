@@ -9,8 +9,10 @@ using DBetter.Infrastructure.BahnDe;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
+using DBetter.Infrastructure.BahnDe.TrainRuns.Entities;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
+using JourneyId = DBetter.Domain.TrainRun.ValueObjects.JourneyId;
 
 namespace DBetter.Infrastructure.Repositories;
 
@@ -28,12 +30,12 @@ public class ConnectionsQueryRepository(
         var journeyIds = response.Verbindungen
             .SelectMany(v => v.VerbindungsAbschnitte)
             .Where(va => va.Verkehrsmittel.Typ is not VerkehrsmittelTyp.WALK)
-            .Select(va => new BahnJourneyId(va.JourneyId!))
+            .Select(va => new JourneyId(va.JourneyId!))
             .Distinct();
 
         var existingTrainRuns = await context.TrainRuns
-            .Where(tr => journeyIds.Contains(tr.BahnId))
-            .ToDictionaryAsync(tr => tr.BahnId.Value, tr => tr);
+            .Where(tr => journeyIds.Contains(tr.JourneyId))
+            .ToDictionaryAsync(tr => tr.JourneyId.Value, tr => tr);
 
         List<TrainRunEntity> trainRunsToCreate = [];
         List<ConnectionEntity> connectionsToCreate = [];
@@ -83,12 +85,12 @@ public class ConnectionsQueryRepository(
 
         var journeyIds = response.Verbindung.VerbindungsAbschnitte
             .Where(va => va.Verkehrsmittel.Typ is not VerkehrsmittelTyp.WALK)
-            .Select(va => new BahnJourneyId(va.JourneyId!))
+            .Select(va => new JourneyId(va.JourneyId!))
             .Distinct();
 
         var existingTrainRuns = await context.TrainRuns
-            .Where(tr => journeyIds.Contains(tr.BahnId))
-            .ToDictionaryAsync(tr => tr.BahnId.Value, tr => tr);
+            .Where(tr => journeyIds.Contains(tr.JourneyId))
+            .ToDictionaryAsync(tr => tr.JourneyId.Value, tr => tr);
         
         var connection = response.Verbindung.ToDomain(bahnRequest.Id, existingTrainRuns, out var trainRunsToCreate);
 
@@ -101,12 +103,4 @@ public class ConnectionsQueryRepository(
     }
 }
 
-//VerbindungsReference -> Pagination
-//ctxRecon + FixedSection + Anfrage (ohne Start und Zielbahnhof) -> Umstiegszeit verlängern
-//=> Umstiegszeit verlängern generiert neue Connection mit eigener Id
-//JourneyId -> Gesamtfahrt anzeigen
-//ctxRecon + ReisendenAnfrage -> Verbindungsabfrage mit Preisdetails (recon)
-//ctxRecon + Neu generierte ReisendenAbfrage -> Verbindung ohne Preisdetails (recon)
-
-//ctxRecon + Abfahrtzeit + Startbahnhof + Zielbahnhof (Name, wie Stationen) -> Bahn Request Id
-//=> Einfache Weiterleitung auf Bahn.de, aber Reisendeninfos gehen verloren. Damit sinnlos für Buchung
+//TODO: Store all stations of all connections -> JourneyId LS Value is EVA id of last stop of the planned train run -> lookup in Database instead of rely on db information
