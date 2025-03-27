@@ -5,6 +5,7 @@ public enum TransportProduct
     InterCityExpress,
     InterCity,
     EuroCity,
+    EuroCityDirect,
     EuroNight,
     EuropeanSleeper,
     RailJet,
