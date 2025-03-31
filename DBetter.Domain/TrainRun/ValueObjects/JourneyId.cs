@@ -34,12 +34,4 @@ public record JourneyId(string Value)
         
         return EvaNumber.Create(evaNumber).Value;
     }
-
-    public EvaNumber GetOriginEvaNumber()
-    {
-        var data = GetData();
-        var evaNumber = data["1S"];
-        
-        return EvaNumber.Create(evaNumber).Value;
-    }
 }

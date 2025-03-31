@@ -5,6 +5,7 @@ using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
@@ -30,29 +31,28 @@ public class ConnectionsQueryRepository(
             .SelectMany(v => v.VerbindungsAbschnitte)
             .Where(va => va.Verkehrsmittel.Typ is not VerkehrsmittelTyp.WALK)
             .Select(va => new JourneyId(va.JourneyId!))
-            .Distinct();
-        
+            .Distinct()
+            .ToList();
+
         var stopEvas = response.Verbindungen
             .SelectMany(v => v.VerbindungsAbschnitte)
             .SelectMany(va => va.Halte)
             .Select(h => EvaNumber.Create(h.ExtId).Value)
-            .Distinct();
-        
-        foreach (var journeyId in journeyIds)
-        {
-            //TODO: handle origin and destination station name
-            var originStationEva = journeyId.GetOriginEvaNumber();
-            var destinationStationEva = journeyId.GetDestinationEvaNumber();
-            Console.WriteLine($"{originStationEva} - {destinationStationEva}");
-        }
+            .Distinct()
+            .Union(
+                journeyIds.Select(id => id.GetDestinationEvaNumber())
+                    .Distinct())
+            .ToList();
 
         var existingTrainRuns = await context.TrainRuns
+            .AsNoTracking()
             .Where(tr => journeyIds.Contains(tr.JourneyId))
-            .ToDictionaryAsync(tr => tr.JourneyId.Value, tr => tr);
+            .ToDictionaryAsync(tr => tr.JourneyId, tr => tr);
         
         var existingStations = await context.Stations
+            .AsNoTracking()
             .Where(s => stopEvas.Contains(s.EvaNumber))
-            .ToDictionaryAsync(s => s.EvaNumber.Value, s => s);
+            .ToDictionaryAsync(s => s.EvaNumber, s => s);
 
         List<Station> stationsToCreate = [];
         List<TrainRunEntity> trainRunsToCreate = [];
@@ -74,6 +74,11 @@ public class ConnectionsQueryRepository(
             
             return connection;
         }).ToList();
+        
+        TrainRunScraperJob.AddTrainRuns(trainRunsToCreate
+            .Where(tr => tr.ScrapingRequired)
+            .Select(tr => tr.Id)
+            .ToList());
         
         await context.BahnConnectionRequests.AddAsync(bahnConnectionRequestEntity);
         await context.Stations.AddRangeAsync(stationsToCreate);
@@ -112,28 +117,25 @@ public class ConnectionsQueryRepository(
         var journeyIds = response.Verbindung.VerbindungsAbschnitte
             .Where(va => va.Verkehrsmittel.Typ is not VerkehrsmittelTyp.WALK)
             .Select(va => new JourneyId(va.JourneyId!))
-            .Distinct();
+            .Distinct()
+            .ToList();
 
         var stopEvas = response.Verbindung.VerbindungsAbschnitte
             .SelectMany(va => va.Halte)
             .Select(h => EvaNumber.Create(h.ExtId).Value)
-            .Distinct();
-
-        foreach (var journeyId in journeyIds)
-        {
-            //TODO: handle origin and destination station name
-            var originStationEva = journeyId.GetOriginEvaNumber();
-            var destinationStationEva = journeyId.GetDestinationEvaNumber();
-            Console.WriteLine($"{originStationEva} - {destinationStationEva}");
-        }
+            .Distinct()
+            .Union(
+                journeyIds.Select(jid => jid.GetDestinationEvaNumber())
+                .Distinct())
+            .ToList();
 
         var existingTrainRuns = await context.TrainRuns
             .Where(tr => journeyIds.Contains(tr.JourneyId))
-            .ToDictionaryAsync(tr => tr.JourneyId.Value, tr => tr);
+            .ToDictionaryAsync(tr => tr.JourneyId, tr => tr);
         
         var existingStations = await context.Stations
             .Where(s => stopEvas.Contains(s.EvaNumber))
-            .ToDictionaryAsync(s => s.EvaNumber.Value, s => s);
+            .ToDictionaryAsync(s => s.EvaNumber, s => s);
         
         var connection = response.Verbindung.ToDomain(
             bahnRequest.Id,
@@ -143,6 +145,11 @@ public class ConnectionsQueryRepository(
             out var stationsToCreate);
 
         var connectionToCreate = new ConnectionEntity(connection.Id, bahnRequest.Id, response.Verbindung.CtxRecon);
+        
+        TrainRunScraperJob.AddTrainRuns(trainRunsToCreate
+            .Where(tr => tr.ScrapingRequired)
+            .Select(tr => tr.Id)
+            .ToList());
         
         await context.Stations.AddRangeAsync(stationsToCreate);
         await context.TrainRuns.AddRangeAsync(trainRunsToCreate);

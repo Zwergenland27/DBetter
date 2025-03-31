@@ -44,5 +44,9 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRunEntity>
                     value => value.HasValue ? new TrainNumber(value.Value) : null)
                 .IsRequired(false);
         });
+
+        builder.Property<bool>("_hasBeenScraped");
+        
+        builder.Property(x => x.ScrapingRequired);
     }
 }

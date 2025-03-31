@@ -1,4 +1,3 @@
-using System.Text.Json;
 using DBetter.Application.TrainRuns;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRun;
@@ -20,6 +19,8 @@ public class TrainRunQueryRepository(
 
         if (trainRunInfos is null) return null;
         
+        trainRunInfos.Scraped();
+        
         var fahrt = await service.GetFahrtAsync(trainRunInfos.JourneyId.Value);
 
         if (fahrt is null) return null;
@@ -30,13 +31,13 @@ public class TrainRunQueryRepository(
             .Distinct();
         
         var existingStations = context.Stations
+            .AsNoTracking()
             .Where(s => stopEvas.Contains(s.EvaNumber))
             .ToDictionary(s => s.EvaNumber.Value, s => s);
 
         
-        //TODO: Update train number of entity
         var trainRun = fahrt.ToDomain(trainRunInfos, existingStations, out var stationsToCreate);
-
+        
         await context.Stations.AddRangeAsync(stationsToCreate);
 
         return trainRun;

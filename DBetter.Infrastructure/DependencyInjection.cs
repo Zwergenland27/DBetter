@@ -6,6 +6,7 @@ using DBetter.Application.Users;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.Authentication;
+using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe;
 using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddPostgres("Host=localhost;Database=DBetter;Username=user;Password=password");
         services.AddJwtAuthentication(configuration);
         services.AddBahnApi();
+        services.AddBackgroundJobs();
         return services;
     }
     

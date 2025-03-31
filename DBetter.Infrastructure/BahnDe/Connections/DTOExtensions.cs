@@ -18,9 +18,9 @@ public static class DTOExtensions
     public static Connection ToDomain(
         this Verbindung verbindung,
         ConnectionRequestId requestId,
-        Dictionary<string, TrainRunEntity> trainRunMapping,
+        Dictionary<JourneyId, TrainRunEntity> trainRunMapping,
         out List<TrainRunEntity> newTrainRuns,
-        Dictionary<string, Station> stationMapping,
+        Dictionary<EvaNumber, Station> stationMapping,
         out List<Station> newStations)
     {
         Offer? offer = null;
@@ -104,9 +104,9 @@ public static class DTOExtensions
 
     private static TransportSection ToDomain(
         this VerbindungsAbschnitt abschnitt, 
-        Dictionary<string, TrainRunEntity> trainRunMapping,
+        Dictionary<JourneyId, TrainRunEntity> trainRunMapping,
         out TrainRunEntity? newTrainRun,
-        Dictionary<string, Station> stationMapping,
+        Dictionary<EvaNumber, Station> stationMapping,
         out List<Station> newStations)
     {
         var trains = TrainInformationFactory.Create(
@@ -114,17 +114,25 @@ public static class DTOExtensions
             abschnitt.Verkehrsmittel.LangText!);
 
         newTrainRun = null;
-        var trainRunExists = trainRunMapping.TryGetValue(abschnitt.JourneyId!, out var trainRun);
+
+        var journeyId = new JourneyId(abschnitt.JourneyId!);
+        
+        var trainRunExists = trainRunMapping.TryGetValue(journeyId, out var trainRun);
 
         var trainRunId = trainRun?.Id;
         
         if (!trainRunExists)
         {
             trainRunId = TrainRunId.CreateNew();
-            var bahnId = new JourneyId(abschnitt.JourneyId!);
             
-            newTrainRun = new TrainRunEntity(trainRunId, bahnId, trains[0]);
-            trainRunMapping.Add(abschnitt.JourneyId!, newTrainRun);
+            newTrainRun = new TrainRunEntity(trainRunId, journeyId, trains[0]);
+
+            if (!stationMapping.ContainsKey(journeyId.GetDestinationEvaNumber()))
+            {
+                newTrainRun.DestinationStationMissing();
+            }
+            
+            trainRunMapping.Add(journeyId, newTrainRun);
         }
 
         List<Station> tmpNewStations = [];
@@ -168,7 +176,7 @@ public static class DTOExtensions
             abschnitt.Halte);
     }
     
-    private static Stop ToDomain(this Halt halt, Dictionary<string, Station> stationMapping, out Station? newStation)
+    private static Stop ToDomain(this Halt halt, Dictionary<EvaNumber, Station> stationMapping, out Station? newStation)
     {
         Platform? platform = null;
         if (halt.Gleis is not null)
@@ -205,7 +213,8 @@ public static class DTOExtensions
         }
         
         newStation = null;
-        var stationExists =  stationMapping.TryGetValue(halt.ExtId, out var station);
+        var evaNumber = EvaNumber.Create(halt.ExtId).Value;
+        var stationExists =  stationMapping.TryGetValue(evaNumber, out var station);
 
         var stationId = station?.Id;
         
@@ -221,12 +230,12 @@ public static class DTOExtensions
             
             newStation = new Station(
                 stationId,
-                EvaNumber.Create(halt.ExtId).Value,
+                evaNumber,
                 StationName.Create(halt.Name).Value,
                 null,
                 stationInfoId);
             
-            stationMapping.Add(halt.ExtId, newStation);
+            stationMapping.Add(evaNumber, newStation);
         }
         
         return new Stop(
