@@ -9,19 +9,19 @@ public class Zugattribut
     /// Additional information type
     /// </summary>
     /// <example>BEFÖRDERER</example>
-    public string Kategorie { get; set; }
+    public required string Kategorie { get; set; }
     
     /// <summary>
     /// Code of information type
     /// </summary>
     /// <example>BEF</example>
-    public string Key { get; set; }
+    public required string Key { get; set; }
     
     /// <summary>
     /// The information itself
     /// </summary>
     /// <example>trilex - Die Länderbahn GmbH DLB</example>
-    public string Value { get; set; }
+    public required string Value { get; set; }
     
     /// <summary>
     /// Contains information about the section where the attribute is valid

@@ -1,4 +1,4 @@
-namespace DBetter.Domain.Shared;
+namespace DBetter.Domain.TrainRun.ValueObjects;
 
 public record ArrivalTime(
     DateTime Planned,

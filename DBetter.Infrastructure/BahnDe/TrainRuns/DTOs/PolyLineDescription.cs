@@ -1,9 +1,12 @@
 namespace DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
+/// <summary>
+/// Polyline containing coordinates
+/// </summary>
 public class PolyLineDescription
 {
     /// <summary>
-    /// Coordinates
+    /// List of Coordinates of the polyline
     /// </summary>
-    public List<Coordinate> Coordinates { get; set; }
+    public required List<Coordinate> Coordinates { get; set; }
 }

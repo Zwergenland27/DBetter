@@ -10,12 +10,12 @@ public class HimMeldung
     /// <summary>
     /// Priority of the message
     /// </summary>
-    public Prioritaet Priority { get; set; }
+    public required Prioritaet Priority { get; set; }
     
     /// <summary>
     /// Title
     /// </summary>
-    public string Ueberschrift { get; set; }
+    public required string Ueberschrift { get; set; }
     
     /// <summary>
     /// Text
@@ -29,5 +29,5 @@ public class HimMeldung
     /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
     /// </remarks>
     /// <example>2025-03-15T19:08:00</example>
-    public string ModDateTime { get; set; }
+    public required string ModDateTime { get; set; }
 }

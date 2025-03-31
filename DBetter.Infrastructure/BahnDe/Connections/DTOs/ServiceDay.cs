@@ -12,7 +12,7 @@ public class ServiceDay
     /// Date in format yyyy-mm-dd german time zone
     /// </remarks>
     /// <example>2025-03-16</example>
-    public string LastDateInPeriod { get; set; }
+    public required string LastDateInPeriod { get; set; }
     
     /// <summary>
     /// Begin of the planning period
@@ -21,7 +21,7 @@ public class ServiceDay
     /// Date in format yyyy-mm-dd german time zone
     /// </remarks>
     /// <example>2024-12-15</example>
-    public string PlanningPeriodBegin { get; set; }
+    public required string PlanningPeriodBegin { get; set; }
     
     /// <summary>
     /// End of the currently planned period
@@ -30,10 +30,10 @@ public class ServiceDay
     /// Date in format yyyy-mm-dd german time zone
     /// </remarks>
     /// <example>2025-12-13</example>
-    public string PlanningPeriodEnd { get; set; }
+    public required string PlanningPeriodEnd { get; set; }
     
     /// <summary>
-    /// 
+    /// List of the week days on which the train service will be present
     /// </summary>
-    public List<Weekday> Weekdays { get; set; }
+    public required List<Weekday> Weekdays { get; set; }
 }

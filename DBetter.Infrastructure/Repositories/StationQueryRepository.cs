@@ -8,13 +8,18 @@ using StationDto = DBetter.Contracts.Stations.Queries.Find.StationDto;
 namespace DBetter.Infrastructure.Repositories;
 
 public class StationQueryRepository(
-    StationService service,
+    StationService stationService,
     DBetterContext context) : IStationQueryRepository
 {
     public async Task<List<StationDto>> FindAsync(string query)
     {
-        var stations = await service.FindAsync(query, 5);
-        
+        var haltestellen = await stationService.FindAsync(query, 5);
+
+        var stations = haltestellen
+            .Select(halt => halt.ToDomain())
+            .OfType<Station>()
+            .ToList();
+
         await InsertOrUpdateStations(stations);
         
         return stations.Select(station => new StationDto

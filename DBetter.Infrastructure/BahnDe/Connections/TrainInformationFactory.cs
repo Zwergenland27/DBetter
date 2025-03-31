@@ -171,7 +171,7 @@ public class TrainInformationFactory
         };
     }
     
-    public static CateringInformation CreateCateringInformation(List<Zugattribut>  zugattribute, TransportProduct product, IEnumerable<IPartialValidityStopInfos> stopInfos)
+    public static CateringInformation CreateCateringInformation(List<Zugattribut>  zugattribute, TransportProduct product, IEnumerable<ITrainRunStop> stopInfos)
     {
         string? validityText = null;
         CateringType type = CateringType.NoInfo;
@@ -219,7 +219,7 @@ public class TrainInformationFactory
             partialSectionIndices.Item2);
     }
 
-    public static BikeCarriage CreateBikeCarriageInformation(List<Zugattribut>  zugattribute, List<HimMeldung> himMeldungen, IEnumerable<IPartialValidityStopInfos> stopInfos)
+    public static BikeCarriage CreateBikeCarriageInformation(List<Zugattribut>  zugattribute, List<HimMeldung> himMeldungen, IEnumerable<ITrainRunStop> stopInfos)
     {
         string? validityText = null;
         BikeStatus status = BikeStatus.NoInfo;
@@ -249,7 +249,7 @@ public class TrainInformationFactory
             partialSectionIndices.Item2);
     }
 
-    private static void GetAccessibilityInformation(List<Zugattribut>  zugattribute, IEnumerable<IPartialValidityStopInfos> stopInfos)
+    private static void GetAccessibilityInformation(List<Zugattribut>  zugattribute, IEnumerable<ITrainRunStop> stopInfos)
     {
         string? validityText = null;
         
@@ -287,7 +287,7 @@ public class TrainInformationFactory
     }
     
     
-    private static Tuple<StopIndex, StopIndex> GetPartialSectionValidityInfos(string? validityText, IEnumerable<IPartialValidityStopInfos> stopInfos)
+    private static Tuple<StopIndex, StopIndex> GetPartialSectionValidityInfos(string? validityText, IEnumerable<ITrainRunStop> stopInfos)
     {
         var firstStopIndex = new StopIndex(stopInfos.First().RouteIdx);
         var lastStopIndex = new StopIndex(stopInfos.Last().RouteIdx);

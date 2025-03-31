@@ -5,22 +5,16 @@ namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
 /// <summary>
 /// Connection section
 /// </summary>
-public class VerbindungsAbschnitt : IHasMessage
+public class VerbindungsAbschnitt : IHasMessage, IHasDemandInformation
 {
-    /// <summary>
-    /// Messages from Hafas Information Manager
-    /// </summary>
-    public List<HimMeldung> HimMeldungen { get; set; }
+    /// <inheritdoc/>
+    public List<HimMeldung>? HimMeldungen { get; set; }
     
-    /// <summary>
-    /// Messages from Reisenden Informations System
-    /// </summary>
-    public List<RisNotiz> RisNotizen { get; set; }
+    /// <inheritdoc/>
+    public required List<RisNotiz> RisNotizen { get; set; }
     
-    /// <summary>
-    /// Prioritized messages
-    /// </summary>
-    public List<PriorisierteMeldung> PriorisierteMeldungen { get; set; }
+    /// <inheritdoc/>
+    public required List<PriorisierteMeldung> PriorisierteMeldungen { get; set; }
     
     /// <summary>
     /// Id for information about the first station
@@ -41,7 +35,7 @@ public class VerbindungsAbschnitt : IHasMessage
     /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
     /// </remarks>
     /// <example>2025-03-15T19:07:00</example>
-    public string AbfahrtsZeitpunkt { get; set; }
+    public required string AbfahrtsZeitpunkt { get; set; }
     
     /// <summary>
     /// Real departure time
@@ -57,19 +51,19 @@ public class VerbindungsAbschnitt : IHasMessage
     /// Name of the first station
     /// </summary>
     /// <example>Dresden Hbf</example>
-    public string AbfahrtsOrt { get; set; }
+    public required string AbfahrtsOrt { get; set; }
     
     /// <summary>
     /// Eva number of the first station
     /// </summary>
     /// <example>8010085</example>
-    public string AbfahrtsOrtExtId { get; set; }
+    public required string AbfahrtsOrtExtId { get; set; }
     
     /// <summary>
     /// Planned duration of the section in seconds
     /// </summary>
     /// <example>7140</example>
-    public int AbschnittsDauer { get; set; }
+    public required int AbschnittsDauer { get; set; }
     
     /// <summary>
     /// Real duration of the section in seconds
@@ -84,7 +78,7 @@ public class VerbindungsAbschnitt : IHasMessage
     /// Planned percentage of the connection section of the total connection duration
     /// </summary>
     /// <example>39.53</example>
-    public float AbschnittsAnteil { get; set; }
+    public required float AbschnittsAnteil { get; set; }
     
     /// <summary>
     /// Planned arrival time
@@ -93,7 +87,7 @@ public class VerbindungsAbschnitt : IHasMessage
     /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
     /// </remarks>
     /// <example>2025-03-15T19:07:00</example>
-    public string AnkunftsZeitpunkt { get; set; }
+    public required string AnkunftsZeitpunkt { get; set; }
     
     /// <summary>
     /// Real arrival time
@@ -109,29 +103,27 @@ public class VerbindungsAbschnitt : IHasMessage
     /// Name of the last station
     /// </summary>
     /// <example>Frankfurt(Main)Hbf</example>
-    public string AnkunftsOrt { get; set; }
+    public required string AnkunftsOrt { get; set; }
     
     /// <summary>
     /// Eva number of the last station
     /// </summary>
     /// <example>8000105</example>
-    public string AnkunftsOrtExtId { get; set; }
+    public required string AnkunftsOrtExtId { get; set; }
     
-    /// <summary>
-    /// Demand
-    /// </summary>
-    public List<AuslastungsMeldung> Auslastungsmeldungen { get; set; }
+    /// <inheritdoc/>
+    public required List<AuslastungsMeldung> Auslastungsmeldungen { get; set; }
     
     /// <summary>
     /// List of all stops
     /// </summary>
-    public List<Halt> Halte { get; set; }
+    public required List<Halt> Halte { get; set; }
     
     /// <summary>
     /// Index of the section of the connection
     /// </summary>
     /// <example>0</example>
-    public int Idx { get; set; }
+    public required int Idx { get; set; }
     
     /// <summary>
     /// Id of the full journey
@@ -145,7 +137,7 @@ public class VerbindungsAbschnitt : IHasMessage
     /// <summary>
     /// Information about transport method
     /// </summary>
-    public Verkehrsmittel Verkehrsmittel { get; set; }
+    public required Verkehrsmittel Verkehrsmittel { get; set; }
     
     /// <summary>
     /// Walking Distance in m, if section is of type walking

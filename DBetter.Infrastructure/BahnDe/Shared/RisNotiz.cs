@@ -12,13 +12,13 @@ public class RisNotiz
     /// This can be a unique and useful id or a two-letter code that maps many different values
     /// </remarks>
     /// <example>text.realtime.connection.platform.change</example>
-    public string Key { get; set; }
+    public required string Key { get; set; }
     
     /// <summary>
     /// Detailed message
     /// </summary>
     /// <example>TL 52973 departs differently from Dresden Hbf from Platform 13</example>
-    public string Value { get; set; }
+    public required string Value { get; set; }
     
     /// <summary>
     /// Message is relevant from this route index until <see cref="RouteIdxTo"/>

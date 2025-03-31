@@ -6,11 +6,11 @@ public class Coordinate
     /// Longitude of a coordinate
     /// </summary>
     /// <example>14.234688</example>
-    public float Lng { get; set; }
+    public required float Lng { get; set; }
     
     /// <summary>
     /// Longitude of a coordinate
     /// </summary>
     /// <example>50.87588</example>
-    public float Lat { get; set; }
+    public required float Lat { get; set; }
 }

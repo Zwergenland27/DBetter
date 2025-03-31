@@ -10,10 +10,10 @@ public class Fahrplan
     /// <summary>
     /// Suggested connections
     /// </summary>
-    public List<Verbindung> Verbindungen { get; set; }
+    public required List<Verbindung> Verbindungen { get; set; }
     
     /// <summary>
     /// Pagination references
     /// </summary>
-    public VerbindungsReference VerbindungReference { get; set; }
+    public required VerbindungsReference VerbindungReference { get; set; }
 }

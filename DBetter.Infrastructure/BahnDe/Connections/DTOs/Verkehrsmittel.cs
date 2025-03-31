@@ -23,7 +23,7 @@ public class Verkehrsmittel
     /// Set to "Walk" for walking section 
     /// </remarks>
     /// <example>TL 52973</example>
-    public string Name { get; set; }
+    public required string Name { get; set; }
     
     /// <summary>
     /// Train number
@@ -43,7 +43,7 @@ public class Verkehrsmittel
     /// <summary>
     /// Type of the transportation method
     /// </summary>
-    public VerkehrsmittelTyp Typ { get; set; }
+    public required VerkehrsmittelTyp Typ { get; set; }
     
     /// <summary>
     /// Additional information about the train
@@ -51,7 +51,7 @@ public class Verkehrsmittel
     /// <remarks>
     /// Empty if <see cref="Typ"/> is <see cref="VerkehrsmittelTyp.WALK"/>
     /// </remarks>
-    public List<Zugattribut> Zugattribute { get; set; }
+    public required List<Zugattribut> Zugattribute { get; set; }
     
     /// <summary>
     /// Short name of the train

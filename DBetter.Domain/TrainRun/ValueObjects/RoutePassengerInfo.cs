@@ -1,4 +1,6 @@
-namespace DBetter.Domain.Shared;
+using DBetter.Domain.Shared;
+
+namespace DBetter.Domain.TrainRun.ValueObjects;
 
 public class RoutePassengerInfo : PassengerInfo
 {

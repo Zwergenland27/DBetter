@@ -136,25 +136,12 @@ public static class DTOExtensions
         }
 
         List<Station> tmpNewStations = [];
-        
+
         var section = TransportSection.Create(
             abschnitt.Auslastungsmeldungen.GetDomainDemand(),
-            abschnitt.GetDomainSectionMessages(),
             trainRunId!,
-            trains,
-            abschnitt.GetCateringInformation(trains[0]),
-            abschnitt.GetBikeCarriageInformation(),
-            abschnitt.Halte.Select(h =>
-            {
-                var stop = h.ToDomain(stationMapping, out var newStation);
-
-                if (newStation is not null)
-                {
-                    tmpNewStations.Add(newStation);
-                }
-                
-                return stop;
-            }).ToList());
+            new StopIndex(abschnitt.Halte.First().RouteIdx),
+            new StopIndex(abschnitt.Halte.Last().RouteIdx));
         
         newStations = tmpNewStations;
         return section;

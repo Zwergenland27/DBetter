@@ -1,6 +1,12 @@
 namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
 
+/// <summary>
+/// Section
+/// </summary>
 public class Teilstrecke
 {
-    public Verbindung Verbindung { get; set; }
+    /// <summary>
+    /// Connection
+    /// </summary>
+    public required Verbindung Verbindung { get; set; }
 }

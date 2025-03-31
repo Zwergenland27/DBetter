@@ -1,7 +1,8 @@
-using DBetter.Infrastructure.BahnDe.Connections.DTOs;
-
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
+/// <summary>
+/// Classes that implement this interface contain passenger information
+/// </summary>
 public interface IHasMessage
 {
     /// <summary>

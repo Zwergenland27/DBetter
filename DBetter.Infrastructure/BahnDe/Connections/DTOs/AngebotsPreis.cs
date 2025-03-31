@@ -8,10 +8,10 @@ public class AngebotsPreis
     /// <summary>
     /// Offer price
     /// </summary>
-    public float Betrag { get; set; }
+    public required float Betrag { get; set; }
     
     /// <summary>
     /// Currency of the price
     /// </summary>
-    public Waehrung Waehrung { get; set; }
+    public required Waehrung Waehrung { get; set; }
 }

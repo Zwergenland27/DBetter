@@ -11,10 +11,10 @@ public class AuslastungsMeldung
     /// <summary>
     /// Comfort Class of the occupancy value
     /// </summary>
-    public Klasse Klasse { get; set; }
+    public required Klasse Klasse { get; set; }
     
     /// <summary>
     /// Demand
     /// </summary>
-    public AuslastungsStufe Stufe { get; set; }
+    public required AuslastungsStufe Stufe { get; set; }
 }

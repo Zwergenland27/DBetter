@@ -3,6 +3,7 @@ using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
