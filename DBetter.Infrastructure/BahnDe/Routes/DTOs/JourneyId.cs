@@ -1,6 +1,6 @@
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Infrastructure.BahnDe.Shared;
+namespace DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
 /// <summary>
 /// Journey Id of bahn.de

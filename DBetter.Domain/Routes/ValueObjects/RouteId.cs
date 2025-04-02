@@ -1,7 +1,7 @@
 using CleanDomainValidation.Domain;
 using DBetter.Domain.Errors;
 
-namespace DBetter.Domain.Route.ValueObjects;
+namespace DBetter.Domain.Routes.ValueObjects;
 
 public record RouteId(Guid Value)
 {

@@ -18,10 +18,10 @@ public class ConnectionDto
     /// <summary>
     /// Sections of the connection
     /// </summary>
-    public required List<Segment> Sections { get; set; }
+    public required List<SegmentDto> Segments { get; set; }
     
     /// <summary>
     /// Offer for the section, if available
     /// </summary>
-    public required Offer? Offer { get; set; }
+    public required OfferDto? Offer { get; set; }
 }

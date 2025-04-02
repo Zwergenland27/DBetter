@@ -1,5 +1,5 @@
 using CleanDomainValidation.Domain;
-using DBetter.Domain.Route.ValueObjects;
+using DBetter.Domain.Routes.ValueObjects;
 
 namespace DBetter.Domain.Errors;
 

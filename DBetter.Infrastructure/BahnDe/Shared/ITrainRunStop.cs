@@ -72,7 +72,7 @@ public interface ITrainRunStop
     /// <summary>
     /// Type of the platform
     /// </summary>
-    public HaltTyp HaltTyp { get; set; }
+    public HaltTyp? HaltTyp { get; set; }
     
     /// <summary>
     /// Id for information about the station

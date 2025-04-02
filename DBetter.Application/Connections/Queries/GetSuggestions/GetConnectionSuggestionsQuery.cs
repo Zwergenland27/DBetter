@@ -3,6 +3,7 @@ using CleanDomainValidation.Application.Extensions;
 using DBetter.Application.Abstractions.Messaging;
 using DBetter.Contracts.ConnectionRequests.Commands.Put;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
+using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
@@ -181,4 +182,4 @@ public record GetConnectionSuggestionsQuery(
     List<Passenger> Passengers,
     ConnectionOptions Options,
     Route Route,
-    string? Page) : ICommand<List<Connection>>;
+    string? Page) : ICommand<ConnectionSuggestionsDto>;

@@ -1,9 +1,10 @@
 using CleanDomainValidation.Application;
 using DBetter.Application.TrainRuns.Queries.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get;
-using DBetter.Domain.TrainRun;
+using DBetter.Domain.Routes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Route = DBetter.Domain.Routes.Route;
 
 namespace DBetter.Api;
 
@@ -21,7 +22,7 @@ public static class TrainRunModule
                     .MapParameter(p => p.Id, id)
                     .BuildUsing<GetTrainRunQueryBuilder>();
 
-                return await mediator.HandleCommandAsync(query, (TrainRun result) =>
+                return await mediator.HandleCommandAsync(query, (Route result) =>
                 {
                     return Results.Ok(result);
                 });

@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
+using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.Routes;
 

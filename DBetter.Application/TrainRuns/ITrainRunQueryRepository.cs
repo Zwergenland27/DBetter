@@ -1,9 +1,9 @@
-using DBetter.Domain.TrainRun;
-using DBetter.Domain.TrainRun.ValueObjects;
+using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.ValueObjects;
 
 namespace DBetter.Application.TrainRuns;
 
 public interface ITrainRunQueryRepository
 {
-    public Task<TrainRun?> GetAsync(TrainRunId id);
+    public Task<Route?> GetAsync(RouteId id);
 }

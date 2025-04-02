@@ -4,11 +4,8 @@ using DBetter.Domain.Routes.ValueObjects;
 namespace DBetter.Domain.Routes;
 
 /// <summary>
-/// Journey without any information
+/// Complete route of a vehicle
 /// </summary>
-/// <remarks>
-/// Necessary to map journeyId to Bahn journey id
-/// </remarks>
 public class Route : AggregateRoot<RouteId>
 {
     private readonly List<RoutePassengerInformation> _messages = [];
@@ -19,7 +16,7 @@ public class Route : AggregateRoot<RouteId>
     
     public CateringInformation Catering { get; private init; }
     
-    public BikeCarriage BikeCarriage { get; private init; }
+    public BikeCarriageInformation BikeCarriage { get; private init; }
     
     public RouteInformation RouteInfos { get; private init; }
     
@@ -32,7 +29,7 @@ public class Route : AggregateRoot<RouteId>
         List<RoutePassengerInformation> messages,
         RouteInformation routeInfos,
         CateringInformation catering,
-        BikeCarriage bikeCarriage,
+        BikeCarriageInformation bikeCarriage,
         List<Stop> stops) : base(id)
     {
         _messages = messages;

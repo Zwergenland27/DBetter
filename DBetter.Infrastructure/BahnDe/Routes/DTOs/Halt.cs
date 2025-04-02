@@ -34,7 +34,7 @@ public class Halt : IHasMessage, ITrainRunStop, IHasDemandInformation
     public string? EzGleis { get; set; }
     
     /// <inheritdoc/>
-    public required HaltTyp HaltTyp { get; set; }
+    public HaltTyp? HaltTyp { get; set; }
     
     /// <inheritdoc/>
     public required string Name { get; set; }

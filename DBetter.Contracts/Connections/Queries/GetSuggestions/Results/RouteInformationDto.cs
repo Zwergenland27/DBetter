@@ -5,10 +5,7 @@ namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 /// </summary>
 public class RouteInformationDto
 {
-    /// <summary>
-    /// If of the train run
-    /// </summary>
-    public required string RouteId { get; set; }
+    //TODO: Überlegen, ob diese Klasse wirklich nötig ist oder mit der TransportSegment Klasse kombiniert werden kann
     
     /// <summary>
     /// Destination if available

@@ -10,7 +10,7 @@ public class DatabaseTrainRunScrapingScheduler(DBetterContext database) : IJob
     
     public async Task Execute(IJobExecutionContext context)
     {
-        var trainRunIdsToScrape = await database.TrainRuns
+        var trainRunIdsToScrape = await database.Routes
             .Where(tr => tr.ScrapingRequired)
             .Select(tr => tr.Id)
             .ToListAsync();

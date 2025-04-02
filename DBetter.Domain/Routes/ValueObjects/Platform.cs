@@ -1,3 +1,3 @@
-namespace DBetter.Domain.Route.ValueObjects;
+namespace DBetter.Domain.Routes.ValueObjects;
 
-public record Platform(string Planned, string? Realtime, PlatformType Type);
+public record Platform(string Planned, string? Real, PlatformType Type);

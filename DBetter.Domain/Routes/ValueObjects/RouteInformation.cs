@@ -1,9 +1,9 @@
-namespace DBetter.Domain.Route.ValueObjects;
+namespace DBetter.Domain.Routes.ValueObjects;
 
-public record RouteInformation(TransportProduct Product, LineNumber? Line, ServiceNumber? Number)
+public record RouteInformation(TransportProduct Product, LineNumber? LineNumber, ServiceNumber? ServiceNumber)
 {
     public RouteInformation UpdateServiceNumber(ServiceNumber number)
     {
-        return this with { Number = number };
+        return this with { ServiceNumber = number };
     }
 }

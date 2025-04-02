@@ -4,6 +4,7 @@ using DBetter.Application.Connections.Queries.GetSuggestions;
 using DBetter.Application.Connections.Queries.GetWithIncreasedTransferTime;
 using DBetter.Contracts.ConnectionRequests.Commands.Put;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
+using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Contracts.Connections.Queries.GetWithIncreasedTransferTime;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.ValueObjects;
@@ -36,13 +37,13 @@ public static class ConnectionsModule
                     .MapParameter(r => r.Page, page)
                     .BuildUsing<GetConnectionSuggestionsQueryBuilder>();
 
-                return await mediator.HandleCommandAsync(command, (List<Connection> result) =>
+                return await mediator.HandleCommandAsync(command, (ConnectionSuggestionsDto result) =>
                 {
                     return Results.Ok(result);
                 });
             })
             .WithName("GetConnectionSuggestions")
-            .Produces<List<Connection>>()
+            .Produces<ConnectionSuggestionsDto>()
             .WithOpenApi();
         
         app.MapPost("connections/{id}/increasetransfertime", async (
@@ -56,12 +57,12 @@ public static class ConnectionsModule
                 .MapParameter(r => r.Id, id)
                 .BuildUsing<GetWithIncreasedTransferTimeQueryBuilder>();
 
-            return await mediator.HandleCommandAsync(command, (Connection result) =>
+            return await mediator.HandleCommandAsync(command, (ConnectionDto result) =>
             {
                 return Results.Ok(result);
             });
         }).WithName("GetConnectionWithIncreasedTransferTime")
-        .Produces<Connection>()
+        .Produces<ConnectionDto>()
         .WithOpenApi();
     }
 }

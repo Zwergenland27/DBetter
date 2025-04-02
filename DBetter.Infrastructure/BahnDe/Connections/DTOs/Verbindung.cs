@@ -67,7 +67,7 @@ public class Verbindung : IHasMessage, IHasDemandInformation
     /// <summary>
     /// True, if the <see cref="Reisender.Alter"/> is required
     /// </summary>
-    public required bool IsAlterseingabeErfoderlich { get; set; }
+    public bool? IsAlterseingabeErfoderlich { get; set; }
     
     /// <summary>
     /// List of known service days
@@ -92,5 +92,5 @@ public class Verbindung : IHasMessage, IHasDemandInformation
     /// <summary>
     /// Messages
     /// </summary>
-    public required List<Meldung> MeldungenAsObject { get; set; }
+    public List<Meldung>? MeldungenAsObject { get; set; }
 }

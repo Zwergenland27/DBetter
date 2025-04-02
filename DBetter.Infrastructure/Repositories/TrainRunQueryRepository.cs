@@ -1,7 +1,8 @@
 using DBetter.Application.TrainRuns;
+using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
-using DBetter.Domain.TrainRun;
-using DBetter.Domain.TrainRun.ValueObjects;
+using DBetter.Infrastructure.BahnDe.Routes;
 using DBetter.Infrastructure.BahnDe.TrainRuns;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +11,11 @@ namespace DBetter.Infrastructure.Repositories;
 
 public class TrainRunQueryRepository(
     DBetterContext context,
-    TrainRunService service) : ITrainRunQueryRepository
+    RouteService service) : ITrainRunQueryRepository
 {
-    public async Task<TrainRun?> GetAsync(TrainRunId id)
+    public async Task<Route?> GetAsync(RouteId id)
     {
-        var trainRunInfos = await context.TrainRuns
+        var trainRunInfos = await context.Routes
             .FirstOrDefaultAsync(tr => tr.Id == id);
 
         if (trainRunInfos is null) return null;

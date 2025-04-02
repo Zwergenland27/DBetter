@@ -1,9 +1,7 @@
-using CleanDomainValidation.Domain;
 using DBetter.Domain.Routes.ValueObjects;
-using DBetter.Domain.Stations.ValueObjects;
-using DBetter.Infrastructure.BahnDe.Shared;
+using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
-namespace DBetter.Infrastructure.BahnDe.TrainRuns.Entities;
+namespace DBetter.Infrastructure.BahnDe.Routes.Entities;
 
 public class RouteEntity
 {
@@ -12,7 +10,7 @@ public class RouteEntity
     
     public JourneyId JourneyId { get; private set; }
     
-    public RouteInformation RouteInfos { get; private set; }
+    public RouteInformation Information { get; private set; }
     
     /// <summary>
     /// Indicates that some information about the train run are missing and should be scraped
@@ -24,16 +22,16 @@ public class RouteEntity
     public RouteEntity(
         RouteId id,
         JourneyId journeyId,
-        RouteInformation routeInfos)
+        RouteInformation information)
     {
         Id = id;
         JourneyId = journeyId;
-        RouteInfos = routeInfos;
+        Information = information;
     }
 
-    public void UpdateTrainNumber(ServiceNumber serviceNumber)
+    public void UpdateServiceNumber(ServiceNumber serviceNumber)
     {
-        RouteInfos = RouteInfos.UpdateServiceNumber(serviceNumber);
+        Information = Information.UpdateServiceNumber(serviceNumber);
     }
 
     public void Scraped()

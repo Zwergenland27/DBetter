@@ -56,7 +56,7 @@ public class RouteInformationFactory
         LineNumber? trainLine = null;
         ServiceNumber? trainNumber;
         
-        if (TrainNumberIsLineNumber(product))
+        if (ServiceNumberIsLineNumber(product))
         {
             trainNumber = GetTrainNumber(trainLineInfo);
         }
@@ -74,7 +74,7 @@ public class RouteInformationFactory
         var fullNames = fullName.Split(" / ")
             .OrderBy(n => !n.Contains(leadingVehicleName))
             .ToList();
-        return fullNames.Select(RouteInformationFactory.Create).ToList();
+        return fullNames.Select(Create).ToList();
     }
     
     private static TransportProduct GetTransportProduct(string info)
@@ -108,7 +108,7 @@ public class RouteInformationFactory
         };
     }
 
-    private static bool TrainNumberIsLineNumber(TransportProduct transportProduct)
+    public static bool ServiceNumberIsLineNumber(TransportProduct transportProduct)
     {
         return transportProduct switch
         {
@@ -219,10 +219,14 @@ public class RouteInformationFactory
             partialSectionIndices.Item2);
     }
 
-    public static BikeCarriage CreateBikeCarriageInformation(List<Zugattribut>  zugattribute, List<HimMeldung> himMeldungen, IEnumerable<ITrainRunStop> stopInfos)
+    public static BikeCarriageInformation CreateBikeCarriageInformation(List<Zugattribut>  zugattribute, List<HimMeldung>? himMeldungen, IEnumerable<ITrainRunStop> stopInfos)
     {
         string? validityText = null;
         BikeCarriageStatus carriageStatus = BikeCarriageStatus.NoInfo;
+
+        if(himMeldungen is null){
+            himMeldungen = [];
+        }
         
         if (himMeldungen.Any(m => m.Text != null && m.Text.Contains("Die Mitnahme von Fahrrädern ist nicht möglich.")))
         {
@@ -243,7 +247,7 @@ public class RouteInformationFactory
         
         var partialSectionIndices = GetPartialSectionValidityInfos(validityText, stopInfos);
         
-        return new BikeCarriage(
+        return new BikeCarriageInformation(
             carriageStatus,
             partialSectionIndices.Item1,
             partialSectionIndices.Item2);

@@ -4,24 +4,25 @@ using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections;
+using DBetter.Infrastructure.BahnDe.Routes.DTOs;
+using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
 using DBetter.Infrastructure.BahnDe.Stations;
 using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
-using DBetter.Infrastructure.BahnDe.TrainRuns.Entities;
 
 namespace DBetter.Infrastructure.BahnDe.TrainRuns;
 
 public static class DTOExtensions
 {
-    public static Route ToDomain(this Fahrt fahrt, TrainRunEntity trainRunEntity, Dictionary<string, Station> stationMapping, out List<Station> newStations)
+    public static Route ToDomain(this Fahrt fahrt, RouteEntity routeEntity, Dictionary<string, Station> stationMapping, out List<Station> newStations)
     {
         List<Station> tmpNewStations = [];
         
         var trainRun = new Route(
-            trainRunEntity.Id,
+            routeEntity.Id,
             fahrt.GetDomainSectionMessages(),
-            fahrt.GetTrainInfos(trainRunEntity),
-            fahrt.GetCateringInformation(trainRunEntity),
+            fahrt.GetTrainInfos(routeEntity),
+            fahrt.GetCateringInformation(routeEntity),
             fahrt.GetBikeCarriageInformation(),
             fahrt.Halte.Select(h =>
             {
@@ -39,36 +40,36 @@ public static class DTOExtensions
         return trainRun;
     }
 
-    private static RouteInformation GetTrainInfos(this Fahrt fahrt, TrainRunEntity trainRunEntity)
+    private static RouteInformation GetTrainInfos(this Fahrt fahrt, RouteEntity routeEntity)
     {
         var nummer = fahrt.Halte
             .First()
             .Nummer;
         
-        var trainNumber = TrainInformationFactory.GetTrainNumber(nummer);
+        var trainNumber = RouteInformationFactory.GetTrainNumber(nummer);
         
-        if (trainRunEntity.RouteInfos.Number is null && trainNumber is not null)
+        if (routeEntity.Information.ServiceNumber is null && trainNumber is not null)
         {
-            trainRunEntity.UpdateTrainNumber(trainNumber);
+            routeEntity.UpdateServiceNumber(trainNumber);
         }
 
         return new RouteInformation(
-            trainRunEntity.RouteInfos.Product,
-            trainRunEntity.RouteInfos.Line,
-            trainRunEntity.RouteInfos.Number);
+            routeEntity.Information.Product,
+            routeEntity.Information.LineNumber,
+            routeEntity.Information.ServiceNumber);
     }
 
-    private static CateringInformation GetCateringInformation(this Fahrt fahrt, TrainRunEntity trainRun)
+    private static CateringInformation GetCateringInformation(this Fahrt fahrt, RouteEntity route)
     {
-        return TrainInformationFactory.CreateCateringInformation(
+        return RouteInformationFactory.CreateCateringInformation(
             fahrt.Zugattribute,
-            trainRun.RouteInfos.Product,
+            route.Information.Product,
             fahrt.Halte);
     }
 
-    private static BikeCarriage GetBikeCarriageInformation(this Fahrt fahrt)
+    private static BikeCarriageInformation GetBikeCarriageInformation(this Fahrt fahrt)
     {
-        return TrainInformationFactory.CreateBikeCarriageInformation(
+        return RouteInformationFactory.CreateBikeCarriageInformation(
             fahrt.Zugattribute,
             fahrt.HimMeldungen,
             fahrt.Halte);
@@ -92,13 +93,13 @@ public static class DTOExtensions
         var exitOnly = halt.RisNotizen.Any(n => n.Key is "text.realtime.stop.entry.disabled");
         var entryOnly = halt.RisNotizen.Any(n => n.Key is "text.realtime.stop.exit.disabled");
         
-        DepartureTime? departureTime = null;
+        TravelTime? departureTime = null;
         if (halt.AbfahrtsZeitpunkt is not null)
         {
             var planned = halt.AbfahrtsZeitpunkt.ConvertToDateTime()!.Value;
             var real = halt.EzAbfahrtsZeitpunkt.ConvertToDateTime();
             
-            departureTime = new DepartureTime(planned, real);
+            departureTime = new TravelTime(planned, real);
         }
         
         TravelTime? arrivalTime = null;
@@ -139,7 +140,7 @@ public static class DTOExtensions
             stationId!,
             new StopIndex(halt.RouteIdx),
             platform,
-            halt.Auslastungsmeldungen.GetDomainDemand(),
+            halt.GetDemand(),
             additional,
             cancelled,
             exitOnly,

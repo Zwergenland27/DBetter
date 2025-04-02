@@ -1,6 +1,7 @@
 using DBetter.Infrastructure.BahnDe.Shared;
+using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
-namespace DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
+namespace DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
 public class Fahrt : IHasMessage
 {
@@ -11,13 +12,13 @@ public class Fahrt : IHasMessage
     /// Time format: yyyy-mm-dd german time zone
     /// </remarks>
     /// <example>2025-03-23</example>
-    public required string ReiseTag { get; set; }
+    public string? ReiseTag { get; set; }
     
     /// <summary>
     /// Information about regularity of the train run
     /// </summary>
     /// <example>nicht täglich</example>
-    public required string RegulaereVerkehrstage { get; set; }
+    public string? RegulaereVerkehrstage { get; set; }
     
     /// <summary>
     /// Information about irregular days of the train run
@@ -26,7 +27,7 @@ public class Fahrt : IHasMessage
     /// This string does not have a default format.
     /// </remarks>
     /// <example>23. Mär bis 9. Aug 2025 Sa, So; 5. bis 26. Apr 2025 So; nicht 20., 27. Apr; auch 29. Mai, 9. Jun bis 8. Aug 2025</example>
-    public required string IrregulaereVerkehrstage { get; set; }
+    public string? IrregulaereVerkehrstage { get; set; }
     
     /// <summary>
     /// Name of the train run

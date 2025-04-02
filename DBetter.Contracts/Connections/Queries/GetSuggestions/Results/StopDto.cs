@@ -8,17 +8,17 @@ public class StopDto
     /// <summary>
     /// Departure time
     /// </summary>
-    public required TravelTime DepartureTime { get; set; }
+    public required TravelTimeDto? DepartureTime { get; set; }
     
     /// <summary>
     /// Arrival time
     /// </summary>
-    public required TravelTime ArrivalTime { get; set; }
+    public required TravelTimeDto? ArrivalTime { get; set; }
     
     /// <summary>
     /// Demand information
     /// </summary>
-    public required DemandDto DemandDto { get; set; }
+    public required DemandDto Demand { get; set; }
     
     /// <summary>
     /// Name of the station
@@ -29,7 +29,7 @@ public class StopDto
     /// <summary>
     /// Platform
     /// </summary>
-    public required PlatformDto PlatformDto { get; set; }
+    public required PlatformDto? Platform { get; set; }
     
     /// <summary>
     /// Stop index of the full train run

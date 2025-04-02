@@ -1,7 +1,7 @@
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Route.ValueObjects;
+namespace DBetter.Domain.Routes.ValueObjects;
 
 public record Stop
 {

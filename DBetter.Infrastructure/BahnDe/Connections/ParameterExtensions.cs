@@ -1,9 +1,9 @@
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
-using DBetter.Domain.TrainRun.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
@@ -36,9 +36,9 @@ public static class ParameterExtensions
         this ReiseAnfrage bahnRequest,
         string contextId,
         EvaNumber fixedStartEvaNumber,
-        DepartureTime fixedStartTime,
+        TravelTime fixedStartTime,
         EvaNumber fixedEndEvaNumber,
-        ArrivalTime fixedEndTime)
+        TravelTime fixedEndTime)
     {
         var fixedSectionBegin = new TeilstreckenStop
         {

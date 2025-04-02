@@ -1,14 +1,15 @@
 using CleanDomainValidation.Domain;
 using DBetter.Application.Abstractions.Messaging;
+using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Errors;
 
 namespace DBetter.Application.Connections.Queries.GetWithIncreasedTransferTime;
 
 public class GetWithIncreasedTransferTimeQueryHandler(
-    IConnectionsQueryRepository repository) : ICommandHandler<GetWithIncreasedTransferTimeQuery, Connection>
+    IConnectionsQueryRepository repository) : ICommandHandler<GetWithIncreasedTransferTimeQuery, ConnectionDto>
 {
-    public async Task<CanFail<Connection>> Handle(GetWithIncreasedTransferTimeQuery request, CancellationToken cancellationToken)
+    public async Task<CanFail<ConnectionDto>> Handle(GetWithIncreasedTransferTimeQuery request, CancellationToken cancellationToken)
     {
         var connection = await repository.GetConnectionWithIncreasedTransferTime(
             request.Id,

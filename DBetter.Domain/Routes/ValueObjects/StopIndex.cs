@@ -1,3 +1,3 @@
-namespace DBetter.Domain.Route.ValueObjects;
+namespace DBetter.Domain.Routes.ValueObjects;
 
 public record StopIndex(int Value);

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using DBetter.Application.TrainRuns.Queries.Get;
-using DBetter.Domain.TrainRun.ValueObjects;
+using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Infrastructure.Postgres;
 using MediatR;
 using Quartz;
@@ -12,24 +12,24 @@ public class TrainRunScraperJob(
 {
     public static JobKey JobKey => JobKey.Create(nameof(TrainRunScraperJob));
     
-    private static readonly ConcurrentQueue<TrainRunId> _trainRunQueue = [];
+    private static readonly ConcurrentQueue<RouteId> _trainRunQueue = [];
 
-    private static void AddTrainRunToScrape(TrainRunId trainRunId)
+    private static void AddTrainRunToScrape(RouteId routeId)
     {
         lock (_trainRunQueue)
         {
-            _trainRunQueue.Enqueue(trainRunId);
+            _trainRunQueue.Enqueue(routeId);
         }
     }
 
-    public static void AddTrainRuns(List<TrainRunId> trainRunIds)
+    public static void AddTrainRuns(List<RouteId> trainRunIds)
     {
         trainRunIds.ForEach(AddTrainRunToScrape);
     }
     
     public async Task Execute(IJobExecutionContext context)
     {
-        TrainRunId?  trainRunId;
+        RouteId?  trainRunId;
 
         lock (_trainRunQueue)
         {

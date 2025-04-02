@@ -10,7 +10,7 @@ public class HimMeldung
     /// <summary>
     /// Priority of the message
     /// </summary>
-    public required Prioritaet Priority { get; set; }
+    public Prioritaet? Priority { get; set; }
     
     /// <summary>
     /// Title

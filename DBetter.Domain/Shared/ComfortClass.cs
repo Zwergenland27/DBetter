@@ -3,5 +3,6 @@ namespace DBetter.Domain.Shared;
 public enum ComfortClass
 {
     First,
-    Second
+    Second,
+    Unknown
 }
