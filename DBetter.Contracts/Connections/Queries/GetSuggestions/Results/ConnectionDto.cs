@@ -1,0 +1,27 @@
+namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
+
+/// <summary>
+/// A connection from origin to destination station
+/// </summary>
+public class ConnectionDto
+{
+    /// <summary>
+    /// Id of the connection
+    /// </summary>
+    public required string Id { get; set; }
+    
+    /// <summary>
+    /// Demand information
+    /// </summary>
+    public required DemandDto Demand { get; set; }
+    
+    /// <summary>
+    /// Sections of the connection
+    /// </summary>
+    public required List<Segment> Sections { get; set; }
+    
+    /// <summary>
+    /// Offer for the section, if available
+    /// </summary>
+    public required Offer? Offer { get; set; }
+}
