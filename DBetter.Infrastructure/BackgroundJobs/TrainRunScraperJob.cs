@@ -7,10 +7,10 @@ using Quartz;
 
 namespace DBetter.Infrastructure.BackgroundJobs;
 
-public class TrainRunScraperJob(
+public class RouteScraperJob(
     IMediator mediator) : IJob
 {
-    public static JobKey JobKey => JobKey.Create(nameof(TrainRunScraperJob));
+    public static JobKey JobKey => JobKey.Create(nameof(RouteScraperJob));
     
     private static readonly ConcurrentQueue<RouteId> _trainRunQueue = [];
 
@@ -22,7 +22,7 @@ public class TrainRunScraperJob(
         }
     }
 
-    public static void AddTrainRuns(List<RouteId> trainRunIds)
+    public static void AddRoutes(List<RouteId> trainRunIds)
     {
         trainRunIds.ForEach(AddTrainRunToScrape);
     }

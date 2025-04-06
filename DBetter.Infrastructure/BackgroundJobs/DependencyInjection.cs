@@ -10,15 +10,15 @@ public static class DependencyInjection
         services.AddQuartz(options =>
         {
             options
-                .AddJob<TrainRunScraperJob>(TrainRunScraperJob.JobKey)
+                .AddJob<RouteScraperJob>(RouteScraperJob.JobKey)
                 .AddTrigger(trigger => trigger
-                    .ForJob(TrainRunScraperJob.JobKey)
+                    .ForJob(RouteScraperJob.JobKey)
                     .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).RepeatForever())
                 );
             
-            options.AddJob<DatabaseTrainRunScrapingScheduler>(DatabaseTrainRunScrapingScheduler.JobKey)
+            options.AddJob<DatabaseRoutesScrapingScheduler>(DatabaseRoutesScrapingScheduler.JobKey)
                 .AddTrigger(trigger => trigger
-                    .ForJob(DatabaseTrainRunScrapingScheduler.JobKey)
+                    .ForJob(DatabaseRoutesScrapingScheduler.JobKey)
                     .WithSimpleSchedule(schedule => schedule.WithIntervalInMinutes(5).RepeatForever())
                     );
         });

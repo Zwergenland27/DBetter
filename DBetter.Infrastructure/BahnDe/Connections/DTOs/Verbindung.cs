@@ -1,4 +1,7 @@
+using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
+using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
+using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
 
 namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
@@ -93,4 +96,17 @@ public class Verbindung : IHasMessage, IHasDemandInformation
     /// Messages
     /// </summary>
     public List<Meldung>? MeldungenAsObject { get; set; }
+
+    public List<JourneyId> GetJourneyIds(){
+        return VerbindungsAbschnitte
+            .Where(va => va.JourneyId is not null)
+            .Select(va => va.GetJourneyId())
+            .ToList();
+    }
+
+    public List<EvaNumber> GetEvaNumbers(){
+        return VerbindungsAbschnitte
+            .SelectMany(va => va.GetEvaNumbers())
+            .ToList();
+    }
 }

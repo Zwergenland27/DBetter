@@ -23,19 +23,14 @@ public class Fahrplan
     public List<JourneyId> GetJourneyIds()
     {
         return Verbindungen
-            .SelectMany(v => v.VerbindungsAbschnitte)
-            .Where(va => va.Verkehrsmittel.Typ is not VerkehrsmittelTyp.WALK)
-            .Select(va => new JourneyId(va.JourneyId!))
-            .Distinct()
+            .SelectMany(v => v.GetJourneyIds())
             .ToList();
     }
 
     public List<EvaNumber> GetEvaNumbers(List<JourneyId> journeyIds)
     {
         return Verbindungen
-            .SelectMany(v => v.VerbindungsAbschnitte)
-            .SelectMany(va => va.Halte)
-            .Select(h => EvaNumber.Create(h.ExtId).Value)
+            .SelectMany(v => v.GetEvaNumbers())
             .Distinct()
             .Union(
                 journeyIds.Select(id => id.GetDestinationEvaNumber())

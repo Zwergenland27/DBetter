@@ -1,3 +1,5 @@
+using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
 
 namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
@@ -144,4 +146,15 @@ public class VerbindungsAbschnitt : IHasMessage, IHasDemandInformation
     /// </summary>
     /// <example>116</example>
     public int? Distanz { get; set; }
+
+    public JourneyId GetJourneyId(){
+        if(JourneyId is null) throw new BahnDeException("Verbindungsabschnitt", "A walking section does not have a journeyId");
+        return new JourneyId(JourneyId);
+    }
+
+    public List<EvaNumber> GetEvaNumbers(){
+        return Halte
+            .Select(h => EvaNumber.Create(h.ExtId).Value)
+            .ToList();
+    }
 }

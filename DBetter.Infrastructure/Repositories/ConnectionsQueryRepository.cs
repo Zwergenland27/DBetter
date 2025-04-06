@@ -44,17 +44,18 @@ public class ConnectionsQueryRepository(
 
         var connectionFactory = ConnectionFactory
             .CreateFrom(fahrplan)
+            .WithRequestId(request.Id)
             .WithExistingRoutes(existingRoutes)
             .WithExistingStations(existingStations);
         
-        TrainRunScraperJob.AddTrainRuns(connectionFactory.TrainRunsToCreate
+        RouteScraperJob.AddRoutes(connectionFactory.RoutesToCreate
             .Where(tr => tr.ScrapingRequired)
             .Select(tr => tr.Id)
             .ToList());
         
         await context.BahnConnectionRequests.AddAsync(bahnConnectionRequestEntity);
         await context.Stations.AddRangeAsync(connectionFactory.StationsToCreate);
-        await context.Routes.AddRangeAsync(connectionFactory.TrainRunsToCreate);
+        await context.Routes.AddRangeAsync(connectionFactory.RoutesToCreate);
         await context.Connections.AddRangeAsync(connectionFactory.ConnectionsToCreate);
         
         return connectionFactory.SuggestionsDto;
@@ -67,67 +68,52 @@ public class ConnectionsQueryRepository(
         EvaNumber fixedEndEvaNumber,
         TravelTime fixedEndTime)
     {
-        throw new NotImplementedException();
-        // var originalConnection = await context.Connections
-        //     .FirstOrDefaultAsync(c => c.Id == id);
+        var originalConnection = await context.Connections
+            .FirstOrDefaultAsync(c => c.Id == id);
 
-        // if (originalConnection is null) return null;
+        if (originalConnection is null) return null;
         
-        // var bahnRequest = await context.BahnConnectionRequests
-        //     .FirstOrDefaultAsync(r => r.Id ==  originalConnection.RequestId);
+        var bahnRequest = await context.BahnConnectionRequests
+            .FirstOrDefaultAsync(r => r.Id == originalConnection.RequestId);
         
-        // if (bahnRequest is null) return null;
+        if (bahnRequest is null) return null;
 
-        // var request = bahnRequest.Request.ToRequest(
-        //     originalConnection.ContextId,
-        //     fixedStartEvaNumber,
-        //     fixedStartTime,
-        //     fixedEndEvaNumber,
-        //     fixedEndTime);
+        var request = bahnRequest.Request.ToRequest(
+            originalConnection.ContextId,
+            fixedStartEvaNumber,
+            fixedStartTime,
+            fixedEndEvaNumber,
+            fixedEndTime);
 
-        // var response = await connectionService.GetSuggestionsWithIncreasedTransferTimeAsync(request);
+        var teilstrecke = await connectionService.GetSuggestionsWithIncreasedTransferTimeAsync(request);
 
-        // var journeyIds = response.Verbindung.VerbindungsAbschnitte
-        //     .Where(va => va.Verkehrsmittel.Typ is not VerkehrsmittelTyp.WALK)
-        //     .Select(va => new JourneyId(va.JourneyId!))
-        //     .Distinct()
-        //     .ToList();
+        var journeyIds = teilstrecke.Verbindung.GetJourneyIds();
 
-        // var stopEvas = response.Verbindung.VerbindungsAbschnitte
-        //     .SelectMany(va => va.Halte)
-        //     .Select(h => EvaNumber.Create(h.ExtId).Value)
-        //     .Distinct()
-        //     .Union(
-        //         journeyIds.Select(jid => jid.GetDestinationEvaNumber())
-        //         .Distinct())
-        //     .ToList();
+        var stopEvas = teilstrecke.Verbindung.GetEvaNumbers();
 
-        // var existingTrainRuns = await context.Routes
-        //     .Where(tr => journeyIds.Contains(tr.JourneyId))
-        //     .ToDictionaryAsync(tr => tr.JourneyId, tr => tr);
+        var existingRoutes = await context.Routes
+            .Where(tr => journeyIds.Contains(tr.JourneyId))
+            .ToDictionaryAsync(tr => tr.JourneyId, tr => tr);
         
-        // var existingStations = await context.Stations
-        //     .Where(s => stopEvas.Contains(s.EvaNumber))
-        //     .ToDictionaryAsync(s => s.EvaNumber, s => s);
+        var existingStations = await context.Stations
+            .Where(s => stopEvas.Contains(s.EvaNumber))
+            .ToDictionaryAsync(s => s.EvaNumber, s => s);
         
-        // var connection = response.Verbindung.ToDomain(
-        //     bahnRequest.Id,
-        //     existingTrainRuns,
-        //     out var trainRunsToCreate,
-        //     existingStations,
-        //     out var stationsToCreate);
-
-        // var connectionToCreate = new ConnectionEntity(connection.Id, bahnRequest.Id, response.Verbindung.CtxRecon);
+        var connectionFactory = ConnectionFactory
+            .CreateFrom(teilstrecke)
+            .WithRequestId(originalConnection.RequestId)
+            .WithExistingRoutes(existingRoutes)
+            .WithExistingStations(existingStations);
         
-        // TrainRunScraperJob.AddTrainRuns(trainRunsToCreate
-        //     .Where(tr => tr.ScrapingRequired)
-        //     .Select(tr => tr.Id)
-        //     .ToList());
+        RouteScraperJob.AddRoutes(connectionFactory.RoutesToCreate
+            .Where(tr => tr.ScrapingRequired)
+            .Select(tr => tr.Id)
+            .ToList());
         
-        // await context.Stations.AddRangeAsync(stationsToCreate);
-        // await context.Routes.AddRangeAsync(trainRunsToCreate);
-        // await context.Connections.AddAsync(connectionToCreate);
+        await context.Stations.AddRangeAsync(connectionFactory.StationsToCreate);
+        await context.Routes.AddRangeAsync(connectionFactory.RoutesToCreate);
+        await context.Connections.AddRangeAsync(connectionFactory.ConnectionsToCreate);
         
-        // return connection;
+        return connectionFactory.ConnectionDto;
     }
 }

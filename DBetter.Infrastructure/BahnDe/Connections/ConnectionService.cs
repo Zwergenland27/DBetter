@@ -39,11 +39,6 @@ public class ConnectionService(HttpClient http)
 
     public async Task<Teilstrecke> GetSuggestionsWithIncreasedTransferTimeAsync(TeilstreckeAnfrage request)
     {
-        Console.WriteLine(JsonSerializer.Serialize(request, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter()}
-        }));
         var response = await http.PostAsJsonAsync("angebote/teilstrecke", request, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
