@@ -10,8 +10,13 @@ public class ConnectionEntity
     public ConnectionRequestId RequestId { get; private init; }
     
     public string ContextId { get; private init; }
-    
+
+    #pragma warning disable CS8618
+    /// <summary>
+    /// Needed for EF Core
+    /// </summary>    
     private ConnectionEntity(){}
+    #pragma warning restore CS8618
 
     public ConnectionEntity(
         ConnectionId id,

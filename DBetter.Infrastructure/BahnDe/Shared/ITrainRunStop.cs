@@ -3,7 +3,7 @@ namespace DBetter.Infrastructure.BahnDe.Shared;
 /// <summary>
 /// Classes that implement this interface contain base set of stop information
 /// </summary>
-public interface ITrainRunStop
+public interface IRouteStop
 {
     /// <summary>
     /// Fuzzy station id

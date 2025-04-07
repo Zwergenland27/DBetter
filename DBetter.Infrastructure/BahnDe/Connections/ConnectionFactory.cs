@@ -6,11 +6,9 @@ using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
-using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
@@ -260,7 +258,7 @@ public class ConnectionFactory :
             .ToList();
     }
 
-    private StopDto ToDto(Halt halt){
+    private StopDto ToDto(DTOs.Halt halt){
         var evaNumber = EvaNumber.Create(halt.ExtId).Value;
         var stationExists = _existingStations.TryGetValue(evaNumber, out var station);
         if(!stationExists){
@@ -276,7 +274,6 @@ public class ConnectionFactory :
             _existingStations.Add(evaNumber, station);
         }
 
-        
         return new StopDto {
             DepartureTime = halt.GetDepartureTime().ToDto(),
             ArrivalTime = halt.GetArrivalTime().ToDto(),

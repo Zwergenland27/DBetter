@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
-using DBetter.Application.TrainRuns.Queries.Get;
+using DBetter.Application.Routes.Queries.Get;
 using DBetter.Domain.Routes.ValueObjects;
-using DBetter.Infrastructure.Postgres;
 using MediatR;
 using Quartz;
 
@@ -12,31 +11,31 @@ public class RouteScraperJob(
 {
     public static JobKey JobKey => JobKey.Create(nameof(RouteScraperJob));
     
-    private static readonly ConcurrentQueue<RouteId> _trainRunQueue = [];
+    private static readonly ConcurrentQueue<RouteId> _routeQueue = [];
 
-    private static void AddTrainRunToScrape(RouteId routeId)
+    private static void AddRoutesToScrape(RouteId routeId)
     {
-        lock (_trainRunQueue)
+        lock (_routeQueue)
         {
-            _trainRunQueue.Enqueue(routeId);
+            _routeQueue.Enqueue(routeId);
         }
     }
 
-    public static void AddRoutes(List<RouteId> trainRunIds)
+    public static void AddRoutes(List<RouteId> routeIds)
     {
-        trainRunIds.ForEach(AddTrainRunToScrape);
+        routeIds.ForEach(AddRoutesToScrape);
     }
     
     public async Task Execute(IJobExecutionContext context)
     {
-        RouteId?  trainRunId;
+        RouteId?  routeId;
 
-        lock (_trainRunQueue)
+        lock (_routeQueue)
         {
-            if (!_trainRunQueue.TryDequeue(out trainRunId)) return;
+            if (!_routeQueue.TryDequeue(out routeId)) return;
         }
         
-        _ = await mediator.Send(new GetTrainRunQuery(trainRunId));
+        _ = await mediator.Send(new GetRouteQuery(routeId));
     }
 }
 

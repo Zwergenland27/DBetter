@@ -1,4 +1,4 @@
-namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
+namespace DBetter.Contracts.Shared.DTOs;
 
 /// <summary>
 /// Platform at a stop

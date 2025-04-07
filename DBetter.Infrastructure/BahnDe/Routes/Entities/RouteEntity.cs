@@ -17,7 +17,12 @@ public class RouteEntity
     /// </summary>
     public bool ScrapingRequired { get; private set; }
 
+    #pragma warning disable CS8618
+    /// <summary>
+    /// Needed for EF Core
+    /// </summary>
     private RouteEntity(){}
+    #pragma warning restore CS8618
 
     public RouteEntity(
         RouteId id,

@@ -1,13 +1,14 @@
 using System.ComponentModel.DataAnnotations;
+using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
 
-namespace DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
+namespace DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
 /// <summary>
 /// Stop of a train run
 /// </summary>
-public class Halt : IHasMessage, ITrainRunStop, IHasDemandInformation
+public class Halt : IHasMessage, IRouteStop, IHasDemandInformation
 {
     /// <inheritdoc/>
     public required string Id { get; set; }

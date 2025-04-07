@@ -5,7 +5,7 @@ namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
 /// <summary>
 /// Stop of a train run that is part of a connection
 /// </summary>
-public class Halt : IHasMessage, ITrainRunStop, IHasDemandInformation
+public class Halt : IHasMessage, IRouteStop, IHasDemandInformation
 {
     /// <inheritdoc/>
     public required string Id { get; set; }
@@ -50,8 +50,8 @@ public class Halt : IHasMessage, ITrainRunStop, IHasDemandInformation
     public string? BahnhofsInfoId { get; set; }
     
     /// <inheritdoc/>
-    public string ExtId { get; set; }
+    public required string ExtId { get; set; }
     
     /// <inheritdoc/>
-    public int RouteIdx { get; set; }
+    public required int RouteIdx { get; set; }
 }

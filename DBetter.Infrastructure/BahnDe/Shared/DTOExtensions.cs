@@ -1,4 +1,4 @@
-using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
+using DBetter.Contracts.Shared.DTOs;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
@@ -57,7 +57,7 @@ public static class DTOExtensions
         };
     }
 
-    public static TravelTime? GetDepartureTime(this ITrainRunStop stop){
+    public static TravelTime? GetDepartureTime(this IRouteStop stop){
         if(stop.AbfahrtsZeitpunkt is null) return null;
 
         return new TravelTime(
@@ -66,7 +66,7 @@ public static class DTOExtensions
         );
     }
 
-    public static TravelTime? GetArrivalTime(this ITrainRunStop stop){
+    public static TravelTime? GetArrivalTime(this IRouteStop stop){
         if(stop.AnkunftsZeitpunkt is null) return null;
 
         return new TravelTime(
@@ -84,7 +84,7 @@ public static class DTOExtensions
         };
     }
 
-    public static StationInfoId? GetStationInfoId(this ITrainRunStop stop){
+    public static StationInfoId? GetStationInfoId(this IRouteStop stop){
         if(stop.BahnhofsInfoId is null) return null;
 
         var stationInfoResult = StationInfoId.Create(stop.BahnhofsInfoId);
@@ -92,15 +92,16 @@ public static class DTOExtensions
         return stationInfoResult.Value;
     }
 
-    public static StationName GetStationName(this ITrainRunStop stop){
+    public static StationName GetStationName(this IRouteStop stop){
         return StationName.Create(stop.Name).Value;
     }
 
-    public static Platform? GetPlatform(this ITrainRunStop stop){
+    public static Platform? GetPlatform(this IRouteStop stop){
         if(stop.Gleis is null) return null;
 
         var platformType = stop.HaltTyp switch {
             HaltTyp.PL => PlatformType.Platform,
+            HaltTyp.ST => PlatformType.BusPlatform,
             _ => PlatformType.Unknown
         };
 
@@ -117,7 +118,7 @@ public static class DTOExtensions
         };
     }
 
-    public static StopIndex GetStopIndex(this ITrainRunStop stop){
+    public static StopIndex GetStopIndex(this IRouteStop stop){
         return new StopIndex(stop.RouteIdx);
     }
 
@@ -174,7 +175,7 @@ public static class DTOExtensions
             AuslastungsStufe.High => DemandStatus.High,
             AuslastungsStufe.Extreme => DemandStatus.Extreme,
             AuslastungsStufe.Overbooked => DemandStatus.Overbooked,
-            _ => throw  new BahnDeException("ConnectionService.ToDemandStatus", $"Unknown demand {stufe}")
+            _ => DemandStatus.Unknown
         };
     }
 }

@@ -1,3 +1,5 @@
+using DBetter.Contracts.Shared.DTOs;
+
 namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 
 /// <summary>

@@ -1,7 +1,7 @@
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Connections;
+using DBetter.Application.Routes;
 using DBetter.Application.Stations;
-using DBetter.Application.TrainRuns;
 using DBetter.Application.Users;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Users;
@@ -34,7 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
         services.AddScoped<IStationQueryRepository, StationQueryRepository>();
         services.AddScoped<IConnectionsQueryRepository, ConnectionsQueryRepository>();
-        services.AddScoped<ITrainRunQueryRepository, TrainRunQueryRepository>();
+        services.AddScoped<IRouteQueryRepository, RouteQueryRepository>();
         return services;
     }
 }

@@ -1,4 +1,4 @@
-namespace DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
+namespace DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
 public class Coordinate
 {

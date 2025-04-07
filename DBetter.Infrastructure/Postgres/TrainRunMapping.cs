@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DBetter.Infrastructure.Postgres;
 
-public class TrainRunMapping : IEntityTypeConfiguration<RouteEntity>
+public class RouteMapping : IEntityTypeConfiguration<RouteEntity>
 {
     public void Configure(EntityTypeBuilder<RouteEntity> builder)
     {
-        builder.ToTable("TrainRuns");
+        builder.ToTable("Routes");
         
         builder.HasKey(x => x.Id);
         

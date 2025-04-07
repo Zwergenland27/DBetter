@@ -8,5 +8,10 @@ public enum HaltTyp
     /// <summary>
     /// Platform
     /// </summary>
-    PL
+    PL,
+
+    /// <summary>
+    /// Bus platform
+    /// </summary>
+    ST
 }

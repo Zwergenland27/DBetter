@@ -1,5 +1,5 @@
+using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Shared;
-using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
@@ -99,4 +99,10 @@ public class Fahrt : IHasMessage
     /// Indicates wether the train run is completely cancelled or not
     /// </summary>
     public required bool Cancelled { get; set; }
+
+    public List<EvaNumber> GetEvaNumbers(){
+        return Halte
+            .Select(h => EvaNumber.Create(h.ExtId).Value)
+            .ToList();
+    }
 } 

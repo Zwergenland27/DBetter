@@ -1,9 +1,9 @@
 using DBetter.Contracts.Shared.DTOs;
 
-namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
+namespace DBetter.Contracts.Routes.Queries.Get.Results;
 
 /// <summary>
-/// Stop of a train run
+/// A stop on a route
 /// </summary>
 public class StopDto
 {

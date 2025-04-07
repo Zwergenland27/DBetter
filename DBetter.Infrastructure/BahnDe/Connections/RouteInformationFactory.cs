@@ -58,12 +58,12 @@ public class RouteInformationFactory
         
         if (ServiceNumberIsLineNumber(product))
         {
-            trainNumber = GetTrainNumber(trainLineInfo);
+            trainNumber = GetServiceNumber(trainLineInfo);
         }
         else
         {
-            trainLine = GetTrainLine(trainLineInfo);
-            trainNumber = GetTrainNumber(numberInfo);
+            trainLine = GetLineNumber(trainLineInfo);
+            trainNumber = GetServiceNumber(numberInfo);
         }
         
         return new RouteInformation(product, trainLine, trainNumber);
@@ -171,7 +171,7 @@ public class RouteInformationFactory
         };
     }
     
-    public static CateringInformation CreateCateringInformation(List<Zugattribut>  zugattribute, TransportProduct product, IEnumerable<ITrainRunStop> stopInfos)
+    public static CateringInformation CreateCateringInformation(List<Zugattribut>  zugattribute, TransportProduct product, IEnumerable<IRouteStop> stopInfos)
     {
         string? validityText = null;
         CateringType type = CateringType.NoInfo;
@@ -219,7 +219,7 @@ public class RouteInformationFactory
             partialSectionIndices.Item2);
     }
 
-    public static BikeCarriageInformation CreateBikeCarriageInformation(List<Zugattribut>  zugattribute, List<HimMeldung>? himMeldungen, IEnumerable<ITrainRunStop> stopInfos)
+    public static BikeCarriageInformation CreateBikeCarriageInformation(List<Zugattribut>  zugattribute, List<HimMeldung>? himMeldungen, IEnumerable<IRouteStop> stopInfos)
     {
         string? validityText = null;
         BikeCarriageStatus carriageStatus = BikeCarriageStatus.NoInfo;
@@ -253,7 +253,7 @@ public class RouteInformationFactory
             partialSectionIndices.Item2);
     }
 
-    private static void GetAccessibilityInformation(List<Zugattribut>  zugattribute, IEnumerable<ITrainRunStop> stopInfos)
+    private static void GetAccessibilityInformation(List<Zugattribut>  zugattribute, IEnumerable<IRouteStop> stopInfos)
     {
         string? validityText = null;
         
@@ -291,7 +291,7 @@ public class RouteInformationFactory
     }
     
     
-    private static Tuple<StopIndex, StopIndex> GetPartialSectionValidityInfos(string? validityText, IEnumerable<ITrainRunStop> stopInfos)
+    private static Tuple<StopIndex, StopIndex> GetPartialSectionValidityInfos(string? validityText, IEnumerable<IRouteStop> stopInfos)
     {
         var firstStopIndex = new StopIndex(stopInfos.First().RouteIdx);
         var lastStopIndex = new StopIndex(stopInfos.Last().RouteIdx);
@@ -311,17 +311,17 @@ public class RouteInformationFactory
     }
 
 
-    private static LineNumber? GetTrainLine(string? trainLine)
+    private static LineNumber? GetLineNumber(string? lineNumber)
     {
-        if (trainLine is null) return null;
-        return new LineNumber(trainLine);
+        if (lineNumber is null) return null;
+        return new LineNumber(lineNumber);
     }
 
-    public static ServiceNumber? GetTrainNumber(string? trainNumber)
+    public static ServiceNumber? GetServiceNumber(string? serviceNumber)
     {
-        if (trainNumber is null) return null;
+        if (serviceNumber is null) return null;
         
-        if (int.TryParse(trainNumber, out int result))
+        if (int.TryParse(serviceNumber, out int result))
         {
             return new ServiceNumber(result);
         }

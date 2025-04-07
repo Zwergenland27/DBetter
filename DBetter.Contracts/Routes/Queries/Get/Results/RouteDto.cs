@@ -1,20 +1,19 @@
+
+using DBetter.Contracts.Routes.Queries.Get.Results;
 using DBetter.Contracts.Shared.DTOs;
 
-namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
+namespace DBetter.Contracts.Routes.Queries.Get;
 
 /// <summary>
-/// Information about the route of the transport product
+/// Full trip of a public transport relation from start to destination station
 /// </summary>
-public class RouteInformationDto
-{
-    //TODO: Überlegen, ob diese Klasse wirklich nötig ist oder mit der TransportSegment Klasse kombiniert werden kann
-    
+public class RouteDto {
+
     /// <summary>
-    /// Destination if available
+    /// Id of the route
     /// </summary>
-    /// <example>Görlitz</example>
-    public required string? Destination { get; set; }
-    
+    public required string RouteId { get; set; }
+
     /// <summary>
     /// The transport product
     /// </summary>
@@ -22,13 +21,21 @@ public class RouteInformationDto
     public required string Product { get; set; }
     
     /// <summary>
-    /// Line number
+    /// Stops of the route
     /// </summary>
-    /// <remarks>
-    /// For long distance trains the train number will be used
-    /// </remarks>
+    public required List<StopDto> Stops { get; set; }
+
+    /// <summary>
+    /// Line number of the route
+    /// </summary>
     /// <example>2</example>
-    public required string Number { get; set; }
+    public required string? LineNumber { get; set; }
+
+    /// <summary>
+    /// Service number of the route
+    /// </summary>
+    /// <example>1645</example>
+    public required string? ServiceNumber { get; set; }
     
     /// <summary>
     /// Information about bike carriage
