@@ -102,6 +102,10 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
             Demand = halt.GetDemand().ToDto(),
             Name = station!.Name.Value,
             Platform = halt.GetPlatform().ToDto(),
+            IsAdditional = halt.IsAdditional(),
+            IsCancelled = halt.IsCancelled(),
+            IsEntryOnly = halt.IsEntryOnly(),
+            IsExitOnly = halt.IsExitOnly(),
             StopIndex = halt.GetStopIndex().Value
         };
     }

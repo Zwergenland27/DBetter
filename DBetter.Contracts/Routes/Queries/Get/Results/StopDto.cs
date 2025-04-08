@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DBetter.Contracts.Shared.DTOs;
 
 namespace DBetter.Contracts.Routes.Queries.Get.Results;
@@ -37,6 +38,30 @@ public class StopDto
     /// Platform
     /// </summary>
     public required PlatformDto? Platform { get; set; }
+
+    /// <summary>
+    /// Indicates that the stop is additional to the default route
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public required bool IsAdditional { get; set; }
+
+    /// <summary>
+    /// Indicates that the stop has been cancelled
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public required bool IsCancelled { get; set; }
+
+    /// <summary>
+    /// Indicates that passengers are only allowed to leave the train at this stop
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public required bool IsExitOnly { get; set; }
+
+    /// <summary>
+    /// Indicates that passengers are only allowed to enter the train at this stop
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public required bool IsEntryOnly { get; set; }
     
     /// <summary>
     /// Stop index of the full train run

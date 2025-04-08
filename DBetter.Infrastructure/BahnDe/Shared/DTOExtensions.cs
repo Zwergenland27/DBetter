@@ -56,7 +56,8 @@ public static class DTOExtensions
         };
     }
 
-    public static TravelTime? GetDepartureTime(this IRouteStop stop){
+    public static TravelTime? GetDepartureTime(this IRouteStop stop)
+    {
         if(stop.AbfahrtsZeitpunkt is null) return null;
 
         return new TravelTime(
@@ -65,13 +66,34 @@ public static class DTOExtensions
         );
     }
 
-    public static TravelTime? GetArrivalTime(this IRouteStop stop){
+    public static TravelTime? GetArrivalTime(this IRouteStop stop)
+    {
         if(stop.AnkunftsZeitpunkt is null) return null;
 
         return new TravelTime(
             stop.AnkunftsZeitpunkt.ConvertToDateTime()!.Value,
             stop.EzAnkunftsZeitpunkt.ConvertToDateTime()
         );
+    }
+
+    public static bool IsAdditional(this IHasMessage stop)
+    {
+        return stop.RisNotizen.Any(r => r.Key is "text.realtime.stop.additional");
+    }
+
+    public static bool IsCancelled(this IHasMessage stop)
+    {
+        return stop.RisNotizen.Any(r => r.Key is "text.realtime.stop.cancelled");
+    }
+
+    public static bool IsEntryOnly(this IHasMessage stop)
+    {
+        return stop.RisNotizen.Any(r => r.Key is "text.realtime.stop.exit.disabled");
+    }
+
+    public static bool IsExitOnly(this IHasMessage stop)
+    {
+        return stop.RisNotizen.Any(r => r.Key is "text.realtime.stop.entry.disabled");
     }
 
     public static TravelTimeDto? ToDto(this TravelTime? travelTime){
