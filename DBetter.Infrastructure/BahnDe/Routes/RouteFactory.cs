@@ -96,6 +96,7 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
 
         
         return new StopDto {
+            Id = station!.Id.Value.ToString(),
             DepartureTime = halt.GetDepartureTime().ToDto(),
             ArrivalTime = halt.GetArrivalTime().ToDto(),
             Demand = halt.GetDemand().ToDto(),

@@ -13,9 +13,9 @@ public class GetWithIncreasedTransferTimeQueryHandler(
     {
         var connection = await repository.GetConnectionWithIncreasedTransferTime(
             request.Id,
-            request.FixedStartEvaNumber,
+            request.FixedStartStationId,
             request.FixedStartTime,
-            request.FixedEndEvaNumber,
+            request.FixedEndStationId,
             request.FixedEndTime);
 
         if(connection is null) return DomainErrors.Connection.NotFound(request.Id);

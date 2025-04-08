@@ -105,19 +105,19 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
 
         builder.OwnsOne(cr => cr.Route, rb =>
         {
-            rb.Property(r => r.DepartureStop)
+            rb.Property(r => r.DepartureStationId)
                 .HasConversion(
-                    evaNumber => evaNumber.Value,
-                    value => EvaNumber.Create(value).Value);
+                    id => id.Value,
+                    value => new StationId(value));
 
             rb.OwnsOne(r => r.AllowedOnFirstSection);
 
             rb.OwnsOne(r => r.FirstStopOver, sob =>
             {
-                sob.Property(so => so.Stop)
+                sob.Property(so => so.StationId)
                     .HasConversion(
-                        evaNumber => evaNumber.Value,
-                        value => EvaNumber.Create(value).Value);
+                        id => id.Value,
+                        value => new StationId(value));
 
                 sob.Property(so => so.StayMinutes);
             });
@@ -126,20 +126,20 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
             
             rb.OwnsOne(r => r.SecondStopOver, sob =>
             {
-                sob.Property(so => so.Stop)
+                sob.Property(so => so.StationId)
                     .HasConversion(
-                        evaNumber => evaNumber.Value,
-                        value => EvaNumber.Create(value).Value);
+                        id => id.Value,
+                        value => new StationId(value));
 
                 sob.Property(so => so.StayMinutes);
             });
             
             rb.OwnsOne(r => r.AllowedOnThirdSection);
             
-            rb.Property(r => r.ArrivalStop)
+            rb.Property(r => r.ArrivalStationId)
                 .HasConversion(
-                    evaNumber => evaNumber.Value,
-                    value => EvaNumber.Create(value).Value);
+                    id => id.Value,
+                    value => new StationId(value));
         });
     }
 }

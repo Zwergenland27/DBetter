@@ -24,7 +24,12 @@ public class ConnectionsQueryRepository(
 {
     public async Task<ConnectionSuggestionsDto> GetConnectionSuggestionsAsync(ConnectionRequest request, string? page)
     {
-        var bahnConnectionRequest = request.ToRequest(page);
+        var requestStationEvas = await context.Stations
+            .AsNoTracking()
+            .Where(s => request.GetStops().Contains(s.Id))
+            .ToDictionaryAsync(s => s.Id, s => s.EvaNumber);
+
+        var bahnConnectionRequest = request.ToRequest(requestStationEvas, page);
         var bahnConnectionRequestEntity = new BahnConnectionRequestEntity(request.Id, bahnConnectionRequest);
         
         var fahrplan = await connectionService.GetSuggestionsAsync(bahnConnectionRequest);
@@ -63,9 +68,9 @@ public class ConnectionsQueryRepository(
     
     public async Task<ConnectionDto?> GetConnectionWithIncreasedTransferTime(
         ConnectionId id,
-        EvaNumber fixedStartEvaNumber,
+        StationId fixedStartStationId,
         TravelTime fixedStartTime,
-        EvaNumber fixedEndEvaNumber,
+        StationId fixedEndStationId,
         TravelTime fixedEndTime)
     {
         var originalConnection = await context.Connections
@@ -75,14 +80,19 @@ public class ConnectionsQueryRepository(
         
         var bahnRequest = await context.BahnConnectionRequests
             .FirstOrDefaultAsync(r => r.Id == originalConnection.RequestId);
+
+        var stationIds = await context.Stations
+            .AsNoTracking()
+            .Where(s => s.Id == fixedStartStationId || s.Id == fixedEndStationId)
+            .ToDictionaryAsync(s => s.Id, s => s.EvaNumber);
         
         if (bahnRequest is null) return null;
 
         var request = bahnRequest.Request.ToRequest(
             originalConnection.ContextId,
-            fixedStartEvaNumber,
+            stationIds[fixedStartStationId],
             fixedStartTime,
-            fixedEndEvaNumber,
+            stationIds[fixedEndStationId],
             fixedEndTime);
 
         var teilstrecke = await connectionService.GetSuggestionsWithIncreasedTransferTimeAsync(request);

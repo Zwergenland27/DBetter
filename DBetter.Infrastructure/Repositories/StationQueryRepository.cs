@@ -24,7 +24,7 @@ public class StationQueryRepository(
         
         return stations.Select(station => new StationDto
         {
-            EvaNumber = station.EvaNumber.Value,
+            Id = station.Id.Value.ToString(),
             Name = station.Name.Value,
         }).ToList();
     }

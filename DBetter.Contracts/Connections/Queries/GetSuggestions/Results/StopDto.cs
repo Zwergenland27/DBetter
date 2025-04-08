@@ -8,6 +8,11 @@ namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 public class StopDto
 {
     /// <summary>
+    /// Internal id of the station
+    /// </summary>
+    public required string Id { get; set; }
+    
+    /// <summary>
     /// Departure time
     /// </summary>
     public required TravelTimeDto? DepartureTime { get; set; }

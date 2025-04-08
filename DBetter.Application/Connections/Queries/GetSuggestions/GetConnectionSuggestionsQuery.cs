@@ -144,9 +144,9 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
     private ValidatedRequiredProperty<Route> MapRoute(
         RequiredPropertyBuilder<ConnectionRouteParameters, Route> builder)
     {
-        var stops = builder.ListProperty<EvaNumber>("Stops")
+        var stops = builder.ListProperty<StationId>("Stops")
             .Required()
-            .MapEach(p => p.Stops, EvaNumber.Create);
+            .MapEach(p => p.Stops, StationId.Create);
 
         var allowedVehicles = builder.ListProperty<AllowedVehicles>("AllowedVehicles")
             .Required()

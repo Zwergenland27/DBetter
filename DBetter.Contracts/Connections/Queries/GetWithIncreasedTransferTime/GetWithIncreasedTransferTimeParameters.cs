@@ -12,10 +12,9 @@ public class GetWithIncreasedTransferTimeParameters : IParameters
     public string? Id { get; set; }
     
     /// <summary>
-    /// Eva number of the first station of the fixed section
+    /// Internal id of the first station of the fixed section
     /// </summary>
-    /// <example>8010085</example>
-    public string? FixedStartEvaNumber { get; set; }
+    public string? FixedStartStationId { get; set; }
     
     /// <summary>
     /// Start time of the fixed section
@@ -23,10 +22,9 @@ public class GetWithIncreasedTransferTimeParameters : IParameters
     public DateTime? FixedStartTime { get; set; }
     
     /// <summary>
-    /// Eva number of the last station of the fixed section
+    /// Internal id of the last station of the fixed section
     /// </summary>
-    /// <example>8010085</example>
-    public string? FixedEndEvaNumber { get; set; }
+    public string? FixedEndStationId { get; set; }
     
     /// <summary>
     /// End time of the fixed section

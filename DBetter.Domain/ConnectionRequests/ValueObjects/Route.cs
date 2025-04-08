@@ -6,7 +6,7 @@ namespace DBetter.Domain.ConnectionRequests.ValueObjects;
 
 public class Route
 {
-    public EvaNumber DepartureStop  { get; private init; }
+    public StationId DepartureStationId  { get; private init; }
     
     public AllowedVehicles AllowedOnFirstSection { get; private init; }
     
@@ -18,57 +18,57 @@ public class Route
     
     public AllowedVehicles? AllowedOnThirdSection { get; private init; }
     
-    public EvaNumber ArrivalStop  { get; private init; }
+    public StationId ArrivalStationId  { get; private init; }
 
     private Route(){}
 
     private Route(
-        EvaNumber departureStop,
+        StationId departureStopId,
         AllowedVehicles allowedOnFirstSection,
-        EvaNumber arrivalStop)
+        StationId arrivalStopId)
     {
-        DepartureStop = departureStop;
+        DepartureStationId = departureStopId;
         AllowedOnFirstSection = allowedOnFirstSection;
-        ArrivalStop = arrivalStop;
+        ArrivalStationId = arrivalStopId;
     }
     
     private Route(
-        EvaNumber departureStop,
+        StationId departureStopId,
         AllowedVehicles allowedOnFirstSection,
         Stopover firstStopOver,
         AllowedVehicles allowedOnSecondSection,
-        EvaNumber arrivalStop)
+        StationId arrivalStopId)
     {
-        DepartureStop = departureStop;
+        DepartureStationId = departureStopId;
         AllowedOnFirstSection = allowedOnFirstSection;
         FirstStopOver = firstStopOver;
         AllowedOnSecondSection = allowedOnSecondSection;
-        ArrivalStop = arrivalStop;
+        ArrivalStationId = arrivalStopId;
     }
     
     private Route(
-        EvaNumber departureStop,
+        StationId departureStopId,
         AllowedVehicles allowedOnFirstSection,
         Stopover firstStopOver,
         AllowedVehicles allowedOnSecondSection,
         Stopover secondStopOver,
         AllowedVehicles allowedOnThirdSection,
-        EvaNumber arrivalStop)
+        StationId arrivalStopId)
     {
-        DepartureStop = departureStop;
+        DepartureStationId = departureStopId;
         AllowedOnFirstSection = allowedOnFirstSection;
         FirstStopOver = firstStopOver;
         AllowedOnSecondSection = allowedOnSecondSection;
         SecondStopOver = secondStopOver;
         AllowedOnThirdSection = allowedOnThirdSection;
-        ArrivalStop = arrivalStop;
+        ArrivalStationId = arrivalStopId;
     }
 
-    public static CanFail<Route> Create(List<EvaNumber> stops, List<AllowedVehicles> allowedVehicles)
+    public static CanFail<Route> Create(List<StationId> stopIds, List<AllowedVehicles> allowedVehicles)
     {
-        if (stops.Count() < 2) return DomainErrors.ConnectionRequest.Route.Min2Stops;
-        if (stops.Count() > 4) return DomainErrors.ConnectionRequest.Route.Max2Stopovers;
-        if (allowedVehicles.Count() != stops.Count() - 1)
+        if (stopIds.Count() < 2) return DomainErrors.ConnectionRequest.Route.Min2Stops;
+        if (stopIds.Count() > 4) return DomainErrors.ConnectionRequest.Route.Max2Stopovers;
+        if (allowedVehicles.Count() != stopIds.Count() - 1)
             return DomainErrors.ConnectionRequest.Route.AllowedVehiclesMismatch;
         if (allowedVehicles.Any(allowed => allowed is
             {
@@ -81,31 +81,31 @@ public class Route
             return DomainErrors.ConnectionRequest.Route.NoVehicleAllowed;   
         }
 
-        if (stops.Count() == 2)
+        if (stopIds.Count() == 2)
         {
             return new Route(
-                stops[0],
+                stopIds[0],
                 allowedVehicles[0],
-                stops[1]);
+                stopIds[1]);
         }
 
-        if (stops.Count() == 3)
+        if (stopIds.Count() == 3)
         {
             return new Route(
-                stops[0], 
+                stopIds[0], 
                 allowedVehicles[0],
-                new Stopover(stops[1], 0),
+                new Stopover(stopIds[1], 0),
                 allowedVehicles[1],
-                stops[2]);
+                stopIds[2]);
         }
         
         return new Route(
-            stops[0], 
+            stopIds[0], 
             allowedVehicles[0],
-            new Stopover(stops[1], 0),
+            new Stopover(stopIds[1], 0),
             allowedVehicles[1],
-            new Stopover(stops[2], 0),
+            new Stopover(stopIds[2], 0),
             allowedVehicles[2],
-            stops[3]);
+            stopIds[3]);
     }
 }

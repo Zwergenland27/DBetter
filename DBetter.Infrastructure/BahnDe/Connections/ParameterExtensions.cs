@@ -10,12 +10,31 @@ namespace DBetter.Infrastructure.BahnDe.Connections;
 
 public static class ParameterExtensions
 {
-    public static ReiseAnfrage ToRequest(this ConnectionRequest request, string? page)
+    public static List<StationId> GetStops(this ConnectionRequest request)
+    {
+        List<StationId> stationIds = [];
+
+        stationIds.Add(request.Route.DepartureStationId);
+        stationIds.Add(request.Route.ArrivalStationId);
+
+        if(request.Route.FirstStopOver is not null)
+        {
+            stationIds.Add(request.Route.FirstStopOver.StationId);
+        }
+
+        if(request.Route.SecondStopOver is not null)
+        {
+            stationIds.Add(request.Route.SecondStopOver.StationId);
+        }
+
+        return stationIds;
+    }
+    public static ReiseAnfrage ToRequest(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas, string? page)
     {
         return new ReiseAnfrage
         {
-            AbfahrtsHalt = request.GetAbfahrtsHalt(),
-            AnkunftsHalt = request.GetAnkunftsHalt(),
+            AbfahrtsHalt = request.GetAbfahrtsHalt(requestStationEvas),
+            AnkunftsHalt = request.GetAnkunftsHalt(requestStationEvas),
             AnfrageZeitpunkt = request.GetAnfrageZeitpunkt(),
             Klasse = request.GetKlasse(),
             AnkunftSuche = request.GetAnkunftSuche(),
@@ -27,7 +46,7 @@ public static class ParameterExtensions
             SitzplatzOnly = false,
             BikeCarriage = request.AnyBikeCarriage(),
             NurDeutschlandTicketVerbindungen = false,
-            Zwischenhalte = request.GetZwischenhalte(),
+            Zwischenhalte = request.GetZwischenhalte(requestStationEvas),
             PagingReference = page,
         };
     }
@@ -73,14 +92,14 @@ public static class ParameterExtensions
         };
     }
 
-    private static string GetAbfahrtsHalt(this ConnectionRequest request)
+    private static string GetAbfahrtsHalt(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas)
     {
-        return request.Route.DepartureStop.AsFuzzy();
+        return requestStationEvas[request.Route.DepartureStationId].AsFuzzy();
     }
 
-    private static string GetAnkunftsHalt(this ConnectionRequest request)
+    private static string GetAnkunftsHalt(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas)
     {
-        return request.Route.ArrivalStop.AsFuzzy();
+        return requestStationEvas[request.Route.ArrivalStationId].AsFuzzy();
     }
 
     private static string GetAnfrageZeitpunkt(this ConnectionRequest request)
@@ -245,7 +264,7 @@ public static class ParameterExtensions
         return request.Passengers.Any(passenger => passenger.Options.Bikes > 0);
     }
 
-    private static List<Zwischenhalt> GetZwischenhalte(this ConnectionRequest request)
+    private static List<Zwischenhalt> GetZwischenhalte(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas)
     {
         var zwischenhalte = new List<Zwischenhalt>();
 
@@ -255,11 +274,11 @@ public static class ParameterExtensions
             var allowedVehicles = request.Route.AllowedOnSecondSection;
             
             if(allowedVehicles is null) throw new BahnDeException("ConnectionService.GetZwischenhalte", "Allowed vehicles not set for first stopover");
-            
+
             zwischenhalte.Add(new Zwischenhalt
             {
                 Aufenthaltsdauer = stopover.StayMinutes,
-                Id = stopover.Stop.AsFuzzy(),
+                Id = requestStationEvas[stopover.StationId].AsFuzzy(),
                 VerkehrsmittelOfNextAbschnitt = allowedVehicles.GetProduktgattung()
             });
         }
@@ -274,7 +293,7 @@ public static class ParameterExtensions
             zwischenhalte.Add(new Zwischenhalt
             {
                 Aufenthaltsdauer = stopover.StayMinutes,
-                Id = stopover.Stop.AsFuzzy(),
+                Id = requestStationEvas[stopover.StationId].AsFuzzy(),
                 VerkehrsmittelOfNextAbschnitt = allowedVehicles.GetProduktgattung()
             });
         }
