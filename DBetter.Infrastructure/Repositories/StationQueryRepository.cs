@@ -15,12 +15,12 @@ public class StationQueryRepository(
     {
         var haltestellen = await stationService.FindAsync(query, 5);
 
-        var stations = haltestellen
+        var recievedStations = haltestellen
             .Select(halt => halt.ToDomain())
             .OfType<Station>()
             .ToList();
 
-        await InsertOrUpdateStations(stations);
+        var stations = await InsertOrUpdateStations(recievedStations);
         
         return stations.Select(station => new StationDto
         {
@@ -29,12 +29,14 @@ public class StationQueryRepository(
         }).ToList();
     }
 
-    private async Task InsertOrUpdateStations(List<Station> fetchedStations)
+    private async Task<List<Station>> InsertOrUpdateStations(List<Station> fetchedStations)
     {
         var stationEvaNumbers = fetchedStations.Select(s => s.EvaNumber).ToList();
         var existingStations = await context.Stations
             .Where(station => stationEvaNumbers.Contains(station.EvaNumber))
             .ToListAsync();
+
+        List<Station> stations = existingStations;
 
         foreach (var station in fetchedStations)
         {
@@ -42,13 +44,14 @@ public class StationQueryRepository(
             if (existingStation is null)
             {
                 await context.Stations.AddAsync(station);
+                stations.Add(station);
             }
             else if(station.Position is not null)
             {
                 existingStation.UpdatePosition(station.Position);
             }
         }
-        
-        await context.SaveChangesAsync();
+
+        return stations;
     }
 }
