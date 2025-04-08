@@ -15,6 +15,12 @@ public class RouteDto {
     public required string RouteId { get; set; }
 
     /// <summary>
+    /// Operator of the service
+    /// </summary>
+    /// <example>DB Regio Südost</example>
+    public required string? Operator { get; set; } 
+
+    /// <summary>
     /// The transport product
     /// </summary>
     /// <example>RegionalExpress</example>

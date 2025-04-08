@@ -23,7 +23,13 @@ public class TransportSegmentDto : SegmentDto
     /// </summary>
     public required List<StopDto> Stops { get; set; }
     
-/// <summary>
+    /// <summary>
+    /// Operator of the service
+    /// </summary>
+    /// <example>DB Regio Südost</example>
+    public required string? Operator { get; set; } 
+
+    /// <summary>
     /// Destination if available
     /// </summary>
     /// <example>Görlitz</example>

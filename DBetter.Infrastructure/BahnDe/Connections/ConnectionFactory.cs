@@ -234,6 +234,7 @@ public class ConnectionFactory :
         {
             RouteId = route!.Id.Value.ToString(),
             Demand = verbindungsabschnitt.GetDemand().ToDto(),
+            Operator = RouteInformationFactory.GetOperator(verbindungsabschnitt.Verkehrsmittel!.Zugattribute),
             Destination = station?.Name.Value,
             Product = route.Information.Product.ToString(),
             Number = route.Information.GetBookingRelevantNumber(),

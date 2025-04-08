@@ -1,9 +1,6 @@
 using DBetter.Domain.Routes.ValueObjects;
-using DBetter.Domain.Shared;
-using DBetter.Infrastructure.BahnDe.Connections.Parameters;
-using DBetter.Infrastructure.BahnDe.Shared;
 
-namespace DBetter.Infrastructure.BahnDe.Connections;
+namespace DBetter.Infrastructure.BahnDe.Shared;
 
 public class RouteInformationFactory
 {
@@ -31,9 +28,9 @@ public class RouteInformationFactory
         //Trains with train number
         if (information.Length == 2 && information[0].Any(char.IsDigit))
         {
-            productInfo = new String(information[0].Where(char.IsLetter).ToArray());
-            trainLineInfo = new String(information[0].Where(char.IsDigit).ToArray());
-            numberInfo = new String(information[1].Where(char.IsDigit).ToArray());
+            productInfo = new string(information[0].Where(char.IsLetter).ToArray());
+            trainLineInfo = new string(information[0].Where(char.IsDigit).ToArray());
+            numberInfo = new string(information[1].Where(char.IsDigit).ToArray());
         }
         
         //Trains with train number and without any additional naming
@@ -41,15 +38,15 @@ public class RouteInformationFactory
         {
             productInfo = information[0];
             trainLineInfo = information[1];
-            numberInfo = new String(information[2].Where(char.IsDigit).ToArray());
+            numberInfo = new string(information[2].Where(char.IsDigit).ToArray());
         }
         
         //Trains with train number that contain an additional name (for example TL for trilex)
         if (information.Length == 3 && information[1].Any(char.IsLetter))
         {
-            productInfo = new String(information[1].Where(char.IsLetter).ToArray());
-            trainLineInfo = new String(information[1].Where(char.IsDigit).ToArray());
-            numberInfo = new String(information[2].Where(char.IsDigit).ToArray());
+            productInfo = new string(information[1].Where(char.IsLetter).ToArray());
+            trainLineInfo = new string(information[1].Where(char.IsDigit).ToArray());
+            numberInfo = new string(information[2].Where(char.IsDigit).ToArray());
         }
         
         var product = GetTransportProduct(productInfo);
@@ -253,6 +250,11 @@ public class RouteInformationFactory
             partialSectionIndices.Item2);
     }
 
+    public static string? GetOperator(List<Zugattribut> zugattribute)
+    {
+        return zugattribute.FirstOrDefault(a => a.Key is "BEF")?.Value;
+    }
+
     private static void GetAccessibilityInformation(List<Zugattribut>  zugattribute, IEnumerable<IRouteStop> stopInfos)
     {
         string? validityText = null;
@@ -279,6 +281,18 @@ public class RouteInformationFactory
         {
             //Rollstuhlgerechtes Fahrzeug
             validityText = zugattribute.First(a => a.Key is "RG").Teilstreckenhinweis;
+        }
+
+        if(zugattribute.Any(a => a.Key is "OC"))
+        {
+            ///WC accessible for wheelchair
+            validityText = zugattribute.First(a => a.Key is "OC").Teilstreckenhinweis;
+        }
+
+        if(zugattribute.Any(a => a.Key is "OG"))
+        {
+            ///WC with limited accessibility for wheelchair
+            validityText = zugattribute.First(a => a.Key is "OG").Teilstreckenhinweis;
         }
         
         if (zugattribute.Any(a => a.Key is "RO"))

@@ -3,7 +3,6 @@ using DBetter.Contracts.Routes.Queries.Get.Results;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
-using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
@@ -63,6 +62,7 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
             RouteId = _route!.Id.Value.ToString(),
             Product = _route!.Information.Product.ToString(),
             Stops = GetStops(_fahrt),
+            Operator = RouteInformationFactory.GetOperator(_fahrt.Zugattribute),
             LineNumber = _route!.Information.LineNumber?.ToString(),
             ServiceNumber = RouteInformationFactory.GetServiceNumber(serviceNummer)?.ToString(),
             BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(_fahrt.Zugattribute, _fahrt.HimMeldungen, _fahrt.Halte).ToDto(),
