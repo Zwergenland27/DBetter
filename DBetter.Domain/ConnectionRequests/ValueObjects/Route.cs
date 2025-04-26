@@ -6,106 +6,87 @@ namespace DBetter.Domain.ConnectionRequests.ValueObjects;
 
 public class Route
 {
-    public StationId DepartureStationId  { get; private init; }
+    public StationId OriginStationId  { get; private init; }
     
-    public AllowedVehicles AllowedOnFirstSection { get; private init; }
+    public MeansOfTransport MeansOfTransportFirstSection { get; private init; }
     
-    public Stopover? FirstStopOver { get; private init; }
+    public Stopover? FirstStopover { get; private init; }
     
-    public AllowedVehicles? AllowedOnSecondSection { get; private init; }
+    public Stopover? SecondStopover { get; private init; }
     
-    public Stopover? SecondStopOver { get; private init; }
+    public StationId DestinationStationId  { get; private init; }
     
-    public AllowedVehicles? AllowedOnThirdSection { get; private init; }
+    public int MaxTransfers { get; private init; }
     
-    public StationId ArrivalStationId  { get; private init; }
+    public int MinTransferTime { get; private init; }
 
     private Route(){}
 
     private Route(
-        StationId departureStopId,
-        AllowedVehicles allowedOnFirstSection,
-        StationId arrivalStopId)
+        StationId originStationId,
+        MeansOfTransport meansOfTransportFirstSection,
+        Stopover? firstStopover,
+        Stopover? secondStopover,
+        StationId destinationStationId,
+        int maxTransfers,
+        int minTransferTime)
     {
-        DepartureStationId = departureStopId;
-        AllowedOnFirstSection = allowedOnFirstSection;
-        ArrivalStationId = arrivalStopId;
-    }
-    
-    private Route(
-        StationId departureStopId,
-        AllowedVehicles allowedOnFirstSection,
-        Stopover firstStopOver,
-        AllowedVehicles allowedOnSecondSection,
-        StationId arrivalStopId)
-    {
-        DepartureStationId = departureStopId;
-        AllowedOnFirstSection = allowedOnFirstSection;
-        FirstStopOver = firstStopOver;
-        AllowedOnSecondSection = allowedOnSecondSection;
-        ArrivalStationId = arrivalStopId;
-    }
-    
-    private Route(
-        StationId departureStopId,
-        AllowedVehicles allowedOnFirstSection,
-        Stopover firstStopOver,
-        AllowedVehicles allowedOnSecondSection,
-        Stopover secondStopOver,
-        AllowedVehicles allowedOnThirdSection,
-        StationId arrivalStopId)
-    {
-        DepartureStationId = departureStopId;
-        AllowedOnFirstSection = allowedOnFirstSection;
-        FirstStopOver = firstStopOver;
-        AllowedOnSecondSection = allowedOnSecondSection;
-        SecondStopOver = secondStopOver;
-        AllowedOnThirdSection = allowedOnThirdSection;
-        ArrivalStationId = arrivalStopId;
+        OriginStationId = originStationId;
+        MeansOfTransportFirstSection = meansOfTransportFirstSection;
+        FirstStopover = firstStopover;
+        SecondStopover = secondStopover;
+        DestinationStationId = destinationStationId;
+        MaxTransfers = maxTransfers;
+        MinTransferTime = minTransferTime;
     }
 
-    public static CanFail<Route> Create(List<StationId> stopIds, List<AllowedVehicles> allowedVehicles)
+    public static CanFail<Route> Create(
+        StationId originStationId,
+        MeansOfTransport onFirstSection,
+        Stopover? firstStopOver,
+        Stopover? secondStopOver,
+        StationId destinationStationId,
+        int maxTransfers,
+        int minTransferTime)
     {
-        if (stopIds.Count() < 2) return DomainErrors.ConnectionRequest.Route.Min2Stops;
-        if (stopIds.Count() > 4) return DomainErrors.ConnectionRequest.Route.Max2Stopovers;
-        if (allowedVehicles.Count() != stopIds.Count() - 1)
-            return DomainErrors.ConnectionRequest.Route.AllowedVehiclesMismatch;
-        if (allowedVehicles.Any(allowed => allowed is
-            {
-                HighSpeed: false,
-                Intercity: false,
-                Regional: false,
-                PublicTransport: false
-            }))
+        CanFail<Route> transferOptionsResult = new CanFail<Route>();
+        if (maxTransfers < 0)
         {
-            return DomainErrors.ConnectionRequest.Route.NoVehicleAllowed;   
+            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MaxTransfers.NegativeNotAllowed);
         }
-
-        if (stopIds.Count() == 2)
+        else if (maxTransfers > 10)
         {
-            return new Route(
-                stopIds[0],
-                allowedVehicles[0],
-                stopIds[1]);
+            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MaxTransfers.Max10);
         }
-
-        if (stopIds.Count() == 3)
+        
+        if (minTransferTime < 0)
         {
-            return new Route(
-                stopIds[0], 
-                allowedVehicles[0],
-                new Stopover(stopIds[1], 0),
-                allowedVehicles[1],
-                stopIds[2]);
+            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MinTransferTime.NegativeNotAllowed);
+        }
+        else if (minTransferTime > 43)
+        {
+            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MinTransferTime.Max43);
+        }
+        
+        if (firstStopOver is null && secondStopOver is not null)
+        {
+            return DomainErrors.ConnectionRequest.Route.FirstStopoverMissing;
+        }
+        
+        if (!onFirstSection.AnySelected ||
+            (firstStopOver is not null && !firstStopOver.MeansOfTransportNextSection.AnySelected) ||
+            (secondStopOver is not null && !secondStopOver.MeansOfTransportNextSection.AnySelected))
+        {
+            return DomainErrors.ConnectionRequest.Route.NoVehicleAllowed;
         }
         
         return new Route(
-            stopIds[0], 
-            allowedVehicles[0],
-            new Stopover(stopIds[1], 0),
-            allowedVehicles[1],
-            new Stopover(stopIds[2], 0),
-            allowedVehicles[2],
-            stopIds[3]);
+            originStationId,
+            onFirstSection,
+            firstStopOver,
+            secondStopOver,
+            destinationStationId,
+            maxTransfers,
+            minTransferTime);
     }
 }

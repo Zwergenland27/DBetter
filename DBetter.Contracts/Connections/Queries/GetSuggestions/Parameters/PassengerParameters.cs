@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using CleanDomainValidation.Application;
 
-namespace DBetter.Contracts.ConnectionRequests.Commands.Put;
+namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 
 public class PassengerParameters : IParameters
 {
@@ -42,9 +42,16 @@ public class PassengerParameters : IParameters
     public int? Age { get; set; }
 
     /// <summary>
-    /// Individual options for the passenger
+    /// Number of bikes the passenger will carry
     /// </summary>
-    public PassengerOptionsParameters? Options { get; set; }
+    /// <example>0</example>
+    public int? Bikes { get; set; }
+
+    /// <summary>
+    /// Number of dogs the passenger will carry
+    /// </summary>
+    /// <example>0</example>
+    public int? Dogs { get; set; }
     
     /// <summary>
     /// Discount cards of the passenger

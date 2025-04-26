@@ -1,6 +1,6 @@
 using CleanDomainValidation.Application;
 
-namespace DBetter.Contracts.ConnectionRequests.Commands.Put;
+namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 
 public class PassengerDiscountParameters : IParameters
 {
@@ -14,7 +14,7 @@ public class PassengerDiscountParameters : IParameters
     /// Class where the discount is valid
     /// </summary>
     /// <example>Second</example>
-    public string? Class { get; set; }
+    public string? ComfortClass { get; set; }
     
     /// <summary>
     /// Utc date of expiration

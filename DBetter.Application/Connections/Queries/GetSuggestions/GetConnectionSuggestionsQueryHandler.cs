@@ -15,7 +15,7 @@ public class GetConnectionSuggestionsQueryHandler(IConnectionsQueryRepository re
             request.DepartureTime,
             request.ArrivalTime,
             request.Passengers,
-            request.Options,
+            request.ComfortClass,
             request.Route);
 
         if (result.HasFailed) return result.Errors;

@@ -19,7 +19,9 @@ public class Passenger : Entity<PassengerId>
     
     public int? Age { get; set; }
     
-    public PassengerOptions Options { get; set; }
+    public int Bikes { get; set; }
+    
+    public int Dogs { get; set; }
     
     public IReadOnlyList<PassengerDiscount> Discounts => _discounts.AsReadOnly();
 
@@ -31,14 +33,16 @@ public class Passenger : Entity<PassengerId>
         PassengerName? name,
         Birthday? birthday,
         int? age,
-        PassengerOptions options,
+        int bikes,
+        int dogs,
         List<PassengerDiscount> discounts) : base(id)
     {
         UserId = userId;
         Name = name;
         Birthday = birthday;
         Age = age;
-        Options = options;
+        Bikes = bikes;
+        Dogs = dogs;
         _discounts = discounts;
     }
 
@@ -48,7 +52,8 @@ public class Passenger : Entity<PassengerId>
         PassengerName? name,
         Birthday? birthday,
         int? age,
-        PassengerOptions options,
+        int bikes,
+        int dogs,
         List<PassengerDiscount> discounts)
     {
         if (birthday is null && age is null) return DomainErrors.ConnectionRequest.Passenger.MissingAgeField(id);
@@ -57,6 +62,6 @@ public class Passenger : Entity<PassengerId>
         if (discounts.Distinct().Count() != discounts.Count())
             return DomainErrors.ConnectionRequest.Passenger.DuplicateDiscounts(id);
         
-        return new Passenger(id, userId, name, birthday, age, options, discounts);
+        return new Passenger(id, userId, name, birthday, age, bikes, dogs, discounts);
     }
 }

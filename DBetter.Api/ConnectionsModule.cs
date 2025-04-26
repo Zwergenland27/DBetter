@@ -2,7 +2,6 @@ using System.Security.Claims;
 using CleanDomainValidation.Application;
 using DBetter.Application.Connections.Queries.GetSuggestions;
 using DBetter.Application.Connections.Queries.GetWithIncreasedTransferTime;
-using DBetter.Contracts.ConnectionRequests.Commands.Put;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Contracts.Connections.Queries.GetWithIncreasedTransferTime;

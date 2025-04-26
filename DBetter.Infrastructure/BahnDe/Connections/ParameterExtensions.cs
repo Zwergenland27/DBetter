@@ -14,17 +14,17 @@ public static class ParameterExtensions
     {
         List<StationId> stationIds = [];
 
-        stationIds.Add(request.Route.DepartureStationId);
-        stationIds.Add(request.Route.ArrivalStationId);
+        stationIds.Add(request.Route.OriginStationId);
+        stationIds.Add(request.Route.DestinationStationId);
 
-        if(request.Route.FirstStopOver is not null)
+        if(request.Route.FirstStopover is not null)
         {
-            stationIds.Add(request.Route.FirstStopOver.StationId);
+            stationIds.Add(request.Route.FirstStopover.StationId);
         }
 
-        if(request.Route.SecondStopOver is not null)
+        if(request.Route.SecondStopover is not null)
         {
-            stationIds.Add(request.Route.SecondStopOver.StationId);
+            stationIds.Add(request.Route.SecondStopover.StationId);
         }
 
         return stationIds;
@@ -94,12 +94,12 @@ public static class ParameterExtensions
 
     private static string GetAbfahrtsHalt(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas)
     {
-        return requestStationEvas[request.Route.DepartureStationId].AsFuzzy();
+        return requestStationEvas[request.Route.OriginStationId].AsFuzzy();
     }
 
     private static string GetAnkunftsHalt(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas)
     {
-        return requestStationEvas[request.Route.ArrivalStationId].AsFuzzy();
+        return requestStationEvas[request.Route.DestinationStationId].AsFuzzy();
     }
 
     private static string GetAnfrageZeitpunkt(this ConnectionRequest request)
@@ -119,7 +119,7 @@ public static class ParameterExtensions
 
     private static Klasse GetKlasse(this ConnectionRequest request)
     {
-        return request.Options.ComfortClass switch
+        return request.ComfortClass switch
         {
             ComfortClass.First => Klasse.KLASSE_1,
             ComfortClass.Second => Klasse.KLASSE_2,
@@ -144,7 +144,7 @@ public static class ParameterExtensions
 
     private static List<Produktgattung> GetProduktgattungen(this ConnectionRequest request)
     {
-        return request.Route.AllowedOnFirstSection.GetProduktgattung();
+        return request.Route.MeansOfTransportFirstSection.GetProduktgattung();
     }
 
     private static List<Reisender> GetReisende(this ConnectionRequest request)
@@ -163,8 +163,8 @@ public static class ParameterExtensions
             ];
         }
         
-        var bikes = request.Passengers.Sum(passenger => passenger.Options.Bikes);
-        var dogs =  request.Passengers.Sum(passenger => passenger.Options.Dogs);
+        var bikes = request.Passengers.Sum(passenger => passenger.Bikes);
+        var dogs =  request.Passengers.Sum(passenger => passenger.Dogs);
         
         var reisende = request.Passengers.Select(passenger => passenger.ToReisender()).ToList();
 
@@ -251,50 +251,50 @@ public static class ParameterExtensions
     
     private static int GetMaxUmstiege(this ConnectionRequest request)
     {
-        return request.Options.MaxTransfers;
+        return request.Route.MaxTransfers;
     }
 
     private static int GetMinUmstiegszeit(this ConnectionRequest request)
     {
-        return request.Options.MinTransferMinutes;
+        return request.Route.MinTransferTime;
     }
 
     private static bool AnyBikeCarriage(this ConnectionRequest request)
     {
-        return request.Passengers.Any(passenger => passenger.Options.Bikes > 0);
+        return request.Passengers.Any(passenger => passenger.Bikes > 0);
     }
 
     private static List<Zwischenhalt> GetZwischenhalte(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas)
     {
         var zwischenhalte = new List<Zwischenhalt>();
 
-        if (request.Route.FirstStopOver is not null)
+        if (request.Route.FirstStopover is not null)
         {
-            var stopover =  request.Route.FirstStopOver;
-            var allowedVehicles = request.Route.AllowedOnSecondSection;
+            var stopover =  request.Route.FirstStopover;
+            var meansOfTransport = request.Route.FirstStopover.MeansOfTransportNextSection;
             
-            if(allowedVehicles is null) throw new BahnDeException("ConnectionService.GetZwischenhalte", "Allowed vehicles not set for first stopover");
+            if(meansOfTransport is null) throw new BahnDeException("ConnectionService.GetZwischenhalte", "Allowed vehicles not set for first stopover");
 
             zwischenhalte.Add(new Zwischenhalt
             {
-                Aufenthaltsdauer = stopover.StayMinutes,
+                Aufenthaltsdauer = stopover.LengthOfStay,
                 Id = requestStationEvas[stopover.StationId].AsFuzzy(),
-                VerkehrsmittelOfNextAbschnitt = allowedVehicles.GetProduktgattung()
+                VerkehrsmittelOfNextAbschnitt = meansOfTransport.GetProduktgattung()
             });
         }
         
-        if (request.Route.SecondStopOver is not null)
+        if (request.Route.SecondStopover is not null)
         {
-            var stopover =  request.Route.SecondStopOver;
-            var allowedVehicles = request.Route.AllowedOnThirdSection;
+            var stopover =  request.Route.SecondStopover;
+            var meansOfTransport = request.Route.SecondStopover.MeansOfTransportNextSection;
             
-            if(allowedVehicles is null) throw new BahnDeException("ConnectionService.GetZwischenhalte", "Allowed vehicles not set for second stopover");
+            if(meansOfTransport is null) throw new BahnDeException("ConnectionService.GetZwischenhalte", "Allowed vehicles not set for second stopover");
             
             zwischenhalte.Add(new Zwischenhalt
             {
-                Aufenthaltsdauer = stopover.StayMinutes,
+                Aufenthaltsdauer = stopover.LengthOfStay,
                 Id = requestStationEvas[stopover.StationId].AsFuzzy(),
-                VerkehrsmittelOfNextAbschnitt = allowedVehicles.GetProduktgattung()
+                VerkehrsmittelOfNextAbschnitt = meansOfTransport.GetProduktgattung()
             });
         }
         
@@ -307,38 +307,50 @@ public static class ParameterExtensions
         return TimeZoneInfo.ConvertTimeFromUtc(date, germanTimeZone).ToString("yyyy-MM-ddTHH:mm:ss");
     }
 
-    private static List<Produktgattung> GetProduktgattung(this AllowedVehicles allowedVehicles)
+    private static List<Produktgattung> GetProduktgattung(this MeansOfTransport meansOfTransport)
     {
         var produktgattungen = new List<Produktgattung>();
 
-        if (allowedVehicles.HighSpeed)
+        if (meansOfTransport.HighSpeedTrains)
         {
-            produktgattungen.AddRange([
-                Produktgattung.ICE]);
+            produktgattungen.Add(Produktgattung.ICE);
         }
 
-        if (allowedVehicles.Intercity)
+        if (meansOfTransport.FastTrains)
         {
             produktgattungen.AddRange([
                 Produktgattung.EC_IC,
                 Produktgattung.IR]);
         }
 
-        if (allowedVehicles.Regional)
+        if (meansOfTransport.RegionalTrains)
         {
-            produktgattungen.AddRange([
-                Produktgattung.REGIONAL]);
+            produktgattungen.Add(Produktgattung.REGIONAL);
         }
 
-        if (allowedVehicles.PublicTransport)
+        if (meansOfTransport.SuburbanTrains)
         {
-            produktgattungen.AddRange([
-                Produktgattung.SBAHN,
-                Produktgattung.BUS,
-                Produktgattung.SCHIFF,
-                Produktgattung.UBAHN,
-                Produktgattung.TRAM,
-                Produktgattung.ANRUFPFLICHTIG]);
+            produktgattungen.Add(Produktgattung.SBAHN);
+        }
+        
+        if (meansOfTransport.UndergroundTrains)
+        {
+            produktgattungen.Add(Produktgattung.UBAHN);
+        }
+        
+        if (meansOfTransport.Trams)
+        {
+            produktgattungen.Add(Produktgattung.TRAM);
+        }
+        
+        if (meansOfTransport.Busses)
+        {
+            produktgattungen.Add(Produktgattung.BUS);
+        }
+        
+        if (meansOfTransport.Boats)
+        {
+            produktgattungen.Add(Produktgattung.SCHIFF);
         }
 
         return produktgattungen;

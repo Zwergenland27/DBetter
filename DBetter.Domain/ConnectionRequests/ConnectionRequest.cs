@@ -3,6 +3,7 @@ using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Errors;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Domain.ConnectionRequests;
@@ -19,7 +20,7 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     
     public IReadOnlyList<Passenger> Passengers => _passengers.AsReadOnly();
     
-    public ConnectionOptions Options { get; private set; }
+    public ComfortClass ComfortClass { get; private set; }
     
     public Route Route { get; private set; }
 
@@ -31,14 +32,14 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
         DateTime? departureTime,
         DateTime? arrivalTime,
         List<Passenger> passengers,
-        ConnectionOptions options,
+        ComfortClass comfortClass,
         Route route) : base(id)
     {
         OwnerId = ownerId;
         DepartureTime = departureTime;
         ArrivalTime = arrivalTime;
         _passengers = passengers;
-        Options = options;
+        ComfortClass = comfortClass;
         Route = route;
     }
 
@@ -47,10 +48,10 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
         DateTime? departureTime,
         DateTime? arrivalTime,
         List<Passenger> passengers,
-        ConnectionOptions options,
+        ComfortClass comfortClass,
         Route route)
     {
         if (departureTime is null && arrivalTime is null) return DomainErrors.ConnectionRequest.NoTimeSpecified;
-        return new ConnectionRequest(ConnectionRequestId.CreateNew(), ownerId, departureTime, arrivalTime, passengers, options, route);
+        return new ConnectionRequest(ConnectionRequestId.CreateNew(), ownerId, departureTime, arrivalTime, passengers, comfortClass, route);
     }
 }

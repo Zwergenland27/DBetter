@@ -1,17 +1,14 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
 using DBetter.Application.Abstractions.Messaging;
-using DBetter.Contracts.ConnectionRequests.Commands.Put;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
-using DBetter.Domain.Connections;
 using DBetter.Domain.Errors;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
-using ICommand = DBetter.Application.Abstractions.Messaging.ICommand;
 
 namespace DBetter.Application.Connections.Queries.GetSuggestions;
 
@@ -34,9 +31,9 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
             .Required()
             .MapEachComplex(r => r.Passengers, MapPassenger);
 
-        var options = builder.ClassProperty(r => r.Options)
+        var options = builder.EnumProperty(r => r.ComfortClass)
             .Required()
-            .MapComplex(p => p.Options, MapOptions);
+            .Map(p => p.ComfortClass, DomainErrors.Shared.ComfortClass.Invalid);
         
         var route = builder.ClassProperty(r => r.Route)
             .Required()
@@ -78,28 +75,13 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
             .Optional()
             .Map(p => p.Age);
         
-        var options = builder.ClassProperty(r => r.Options)
+        var bikes = builder.StructProperty(r => r.Bikes)
             .Required()
-            .MapComplex(p => p.Options, pBuilder =>
-            {
-                var reservation = pBuilder.StructProperty(r => r.Reservation)
-                    .Required()
-                    .Map(p => p.Reservation);
+            .Map(p => p.Bikes);
                 
-                var bikes = pBuilder.StructProperty(r => r.Bikes)
-                    .Required()
-                    .Map(p => p.Bikes);
-                
-                var dogs = pBuilder.StructProperty(r => r.Dogs)
-                    .Required()
-                    .Map(p => p.Dogs);
-                
-                var needsAccessibility = pBuilder.StructProperty(r => r.NeedsAccessibility)
-                    .Required()
-                    .Map(p => p.NeedsAccessibility);
-                
-                return pBuilder.Build(() => new PassengerOptions(reservation, bikes, dogs, needsAccessibility));
-            });
+        var dogs = builder.StructProperty(r => r.Dogs)
+            .Required()
+            .Map(p => p.Dogs);
 
         var discounts = builder.ListProperty(r => r.Discounts)
             .Required()
@@ -111,7 +93,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
                 
                 var comfortClass = dBuilder.EnumProperty(r => r.ComfortClass)
                     .Required()
-                    .Map(r => r.Class, DomainErrors.Shared.Class.Invalid);
+                    .Map(r => r.ComfortClass, DomainErrors.Shared.ComfortClass.Invalid);
                 
                 var validUntil = dBuilder.StructProperty(r => r.ValidUntil)
                     .Optional()
@@ -120,58 +102,112 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
                 return dBuilder.Build(() => new PassengerDiscount(type, comfortClass, validUntil));
             });
 
-        return builder.Build(() => Passenger.Create(id, userId, name, birthday, age, options, discounts.ToList()));
-    }
-
-    private ValidatedRequiredProperty<ConnectionOptions> MapOptions(
-        RequiredPropertyBuilder<ConnectionOptionsParameters, ConnectionOptions> builder)
-    {
-        var comfortClass = builder.EnumProperty(r => r.ComfortClass)
-            .Required()
-            .Map(r => r.Class, DomainErrors.Shared.Class.Invalid);
-        
-        var maxTransfers = builder.StructProperty(r => r.MaxTransfers)
-            .Required()
-            .Map(r => r.MaxTransfers);
-        
-        var minTransferMinutes = builder.StructProperty(r => r.MinTransferMinutes)
-            .Required()
-            .Map(r => r.MinTransferMinutes);
-        
-        return builder.Build(() => new ConnectionOptions(comfortClass, maxTransfers, minTransferMinutes));
+        return builder.Build(() => Passenger.Create(id, userId, name, birthday, age, bikes, dogs, discounts.ToList()));
     }
 
     private ValidatedRequiredProperty<Route> MapRoute(
         RequiredPropertyBuilder<ConnectionRouteParameters, Route> builder)
     {
-        var stops = builder.ListProperty<StationId>("Stops")
+        var originStationId = builder.ClassProperty(r => r.OriginStationId)
             .Required()
-            .MapEach(p => p.Stops, StationId.Create);
-
-        var allowedVehicles = builder.ListProperty<AllowedVehicles>("AllowedVehicles")
+            .Map(p => p.OriginStationId, StationId.Create);
+       
+        var meansOfTransportFirstSection = builder.ClassProperty(r => r.MeansOfTransportFirstSection)
             .Required()
-            .MapEachComplex(p => p.AllowedVehicles, vBuilder =>
-            {
-                var highSpeed = vBuilder.StructProperty(r => r.HighSpeed)
-                    .Required()
-                    .Map(p => p.HighSpeed);
+            .MapComplex(p => p.MeansOfTransportFirstSection, MapMeansOfTransport);
 
-                var intercity = vBuilder.StructProperty(r => r.Intercity)
-                    .Required()
-                    .Map(p => p.Intercity);
-
-                var regional = vBuilder.StructProperty(r => r.Regional)
-                    .Required()
-                    .Map(p => p.Regional);
-
-                var publicTransport = vBuilder.StructProperty(p => p.PublicTransport)
-                    .Required()
-                    .Map(p => p.PublicTransport);
-
-                return vBuilder.Build(() => new AllowedVehicles(highSpeed, intercity, regional, publicTransport));
-            });
+        var firstStopover = builder.ClassProperty(r => r.FirstStopover)
+            .Optional()
+            .MapComplex(p => p.FirstStopover, MapStopover);
         
-        return builder.Build(() => Route.Create(stops.ToList(), allowedVehicles.ToList()));
+        var secondStopover = builder.ClassProperty(r => r.SecondStopover)
+            .Optional()
+            .MapComplex(p => p.SecondStopover, MapStopover);
+        
+        var destinationStationId = builder.ClassProperty(r => r.DestinationStationId)
+            .Required()
+            .Map(p => p.DestinationStationId, StationId.Create);
+
+        var maxTransfers = builder.StructProperty(r => r.MaxTransfers)
+            .Required()
+            .Map(p => p.MaxTransfers);
+        
+        var minTransferTime = builder.StructProperty(r => r.MinTransferTime)
+            .Required()
+            .Map(p => p.MinTransferTime);
+        
+        return builder.Build(() => Route.Create(
+            originStationId,
+            meansOfTransportFirstSection,
+            firstStopover,
+            secondStopover,
+            destinationStationId,
+            maxTransfers,
+            minTransferTime));
+    }
+
+    private ValidatedRequiredProperty<MeansOfTransport> MapMeansOfTransport(
+        RequiredPropertyBuilder<MeansOfTransportParameters, MeansOfTransport> builder)
+    {
+        var highSpeedTrains = builder.StructProperty(r => r.HighSpeedTrains)
+            .Required()
+            .Map(p => p.HighSpeedTrains);
+        
+        var fastTrains = builder.StructProperty(r => r.FastTrains)
+            .Required()
+            .Map(p => p.FastTrains);
+        
+        var regionalTrains = builder.StructProperty(r => r.RegionalTrains)
+            .Required()
+            .Map(p => p.RegionalTrains);
+        
+        var suburbanTrains = builder.StructProperty(r => r.SuburbanTrains)
+            .Required()
+            .Map(p => p.SuburbanTrains);
+        
+        var undergroundTrains = builder.StructProperty(r => r.UndergroundTrains)
+            .Required()
+            .Map(p => p.UndergroundTrains);
+        
+        var trams = builder.StructProperty(r => r.Trams)
+            .Required()
+            .Map(p => p.Trams);
+        
+        var busses = builder.StructProperty(r => r.Busses)
+            .Required()
+            .Map(p => p.Busses);
+        
+        var boats = builder.StructProperty(r => r.Boats)
+            .Required()
+            .Map(p => p.Boats);
+        
+        return builder.Build(() => new MeansOfTransport(
+            highSpeedTrains,
+            fastTrains,
+            regionalTrains,
+            suburbanTrains,
+            undergroundTrains,
+            trams,
+            busses,
+            boats));
+    }
+
+    private ValidatedOptionalClassProperty<Stopover> MapStopover(
+        OptionalClassPropertyBuilder<ConnectionRouteStopoverParameters, Stopover> builder)
+    {
+        var stationId = builder.ClassProperty(r => r.StationId)
+            .Required()
+            .Map(p => p.StationId, StationId.Create);
+        
+        var lengthOfStay = builder.StructProperty(r => r.LengthOfStay)
+            .Required()
+            .Map(p => p.LengthOfStay);
+        
+        var meansOfTransportNextSection = builder.ClassProperty(r => r.MeansOfTransportNextSection)
+            .Required()
+            .MapComplex(p => p.MeansOfTransportNextSection, MapMeansOfTransport);
+        
+        return builder.Build(() => new Stopover(stationId, lengthOfStay, meansOfTransportNextSection));
     }
 }
 
@@ -180,6 +216,6 @@ public record GetConnectionSuggestionsQuery(
     DateTime? DepartureTime,
     DateTime? ArrivalTime,
     List<Passenger> Passengers,
-    ConnectionOptions Options,
+    ComfortClass ComfortClass,
     Route Route,
     string? Page) : ICommand<ConnectionSuggestionsDto>;

@@ -69,13 +69,9 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
             pb.Property(p => p.Age)
                 .IsRequired(false);
 
-            pb.OwnsOne(p => p.Options, ob =>
-            {
-                ob.Property(o => o.Reservation);
-                ob.Property(o => o.Bikes);
-                ob.Property(o => o.Dogs);
-                ob.Property(o => o.NeedsAccessibility);
-            });
+            pb.Property(p => p.Bikes);
+
+            pb.Property(p => p.Dogs);
 
             pb.OwnsMany(p => p.Discounts, db =>
             {
@@ -93,53 +89,60 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
             }).UsePropertyAccessMode(PropertyAccessMode.Field);
         })
         .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.OwnsOne(cr => cr.Options, ob =>
-        {
-            ob.Property(o => o.ComfortClass);
-            ob.Property(o => o.MaxTransfers);
-            ob.Property(o => o.MinTransferMinutes);
-        });
+        
+        builder.Property(o => o.ComfortClass);
 
         builder.Ignore(cr => cr.Route);
 
         builder.OwnsOne(cr => cr.Route, rb =>
         {
-            rb.Property(r => r.DepartureStationId)
+            rb.Property(r => r.OriginStationId)
                 .HasConversion(
                     id => id.Value,
                     value => new StationId(value));
 
-            rb.OwnsOne(r => r.AllowedOnFirstSection);
-
-            rb.OwnsOne(r => r.FirstStopOver, sob =>
+            rb.OwnsOne(so => so.MeansOfTransportFirstSection, motb =>
+            {
+                motb.Ignore(mot => mot.AnySelected);
+            });
+            
+            rb.OwnsOne(r => r.FirstStopover, sob =>
+             {
+                 sob.Property(so => so.StationId)
+                     .HasConversion(
+                         id => id.Value,
+                         value => new StationId(value));
+            
+                 sob.Property(so => so.LengthOfStay);
+            
+                 sob.OwnsOne(so => so.MeansOfTransportNextSection, motb =>
+                 {
+                     motb.Ignore(mot => mot.AnySelected);
+                 });
+             });
+            
+            rb.OwnsOne(r => r.SecondStopover, sob =>
             {
                 sob.Property(so => so.StationId)
                     .HasConversion(
                         id => id.Value,
                         value => new StationId(value));
-
-                sob.Property(so => so.StayMinutes);
+            
+                sob.Property(so => so.LengthOfStay);
+                
+                sob.OwnsOne(so => so.MeansOfTransportNextSection, motb =>
+                {
+                    motb.Ignore(mot => mot.AnySelected);
+                });
             });
             
-            rb.OwnsOne(r => r.AllowedOnSecondSection);
-            
-            rb.OwnsOne(r => r.SecondStopOver, sob =>
-            {
-                sob.Property(so => so.StationId)
-                    .HasConversion(
-                        id => id.Value,
-                        value => new StationId(value));
-
-                sob.Property(so => so.StayMinutes);
-            });
-            
-            rb.OwnsOne(r => r.AllowedOnThirdSection);
-            
-            rb.Property(r => r.ArrivalStationId)
+            rb.Property(r => r.DestinationStationId)
                 .HasConversion(
                     id => id.Value,
                     value => new StationId(value));
+
+            rb.Property(r => r.MaxTransfers);
+            rb.Property(r => r.MinTransferTime);
         });
     }
 }

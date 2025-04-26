@@ -22,6 +22,8 @@ public class StationQueryRepository(
 
         var stations = await InsertOrUpdateStations(recievedStations);
         
+        await context.SaveChangesAsync();
+        
         return stations.Select(station => new StationDto
         {
             Id = station.Id.Value.ToString(),

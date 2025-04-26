@@ -6,13 +6,13 @@ namespace DBetter.Infrastructure.BahnDe.Connections.Parameters;
 public class ReiseAnfrage
 {
     /// <summary>
-    /// Fuzzy departure station id
+    /// Fuzzy origin station id
     /// </summary>
     /// <example>@L=8010085</example>
     public required string AbfahrtsHalt { get; set; }
     
     /// <summary>
-    /// Fuzzy arrival station id
+    /// Fuzzy destination station id
     /// </summary>
     /// <example>@L=8000105</example>
     public required string AnkunftsHalt { get; set; }

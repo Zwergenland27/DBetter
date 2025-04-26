@@ -22,7 +22,7 @@ public class AddDiscountRequestBuilder : IRequestBuilder<AddDiscountParameters, 
         
         var comfortClass = builder.EnumProperty(r => r.ComfortClass)
             .Required()
-            .Map(p => p.Class, DomainErrors.Shared.Class.Invalid);
+            .Map(p => p.Class, DomainErrors.Shared.ComfortClass.Invalid);
 
         var boughtAtUtc = builder.StructProperty(r => r.BoughtAtUtc)
             .Required()

@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using CleanDomainValidation.Application;
-using DBetter.Contracts.ConnectionRequests.Commands.Put;
 
 namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
 
@@ -34,9 +33,10 @@ public class ConnectionRequestParameters : IParameters
     public List<PassengerParameters>? Passengers { get; set; }
 
     /// <summary>
-    /// Options for the connection
+    /// Comfort class of the trip
     /// </summary>
-    public ConnectionOptionsParameters? Options { get; set; }
+    /// <example>Second</example>
+    public string? ComfortClass { get; set; }
     
     /// <summary>
     /// Requested route of the connection

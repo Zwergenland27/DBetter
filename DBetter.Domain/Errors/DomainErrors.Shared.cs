@@ -11,9 +11,9 @@ public static partial class DomainErrors
             public static Error InFuture => Error.Validation("Birthday.InFuture", "Birthday cannot be in the future");
         }
 
-        public static class Class
+        public static class ComfortClass
         {
-            public static Error Invalid => Error.Validation("Class.Invalid", "The class is invalid");
+            public static Error Invalid => Error.Validation("ComfortClass.Invalid", "The comfort is invalid");
         }
 
         public static class DiscountType
