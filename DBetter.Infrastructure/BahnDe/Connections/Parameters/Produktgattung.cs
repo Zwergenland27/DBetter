@@ -1,7 +1,7 @@
 namespace DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 /// <summary>
-/// Allowed Vehicle type
+/// Means of transport
 /// </summary>
 public enum Produktgattung
 {
@@ -53,5 +53,10 @@ public enum Produktgattung
     /// <summary>
     /// Services requiring telephonic registration
     /// </summary>
-    ANRUFPFLICHTIG
+    ANRUFPFLICHTIG,
+    
+    /// <summary>
+    /// Replacement service
+    /// </summary>
+    ERSATZVERKEHR
 }

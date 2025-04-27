@@ -42,6 +42,11 @@ public class TransportSegmentDto : SegmentDto
     public required string Product { get; set; }
     
     /// <summary>
+    /// Indicates that this is a replacement service
+    /// </summary>
+    public required bool ReplacementService { get; set; }
+    
+    /// <summary>
     /// Line number
     /// </summary>
     /// <remarks>

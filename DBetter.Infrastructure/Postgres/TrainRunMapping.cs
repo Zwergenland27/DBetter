@@ -34,6 +34,8 @@ public class RouteMapping : IEntityTypeConfiguration<RouteEntity>
         {
             tib.Property(x => x.Product);
 
+            tib.Property(x => x.ReplacementService);
+
             tib.Property(x => x.LineNumber)
                 .HasConversion(
                     line => line != null ? line.Value : null,

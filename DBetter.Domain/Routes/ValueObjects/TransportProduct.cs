@@ -25,6 +25,7 @@ public enum TransportProduct
     Underground,
     Tram,
     Bus,
+    ReplacementBus,
     Taxi,
     Unknown
 }

@@ -4,7 +4,7 @@ namespace DBetter.Infrastructure.BahnDe.Shared;
 
 public class RouteInformationFactory
 {
-    private static RouteInformation Create(string fullName)
+    private static RouteInformation Create(string fullName, bool replacementService)
     {
         var information = fullName.Split(' ');
 
@@ -63,15 +63,15 @@ public class RouteInformationFactory
             trainNumber = GetServiceNumber(numberInfo);
         }
         
-        return new RouteInformation(product, trainLine, trainNumber);
+        return new RouteInformation(product, replacementService, trainLine, trainNumber);
     }
 
-    public static List<RouteInformation> Create(string leadingVehicleName, string fullName)
+    public static List<RouteInformation> Create(string leadingVehicleName, string fullName, bool replacementService)
     {
         var fullNames = fullName.Split(" / ")
             .OrderBy(n => !n.Contains(leadingVehicleName))
             .ToList();
-        return fullNames.Select(Create).ToList();
+        return fullNames.Select(name => Create(name, replacementService)).ToList();
     }
     
     private static TransportProduct GetTransportProduct(string info)

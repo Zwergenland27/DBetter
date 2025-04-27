@@ -6,6 +6,7 @@ using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
+using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
@@ -214,7 +215,8 @@ public class ConnectionFactory :
         {
             var routeInformation = RouteInformationFactory.Create(
                 verbindungsabschnitt.Verkehrsmittel.MittelText!, 
-                verbindungsabschnitt.Verkehrsmittel.LangText!)[0];
+                verbindungsabschnitt.Verkehrsmittel.LangText!,
+                verbindungsabschnitt.Verkehrsmittel.ProduktGattung is Produktgattung.ERSATZVERKEHR)[0];
             
             route = new RouteEntity(
                 RouteId.CreateNew(),
@@ -237,6 +239,7 @@ public class ConnectionFactory :
             Operator = RouteInformationFactory.GetOperator(verbindungsabschnitt.Verkehrsmittel!.Zugattribute),
             Destination = station?.Name.Value,
             Product = route.Information.Product.ToString(),
+            ReplacementService = route.Information.ReplacementService,
             Number = route.Information.GetBookingRelevantNumber(),
             BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(
                 verbindungsabschnitt.Verkehrsmittel!.Zugattribute,
