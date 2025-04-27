@@ -13,10 +13,10 @@ public class ConnectionSuggestionsDto
     /// <summary>
     /// Contains pagination reference for earlier connection suggestions
     /// </summary>
-    public required string PageEarlier { get; set; }
+    public required string? PageEarlier { get; set; }
     
     /// <summary>
     /// Contains pagination reference for later connection suggestions
     /// </summary>
-    public required string PageLater { get; set; }
+    public required string? PageLater { get; set; }
 }

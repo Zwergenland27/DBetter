@@ -61,13 +61,13 @@ public static class ParameterExtensions
     {
         var fixedSectionBegin = new TeilstreckenStop
         {
-            ExtId = fixedStartEvaNumber.Value.ToString(),
+            ExtId = fixedStartEvaNumber.Value,
             Zeitpunkt = fixedStartTime.Planned.ToBahnTime()
         };
         
         var fixedSectionEnd = new TeilstreckenStop
         {
-            ExtId = fixedEndEvaNumber.Value.ToString(),
+            ExtId = fixedEndEvaNumber.Value,
             Zeitpunkt = fixedEndTime.Planned.ToBahnTime()
         };
         
