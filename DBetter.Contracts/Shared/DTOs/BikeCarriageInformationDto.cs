@@ -14,10 +14,10 @@ public class BikeCarriageInformationDto
     /// <summary>
     /// Stop index from which the information is valid
     /// </summary>
-    public required int? FromStopIndex { get; set; }
+    public required int FromStopIndex { get; set; }
     
     /// <summary>
     /// Stop index until which the information is valid
     /// </summary>
-    public required int? ToStopIndex { get; set; }
+    public required int ToStopIndex { get; set; }
 }

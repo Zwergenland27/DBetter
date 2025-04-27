@@ -19,7 +19,7 @@ public class GetWithIncreasedTransferTimeParameters : IParameters
     /// <summary>
     /// Start time of the fixed section
     /// </summary>
-    public DateTime? FixedStartTime { get; set; }
+    public string? FixedStartTime { get; set; }
     
     /// <summary>
     /// Internal id of the last station of the fixed section
@@ -29,5 +29,5 @@ public class GetWithIncreasedTransferTimeParameters : IParameters
     /// <summary>
     /// End time of the fixed section
     /// </summary>
-    public DateTime? FixedEndTime { get; set; }
+    public string? FixedEndTime { get; set; }
 }

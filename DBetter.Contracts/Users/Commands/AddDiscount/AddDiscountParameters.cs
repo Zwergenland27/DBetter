@@ -26,10 +26,10 @@ public class AddDiscountParameters : IParameters
     /// <summary>
     /// Utc date of the 
     /// </summary>
-    public DateTime? BoughtAt { get; set; }
+    public string? BoughtAt { get; set; }
     
     /// <summary>
     /// Utc date of expiration
     /// </summary>
-    public DateTime? ValidUntil { get; set; }
+    public string? ValidUntil { get; set; }
 }

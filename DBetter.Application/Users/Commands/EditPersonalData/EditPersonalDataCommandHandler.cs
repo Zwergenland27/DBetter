@@ -27,7 +27,7 @@ public class EditPersonalDataCommandHandler(IUserRepository repository) : IComma
             Firstname = user.Firstname.Value,
             Lastname = user.Lastname.Value,
             Email = user.Email.Value,
-            Birthday = user.Birthday.Utc
+            Birthday = user.Birthday.Utc.ToIso8601()
         };
     }
 }

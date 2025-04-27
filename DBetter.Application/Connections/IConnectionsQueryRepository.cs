@@ -13,7 +13,7 @@ public interface IConnectionsQueryRepository
     Task<ConnectionDto?> GetConnectionWithIncreasedTransferTime(
         ConnectionId id,
         StationId fixedStartStationId,
-        TravelTime fixedStartTime,
+        DateTime fixedStartTime,
         StationId fixedEndStationId,
-        TravelTime fixedEndTime);
+        DateTime fixedEndTime);
 }

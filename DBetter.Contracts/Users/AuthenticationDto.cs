@@ -2,7 +2,7 @@ namespace DBetter.Contracts.Users;
 
 public class AuthenticationDto
 {
-    public required String Token { get; set; }
+    public required string Token { get; set; }
     
-    public required DateTime RefreshTokenExpiration { get; set; }
+    public required string RefreshTokenExpiration { get; set; }
 }

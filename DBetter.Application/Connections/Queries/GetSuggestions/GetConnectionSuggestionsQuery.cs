@@ -21,11 +21,11 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
         
         var departureTime = builder.StructProperty(r => r.DepartureTime)
             .Optional()
-            .Map(p => p.DepartureTime);
+            .Map(p => p.DepartureTime, DateTimeFactory.CreateFromIso8601);
         
         var arrivalTime = builder.StructProperty(r => r.ArrivalTime)
             .Optional()
-            .Map(p => p.ArrivalTime);
+            .Map(p => p.ArrivalTime, DateTimeFactory.CreateFromIso8601);
 
         var passengers = builder.ListProperty(r => r.Passengers)
             .Required()
@@ -69,7 +69,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
 
         var birthday = builder.ClassProperty(r => r.Birthday)
             .Optional()
-            .Map(p => p.Birthday, Birthday.Create);
+            .Map(p => p.Birthday, value => Birthday.Create(DateTimeFactory.CreateFromIso8601(value)));
 
         var age = builder.StructProperty(r => r.Age)
             .Optional()
@@ -97,7 +97,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<ConnectionRe
                 
                 var validUntil = dBuilder.StructProperty(r => r.ValidUntil)
                     .Optional()
-                    .Map(r => r.ValidUntil);
+                    .Map(r => r.ValidUntil, DateTimeFactory.CreateFromIso8601);
                 
                 return dBuilder.Build(() => new PassengerDiscount(type, comfortClass, validUntil));
             });

@@ -29,7 +29,7 @@ public class EditPersonalDataRequestBuilder : IRequestBuilder<EditPersonalDataPa
         
         var birthday = builder.ClassProperty(r => r.Birthday)
             .Optional()
-            .Map(p => p.Birthday, Birthday.Create);
+            .Map(p => p.Birthday, value => Birthday.Create(DateTimeFactory.CreateFromIso8601(value)));
 
         return builder.Build(() => new EditPersonalDataCommand(id, firstname, lastname, email, birthday));
     }

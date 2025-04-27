@@ -17,7 +17,7 @@ public class ConnectionRequestParameters : IParameters
     /// <remarks>
     /// For setting arrival time, please use <see cref="ArrivalTime"/>
     /// </remarks>
-    public DateTime? DepartureTime { get; set; }
+    public string? DepartureTime { get; set; }
     
     /// <summary>
     /// UTC Time of arrival
@@ -25,7 +25,7 @@ public class ConnectionRequestParameters : IParameters
     /// <remarks>
     /// For setting departure time, please use <see cref="DepartureTime"/>
     /// </remarks>
-    public DateTime? ArrivalTime { get; set; }
+    public string? ArrivalTime { get; set; }
     
     /// <summary>
     /// List of the passengers

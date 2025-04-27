@@ -27,5 +27,5 @@ public interface IUserResult
     /// <summary>
     /// Birthday of the user
     /// </summary>
-    public DateTime Birthday { get; set; }
+    public string Birthday { get; set; }
 }

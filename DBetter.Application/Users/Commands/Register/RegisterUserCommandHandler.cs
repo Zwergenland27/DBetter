@@ -31,7 +31,7 @@ public class RegisterUserCommandHandler(IUserRepository repository) : ICommandHa
             Firstname = user.Value.Firstname.Value,
             Lastname = user.Value.Lastname.Value,
             Email = user.Value.Email.Value,
-            Birthday = user.Value.Birthday.Utc
+            Birthday = user.Value.Birthday.Utc.ToIso8601(),
         };
     }
 }

@@ -1,3 +1,4 @@
+using DBetter.Application;
 using DBetter.Application.Users;
 using DBetter.Contracts.Users.Queries.GetMyPassengers;
 using DBetter.Domain.Users.ValueObjects;
@@ -23,12 +24,12 @@ public class UserQueryRepository(DBetterContext context) : IUserQueryRepository
                 Firstname = user.Firstname.Value,
                 Lastname = user.Lastname.Value,
                 Email = user.Email.Value,
-                Birthday = user.Birthday.Utc,
+                Birthday = user.Birthday.Utc.ToIso8601(),
                 Discounts = user.Discounts.Select(discount => new DiscountResult
                 {
                     Type = discount.Type.ToString(),
                     Class = discount.ComfortClass.ToString(),
-                    ValidUntil = discount.ValidUntilUtc
+                    ValidUntil = discount.ValidUntilUtc?.ToIso8601()
                 }).ToList()
             },
             Friends = [],

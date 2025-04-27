@@ -69,9 +69,9 @@ public class ConnectionsQueryRepository(
     public async Task<ConnectionDto?> GetConnectionWithIncreasedTransferTime(
         ConnectionId id,
         StationId fixedStartStationId,
-        TravelTime fixedStartTime,
+        DateTime fixedStartTime,
         StationId fixedEndStationId,
-        TravelTime fixedEndTime)
+        DateTime fixedEndTime)
     {
         var originalConnection = await context.Connections
             .FirstOrDefaultAsync(c => c.Id == id);

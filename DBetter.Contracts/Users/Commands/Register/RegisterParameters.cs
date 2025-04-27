@@ -30,7 +30,7 @@ public class RegisterParameters : IParameters
     /// Birthday of the user
     /// </summary>
     [Required]
-    public DateTime? Birthday { get; set; }
+    public string? Birthday { get; set; }
     
     /// <summary>
     /// Password of the user

@@ -26,11 +26,11 @@ public class AddDiscountRequestBuilder : IRequestBuilder<AddDiscountParameters, 
 
         var boughtAtUtc = builder.StructProperty(r => r.BoughtAtUtc)
             .Required()
-            .Map(p => p.BoughtAt);
+            .Map(p => p.BoughtAt, DateTimeFactory.CreateFromIso8601);
 
         var validUntilUtc = builder.StructProperty(r => r.ValidUntilUtc)
             .Required()
-            .Map(p => p.ValidUntil);
+            .Map(p => p.ValidUntil, DateTimeFactory.CreateFromIso8601);
         
         return builder.Build(() => new AddDiscountCommand(
             userId,

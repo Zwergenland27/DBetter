@@ -8,10 +8,10 @@ public class TravelTimeDto
     /// <summary>
     /// Planned time
     /// </summary>
-    public required DateTime Planned  { get; set; }
+    public required string Planned  { get; set; }
     
     /// <summary>
     /// Real time
     /// </summary>
-    public required DateTime? Real { get; set; }
+    public required string? Real { get; set; }
 }

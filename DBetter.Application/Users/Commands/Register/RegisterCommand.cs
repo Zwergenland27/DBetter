@@ -30,7 +30,7 @@ public class RegisterRequestBuilder : IRequestBuilder<RegisterParameters, Regist
         
         var birthday = builder.ClassProperty(r => r.Birthday)
             .Required()
-            .Map(p => p.Birthday, Birthday.Create);
+            .Map(p => p.Birthday, value => Birthday.Create(DateTimeFactory.CreateFromIso8601(value)));
 
         return builder.Build(() => new RegisterCommand(firstname, lastname, email, password, birthday));
     }

@@ -22,17 +22,17 @@ public class GetWithIncreasedTransferTimeQueryBuilder : IRequestBuilder<GetWithI
             .Required()
             .Map(p => p.FixedStartStationId, StationId.Create);
 
-        var fixedStartTime = builder.ClassProperty(r => r.FixedStartTime)
+        var fixedStartTime = builder.StructProperty(r => r.FixedStartTime)
             .Required()
-            .Map(p => p.FixedStartTime, value => new TravelTime(value, null));
+            .Map(p => p.FixedStartTime, DateTimeFactory.CreateFromIso8601);
         
         var fixedEndEvaNumber = builder.ClassProperty(r => r.FixedEndStationId)
             .Required()
             .Map(p => p.FixedEndStationId, StationId.Create);
 
-        var fixedEndTime = builder.ClassProperty(r => r.FixedEndTime)
+        var fixedEndTime = builder.StructProperty(r => r.FixedEndTime)
             .Required()
-            .Map(p => p.FixedEndTime, value => new TravelTime(value, null));
+            .Map(p => p.FixedEndTime, DateTimeFactory.CreateFromIso8601);
         
         return builder.Build(() => new GetWithIncreasedTransferTimeQuery(
             id,
@@ -46,6 +46,6 @@ public class GetWithIncreasedTransferTimeQueryBuilder : IRequestBuilder<GetWithI
 public record GetWithIncreasedTransferTimeQuery(
     ConnectionId Id,
     StationId FixedStartStationId,
-    TravelTime FixedStartTime,
+    DateTime FixedStartTime,
     StationId FixedEndStationId,
-    TravelTime FixedEndTime) : ICommand<ConnectionDto>;
+    DateTime FixedEndTime) : ICommand<ConnectionDto>;

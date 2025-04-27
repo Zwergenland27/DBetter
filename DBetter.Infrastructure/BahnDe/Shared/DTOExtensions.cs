@@ -1,3 +1,4 @@
+using DBetter.Application;
 using DBetter.Contracts.Shared.DTOs;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
@@ -100,8 +101,8 @@ public static class DTOExtensions
         if(travelTime is null) return null;
 
         return new TravelTimeDto{
-            Planned = travelTime.Planned,
-            Real = travelTime.Real
+            Planned = travelTime.Planned.ToIso8601(),
+            Real = travelTime.Real?.ToIso8601()
         };
     }
 

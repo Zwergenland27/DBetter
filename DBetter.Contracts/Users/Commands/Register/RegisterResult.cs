@@ -7,5 +7,5 @@ public class RegisterResult : IUserResult
     public required string Lastname { get; set; }
     public required string Email { get; set; }
     
-    public required DateTime Birthday { get; set; }
+    public required string Birthday { get; set; }
 }

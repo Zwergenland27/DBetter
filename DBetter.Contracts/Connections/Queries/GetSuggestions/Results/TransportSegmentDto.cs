@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DBetter.Contracts.Shared.DTOs;
 
 namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
@@ -44,6 +45,7 @@ public class TransportSegmentDto : SegmentDto
     /// <summary>
     /// Indicates that this is a replacement service
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public required bool ReplacementService { get; set; }
     
     /// <summary>

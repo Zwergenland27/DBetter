@@ -33,7 +33,7 @@ public class PassengerParameters : IParameters
     /// <remarks>
     /// Either birthday or age must be set
     /// </remarks>
-    public DateTime? Birthday { get; set; }
+    public string? Birthday { get; set; }
     
     /// <summary>
     /// Age of the passenger at the start of the trip

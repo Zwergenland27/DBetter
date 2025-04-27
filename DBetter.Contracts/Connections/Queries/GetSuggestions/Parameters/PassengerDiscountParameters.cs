@@ -19,5 +19,5 @@ public class PassengerDiscountParameters : IParameters
     /// <summary>
     /// Utc date of expiration
     /// </summary>
-    public DateTime? ValidUntil { get; set; }
+    public string? ValidUntil { get; set; }
 }

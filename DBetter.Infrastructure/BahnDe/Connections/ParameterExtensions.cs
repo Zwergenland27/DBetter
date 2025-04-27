@@ -55,20 +55,20 @@ public static class ParameterExtensions
         this ReiseAnfrage bahnRequest,
         string contextId,
         EvaNumber fixedStartEvaNumber,
-        TravelTime fixedStartTime,
+        DateTime fixedStartTime,
         EvaNumber fixedEndEvaNumber,
-        TravelTime fixedEndTime)
+        DateTime fixedEndTime)
     {
         var fixedSectionBegin = new TeilstreckenStop
         {
             ExtId = fixedStartEvaNumber.Value,
-            Zeitpunkt = fixedStartTime.Planned.ToBahnTime()
+            Zeitpunkt = fixedStartTime.ToBahnTime()
         };
         
         var fixedSectionEnd = new TeilstreckenStop
         {
             ExtId = fixedEndEvaNumber.Value,
-            Zeitpunkt = fixedEndTime.Planned.ToBahnTime()
+            Zeitpunkt = fixedEndTime.ToBahnTime()
         };
         
         return new TeilstreckeAnfrage

@@ -6,5 +6,5 @@ public class DiscountResult
     
     public required string Class { get; set; }
     
-    public required DateTime? ValidUntil { get; set; }
+    public required string? ValidUntil { get; set; }
 }

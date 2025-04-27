@@ -1,4 +1,5 @@
 using CleanDomainValidation.Application;
+using DBetter.Application;
 using DBetter.Application.Users.Commands.Login;
 using DBetter.Application.Users.Commands.RefreshJwtToken;
 using DBetter.Application.Users.Commands.Register;
@@ -50,7 +51,7 @@ public static class AuthenticationModule
                     return Results.Ok(new AuthenticationDto()
                     {
                         Token = authData.Item1,
-                        RefreshTokenExpiration = authData.Item2.Expires
+                        RefreshTokenExpiration = authData.Item2.Expires.ToIso8601()
                     });
                 });
             })
@@ -78,7 +79,7 @@ public static class AuthenticationModule
                 return Results.Ok(new AuthenticationDto()
                 {
                     Token = authData.Item1,
-                    RefreshTokenExpiration = authData.Item2.Expires
+                    RefreshTokenExpiration = authData.Item2.Expires.ToIso8601()
                 });
             });
         })
