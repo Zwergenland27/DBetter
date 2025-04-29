@@ -1,4 +1,5 @@
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
+using DBetter.Contracts.Shared.DTOs;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
@@ -177,6 +178,8 @@ public class ConnectionFactory :
             {
                 segments.Add(new WalkingSegmentDto
                 {
+                    DepartureTime = abschnitt.GetDepartureTime().ToDto()!,
+                    ArrivalTime = abschnitt.GetArrivalTime().ToDto()!,
                     Distance = abschnitt.Distanz!.Value,
                     Duration = abschnitt.AbschnittsDauer
                 });
@@ -234,6 +237,8 @@ public class ConnectionFactory :
         
         return new TransportSegmentDto
         {
+            DepartureTime = verbindungsabschnitt.GetDepartureTime().ToDto()!,
+            ArrivalTime = verbindungsabschnitt.GetArrivalTime().ToDto()!,
             RouteId = route!.Id.Value.ToString(),
             Demand = verbindungsabschnitt.GetDemand().ToDto(),
             Operator = RouteInformationFactory.GetOperator(verbindungsabschnitt.Verkehrsmittel!.Zugattribute),

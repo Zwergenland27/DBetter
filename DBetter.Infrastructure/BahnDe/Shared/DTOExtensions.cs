@@ -67,6 +67,13 @@ public static class DTOExtensions
         );
     }
 
+    public static TravelTime GetDepartureTime(this VerbindungsAbschnitt verbindungsabschnitt)
+    {
+        return new TravelTime(
+            verbindungsabschnitt.AbfahrtsZeitpunkt.ConvertToDateTime()!.Value,
+            verbindungsabschnitt.EzAbfahrtsZeitpunkt.ConvertToDateTime());
+    }
+
     public static TravelTime? GetArrivalTime(this IRouteStop stop)
     {
         if(stop.AnkunftsZeitpunkt is null) return null;
@@ -75,6 +82,13 @@ public static class DTOExtensions
             stop.AnkunftsZeitpunkt.ConvertToDateTime()!.Value,
             stop.EzAnkunftsZeitpunkt.ConvertToDateTime()
         );
+    }
+    
+    public static TravelTime GetArrivalTime(this VerbindungsAbschnitt verbindungsabschnitt)
+    {
+        return new TravelTime(
+            verbindungsabschnitt.AnkunftsZeitpunkt.ConvertToDateTime()!.Value,
+            verbindungsabschnitt.EzAnkunftsZeitpunkt.ConvertToDateTime());
     }
 
     public static bool IsAdditional(this IHasMessage stop)
