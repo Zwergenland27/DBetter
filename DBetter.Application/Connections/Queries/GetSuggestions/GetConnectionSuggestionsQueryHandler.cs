@@ -1,8 +1,7 @@
 using CleanDomainValidation.Domain;
 using DBetter.Application.Abstractions.Messaging;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
-using DBetter.Domain.ConnectionRequests;
-using DBetter.Domain.Connections;
+using DBetter.Domain.Errors;
 
 namespace DBetter.Application.Connections.Queries.GetSuggestions;
 
@@ -10,16 +9,8 @@ public class GetConnectionSuggestionsQueryHandler(IConnectionsQueryRepository re
 {
     public async Task<CanFail<ConnectionSuggestionsDto>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
-        var result = ConnectionRequest.Create(
-            request.OwnerId,
-            request.DepartureTime,
-            request.ArrivalTime,
-            request.Passengers,
-            request.ComfortClass,
-            request.Route);
-
-        if (result.HasFailed) return result.Errors;
-        
-        return await repository.GetConnectionSuggestionsAsync(result.Value, request.Page);
+        var suggestions = await repository.GetConnectionSuggestionsAsync(request.Id, request.Page);
+        if (suggestions is null) return DomainErrors.ConnectionRequest.NotFound;
+        return suggestions;
     }
 }

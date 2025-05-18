@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using CleanDomainValidation.Application;
 
-namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
+namespace DBetter.Contracts.Connections.Queries.CreateRequest.Parameters;
 
 public class PassengerParameters : IParameters
 {

@@ -10,6 +10,11 @@ public static partial class DomainErrors
         public static Error NoTimeSpecified => Error.Validation(
             "ConnectionRequest.NoTimeSpecified",
             "Either the departure or the arrival time must be set");
+        
+        public static Error NotFound => Error.NotFound(
+            "ConnectionRequest.NotFound",
+            "A connection request with the specified id was not found");
+        
         public static class Id
         {
             public static Error Invalid(string value) => Error.Validation("ConnectionRequest.Id.Invalid", $"{value} is no valid guid.");

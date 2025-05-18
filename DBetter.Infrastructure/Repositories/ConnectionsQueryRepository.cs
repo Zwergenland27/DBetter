@@ -1,6 +1,7 @@
 using DBetter.Application.Connections;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Shared;
@@ -10,6 +11,7 @@ using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
+using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
@@ -23,17 +25,32 @@ public class ConnectionsQueryRepository(
     ConnectionService connectionService,
     ServiceCategoryProvider serviceCategoryProvider) : IConnectionsQueryRepository
 {
-    public async Task<ConnectionSuggestionsDto> GetConnectionSuggestionsAsync(ConnectionRequest request, string? page)
+    public async Task<ConnectionSuggestionsDto> GetConnectionSuggestionsAsync(ConnectionRequest request)
     {
         var requestStationEvas = await context.Stations
             .AsNoTracking()
             .Where(s => request.GetStops().Contains(s.Id))
             .ToDictionaryAsync(s => s.Id, s => s.EvaNumber);
 
-        var bahnConnectionRequest = request.ToRequest(requestStationEvas, page);
-        var bahnConnectionRequestEntity = new BahnConnectionRequestEntity(request.Id, bahnConnectionRequest);
+        var anfrage = request.ToRequest(requestStationEvas);
+        var anfrageEntity = new BahnConnectionRequestEntity(request.Id, anfrage);
+        await context.BahnConnectionRequests.AddAsync(anfrageEntity);
+        return await GetConnectionSuggestionsAsync(request.Id, anfrage);
+    }
+
+    public async Task<ConnectionSuggestionsDto?> GetConnectionSuggestionsAsync(ConnectionRequestId id, string? page)
+    {
+        var anfrage = await context.BahnConnectionRequests
+            .FirstOrDefaultAsync(s => s.Id == id);
+        if(anfrage is null) return null;
         
-        var fahrplan = await connectionService.GetSuggestionsAsync(bahnConnectionRequest);
+        anfrage.Request.PagingReference = page;
+        return await GetConnectionSuggestionsAsync(id, anfrage.Request);
+    }
+
+    private async Task<ConnectionSuggestionsDto> GetConnectionSuggestionsAsync(ConnectionRequestId id, ReiseAnfrage anfrage)
+    {
+        var fahrplan = await connectionService.GetSuggestionsAsync(anfrage);
 
         var journeyIds = fahrplan.GetJourneyIds();
         var stopEvas = fahrplan.GetEvaNumbers(journeyIds);
@@ -50,7 +67,7 @@ public class ConnectionsQueryRepository(
 
         var connectionFactory = ConnectionFactory
             .CreateFrom(fahrplan)
-            .WithRequestId(request.Id)
+            .WithRequestId(id)
             .WithExistingRoutes(existingRoutes)
             .WithExistingStations(existingStations)
             .UseServiceCategoryProvider(serviceCategoryProvider);
@@ -60,14 +77,13 @@ public class ConnectionsQueryRepository(
             .Select(tr => tr.Id)
             .ToList());
         
-        await context.BahnConnectionRequests.AddAsync(bahnConnectionRequestEntity);
         await context.Stations.AddRangeAsync(connectionFactory.StationsToCreate);
         await context.Routes.AddRangeAsync(connectionFactory.RoutesToCreate);
         await context.Connections.AddRangeAsync(connectionFactory.ConnectionsToCreate);
         
         return connectionFactory.SuggestionsDto;
     }
-    
+
     public async Task<ConnectionDto?> GetConnectionWithIncreasedTransferTime(
         ConnectionId id,
         StationId fixedStartStationId,

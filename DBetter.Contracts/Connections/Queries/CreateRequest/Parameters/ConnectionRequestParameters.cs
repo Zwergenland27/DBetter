@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using CleanDomainValidation.Application;
 
-namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
+namespace DBetter.Contracts.Connections.Queries.CreateRequest.Parameters;
 
 public class ConnectionRequestParameters : IParameters
 {
@@ -42,10 +42,4 @@ public class ConnectionRequestParameters : IParameters
     /// Requested route of the connection
     /// </summary>
     public ConnectionRouteParameters? Route { get; set; }
-    
-    /// <summary>
-    /// Pagination reference
-    /// </summary>
-    [JsonIgnore]
-    public string? Page { get; set; }
 }

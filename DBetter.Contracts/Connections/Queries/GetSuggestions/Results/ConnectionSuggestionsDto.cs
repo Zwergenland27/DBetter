@@ -6,6 +6,10 @@ namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 public class ConnectionSuggestionsDto
 {
     /// <summary>
+    /// Id of the connection request
+    /// </summary>
+    public required string RequestId { get; set; }
+    /// <summary>
     /// Suggested connections
     /// </summary>
     public required List<ConnectionDto> Connections { get; set; }

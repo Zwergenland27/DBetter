@@ -1,4 +1,3 @@
-using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;

@@ -1,6 +1,6 @@
 using CleanDomainValidation.Application;
 
-namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Parameters;
+namespace DBetter.Contracts.Connections.Queries.CreateRequest.Parameters;
 
 public class ConnectionRouteParameters : IParameters
 {

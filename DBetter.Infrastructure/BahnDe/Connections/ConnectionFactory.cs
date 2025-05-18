@@ -158,6 +158,7 @@ public class ConnectionFactory :
         
         SuggestionsDto = new ConnectionSuggestionsDto
         {
+            RequestId = _requestId!.Value.ToString(),
             Connections = GetConnections(),
             PageEarlier = _fahrplan!.VerbindungReference.Earlier,
             PageLater = _fahrplan!.VerbindungReference.Later,

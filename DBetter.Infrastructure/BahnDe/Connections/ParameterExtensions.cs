@@ -29,7 +29,7 @@ public static class ParameterExtensions
 
         return stationIds;
     }
-    public static ReiseAnfrage ToRequest(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas, string? page)
+    public static ReiseAnfrage ToRequest(this ConnectionRequest request, Dictionary<StationId, EvaNumber> requestStationEvas)
     {
         return new ReiseAnfrage
         {
@@ -47,7 +47,7 @@ public static class ParameterExtensions
             BikeCarriage = request.AnyBikeCarriage(),
             NurDeutschlandTicketVerbindungen = false,
             Zwischenhalte = request.GetZwischenhalte(requestStationEvas),
-            PagingReference = page,
+            PagingReference = null,
         };
     }
 
