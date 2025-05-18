@@ -35,7 +35,6 @@ public static class DependencyInjection
         services.AddScoped<IStationQueryRepository, StationQueryRepository>();
         services.AddScoped<IConnectionsQueryRepository, ConnectionsQueryRepository>();
         services.AddScoped<IRouteQueryRepository, RouteQueryRepository>();
-        services.AddSingleton<ServiceCategoryProvider>();
         return services;
     }
 }

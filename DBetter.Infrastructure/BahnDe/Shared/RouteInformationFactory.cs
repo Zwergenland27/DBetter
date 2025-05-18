@@ -1,37 +1,38 @@
+using System.ComponentModel;
+using System.Threading.RateLimiting;
 using DBetter.Domain.Routes.ValueObjects;
-using DBetter.Domain.ServiceCategories;
-using DBetter.Infrastructure.Repositories;
+using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
 public class RouteInformationFactory
 {
     
-    private static RouteInformation Create(ServiceCategoryProvider serviceCategoryProvider, string fullName, bool replacementService)
+    private static ServiceInformation Create(Produktgattung gattung, string fullName)
     {
         var information = fullName.Split(' ');
 
-        string serviceCategory = "";
+        string productClass = "";
         string? trainLineInfo = null;
         string? numberInfo = null;
         
         //Currently just ferry
         if (information.Length == 1)
         {
-            serviceCategory = information[0];
+            productClass = information[0];
         }
         
         //Trains without dedicated train number
         if (information.Length == 2 && information[0].All(char.IsLetter))
         {
-            serviceCategory = information[0];
+            productClass = information[0];
             trainLineInfo = information[1];
         }
         
         //Trains with train number
         if (information.Length == 2 && information[0].Any(char.IsDigit))
         {
-            serviceCategory = new string(information[0].Where(char.IsLetter).ToArray());
+            productClass = new string(information[0].Where(char.IsLetter).ToArray());
             trainLineInfo = new string(information[0].Where(char.IsDigit).ToArray());
             numberInfo = new string(information[1].Where(char.IsDigit).ToArray());
         }
@@ -39,7 +40,7 @@ public class RouteInformationFactory
         //Trains with train number and without any additional naming
         if (information.Length == 3 && information[1].All(char.IsDigit))
         {
-            serviceCategory = information[0];
+            productClass = information[0];
             trainLineInfo = information[1];
             numberInfo = new string(information[2].Where(char.IsDigit).ToArray());
         }
@@ -47,7 +48,7 @@ public class RouteInformationFactory
         //Trains with train number that contain an additional name (for example TL for trilex)
         if (information.Length == 3 && information[1].Any(char.IsLetter))
         {
-            serviceCategory = new string(information[1].Where(char.IsLetter).ToArray());
+            productClass = new string(information[1].Where(char.IsLetter).ToArray());
             trainLineInfo = new string(information[1].Where(char.IsDigit).ToArray());
             numberInfo = new string(information[2].Where(char.IsDigit).ToArray());
         }
@@ -55,7 +56,7 @@ public class RouteInformationFactory
         LineNumber? trainLine = null;
         ServiceNumber? trainNumber;
         
-        if (serviceCategoryProvider.UseServiceNumberAsLineNumber(serviceCategory))
+        if (trainLineInfo is null)
         {
             trainNumber = GetServiceNumber(trainLineInfo);
         }
@@ -65,21 +66,21 @@ public class RouteInformationFactory
             trainNumber = GetServiceNumber(numberInfo);
         }
         
-        return new RouteInformation(serviceCategory, replacementService, trainLine, trainNumber);
+        return new ServiceInformation(gattung.AsDomain(), productClass, trainLine, trainNumber);
     }
 
-    public static List<RouteInformation> Create(ServiceCategoryProvider serviceCategoryProvider, string leadingVehicleName, string fullName, bool replacementService)
+    public static List<ServiceInformation> Create(Produktgattung transportCategory, string leadingVehicleName, string fullName)
     {
         var fullNames = fullName.Split(" / ")
             .OrderBy(n => !n.Contains(leadingVehicleName))
             .ToList();
-        return fullNames.Select(name => Create(serviceCategoryProvider, name, replacementService)).ToList();
+        return fullNames.Select(name => Create(transportCategory, name)).ToList();
     }
     
-    public static CateringInformation CreateCateringInformation(ServiceCategoryProvider serviceCategoryProvider, List<Zugattribut>  zugattribute, string serviceCategory, IEnumerable<IRouteStop> stopInfos)
+    public static CateringInformation CreateCateringInformation(List<Zugattribut>  zugattribute, IEnumerable<IRouteStop> stopInfos)
     {
         string? validityText = null;
-        CateringType type = CateringType.NoInfo;
+        CateringType type = CateringType.None;
         
         if (zugattribute.Any(a => a.Key is "BR"))
         {
@@ -109,11 +110,6 @@ public class RouteInformationFactory
         {
             type = CateringType.None;
             validityText = zugattribute.First(a => a.Key is "KG").Teilstreckenhinweis;
-        }
-
-        if (serviceCategoryProvider.CateringExpected(serviceCategory))
-        {
-            type =  CateringType.None;
         }
 
         var partialSectionIndices = GetPartialSectionValidityInfos(validityText, stopInfos);

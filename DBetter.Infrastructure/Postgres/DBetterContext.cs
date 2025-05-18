@@ -1,5 +1,4 @@
 using DBetter.Domain.ConnectionRequests;
-using DBetter.Domain.ServiceCategories;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
@@ -13,8 +12,6 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     public DbSet<User> Users { get; set; }
     
     public DbSet<Station> Stations { get; set; }
-    
-    public DbSet<ServiceCategory> ServiceCategories { get; set; }
     
     public DbSet<ConnectionRequest> ConnectionRequests { get; set; }
     

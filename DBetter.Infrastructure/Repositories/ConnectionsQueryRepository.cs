@@ -2,28 +2,20 @@ using DBetter.Application.Connections;
 using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
-using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.ValueObjects;
-using DBetter.Domain.Shared;
-using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe.Connections;
-using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
-using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
-using JourneyId = DBetter.Infrastructure.BahnDe.Routes.DTOs.JourneyId;
-using TravelTime = DBetter.Domain.Routes.ValueObjects.TravelTime;
 
 namespace DBetter.Infrastructure.Repositories;
 
 public class ConnectionsQueryRepository(
     DBetterContext context,
-    ConnectionService connectionService,
-    ServiceCategoryProvider serviceCategoryProvider) : IConnectionsQueryRepository
+    ConnectionService connectionService) : IConnectionsQueryRepository
 {
     public async Task<ConnectionSuggestionsDto> GetConnectionSuggestionsAsync(ConnectionRequest request)
     {
@@ -69,8 +61,7 @@ public class ConnectionsQueryRepository(
             .CreateFrom(fahrplan)
             .WithRequestId(id)
             .WithExistingRoutes(existingRoutes)
-            .WithExistingStations(existingStations)
-            .UseServiceCategoryProvider(serviceCategoryProvider);
+            .WithExistingStations(existingStations);
         
         RouteScraperJob.AddRoutes(connectionFactory.RoutesToCreate
             .Where(tr => tr.ScrapingRequired)
@@ -126,13 +117,12 @@ public class ConnectionsQueryRepository(
         var existingStations = await context.Stations
             .Where(s => stopEvas.Contains(s.EvaNumber))
             .ToDictionaryAsync(s => s.EvaNumber, s => s);
-        
+
         var connectionFactory = ConnectionFactory
             .CreateFrom(teilstrecke)
             .WithRequestId(originalConnection.RequestId)
             .WithExistingRoutes(existingRoutes)
-            .WithExistingStations(existingStations)
-            .UseServiceCategoryProvider(serviceCategoryProvider);
+            .WithExistingStations(existingStations);
         
         RouteScraperJob.AddRoutes(connectionFactory.RoutesToCreate
             .Where(tr => tr.ScrapingRequired)

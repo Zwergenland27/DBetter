@@ -6,13 +6,17 @@ using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
-using DBetter.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
 public static class DTOExtensions
 {
+    private static readonly List<string> _ignoredProductClasses =
+    [
+        "Bus",
+        "STR",
+        "Fähre"
+    ];
     public static List<PassengerInfo> GetDomainMessages(this IHasMessage obj)
     {
         return [];
@@ -21,6 +25,25 @@ public static class DTOExtensions
     public static List<RoutePassengerInformation> GetDomainSectionMessages(this IHasMessage obj)
     {
         return [];
+    }
+    
+    public static TransportCategory AsDomain(this Produktgattung gattung)
+    {
+        return gattung switch
+        {
+            Produktgattung.ICE => TransportCategory.HighSpeedTrain,
+            Produktgattung.EC_IC => TransportCategory.FastTrain,
+            Produktgattung.IR => TransportCategory.FastTrain,
+            Produktgattung.REGIONAL => TransportCategory.RegionalTrain,
+            Produktgattung.SBAHN => TransportCategory.SuburbanTrain,
+            Produktgattung.BUS => TransportCategory.Bus,
+            Produktgattung.SCHIFF => TransportCategory.Boat,
+            Produktgattung.UBAHN => TransportCategory.UndergroundTrain,
+            Produktgattung.TRAM => TransportCategory.Tram,
+            Produktgattung.ERSATZVERKEHR => TransportCategory.Replacement,
+            Produktgattung.ANRUFPFLICHTIG => TransportCategory.CallService,
+            _ => throw new InvalidDataException()
+        };
     }
     
     public static DateTime? ConvertToDateTime(this string? bahnDateString)
@@ -159,15 +182,21 @@ public static class DTOExtensions
         return new StopIndex(stop.RouteIdx);
     }
 
-    public static string? GetBookingRelevantNumber(this RouteInformation information, ServiceCategoryProvider serviceCategoryProvider){
-        if(serviceCategoryProvider.UseServiceNumberAsLineNumber(information.ServiceCategory)){
-            return information.ServiceNumber!.Value.ToString();
+    public static string? GetLine(this ServiceInformation information)
+    {
+        if (information.LineNumber is null && information.ServiceNumber is null) return null;
+        
+        var line = information.LineNumber is not null ? information.LineNumber.Value : information.ServiceNumber!.Value.ToString();
+
+        if (!_ignoredProductClasses.Contains(information.ProductClass))
+        {
+            line = $"{information.ProductClass} {line}";
         }
 
-        return information.LineNumber?.Value;
+        return line;
     }
 
-        public static ComfortClass ToComfortClass(this Klasse klasse)
+    public static ComfortClass ToComfortClass(this Klasse klasse)
     {
         return klasse switch
         {

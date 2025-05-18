@@ -1,9 +1,6 @@
 using DBetter.Domain.Routes.ValueObjects;
-using DBetter.Domain.Stations.ValueObjects;
-using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
-using DBetter.Infrastructure.BahnDe.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -32,9 +29,9 @@ public class RouteMapping : IEntityTypeConfiguration<RouteEntity>
         
         builder.OwnsOne(x => x.Information, tib =>
         {
-            tib.Property(x => x.ServiceCategory);
+            tib.Property(x => x.ProductClass);
 
-            tib.Property(x => x.ReplacementService);
+            tib.Property(x => x.TransportCategory);
 
             tib.Property(x => x.LineNumber)
                 .HasConversion(

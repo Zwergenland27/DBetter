@@ -9,8 +9,7 @@ namespace DBetter.Infrastructure.Repositories;
 
 public class RouteQueryRepository(
     DBetterContext context,
-    RouteService service,
-    ServiceCategoryProvider serviceCategoryProvider) : IRouteQueryRepository
+    RouteService service) : IRouteQueryRepository
 {
     public async Task<RouteDto?> GetAsync(RouteId id)
     {
@@ -34,8 +33,7 @@ public class RouteQueryRepository(
 
         var routeFactory = RouteFactory.Create(fahrt)
             .WithExistingInformation(routeInfos)
-            .WithExistingStations(existingStations)
-            .UseServiceCategoryProvider(serviceCategoryProvider);
+            .WithExistingStations(existingStations);
         
         await context.Stations.AddRangeAsync(routeFactory.StationsToCreate);
 

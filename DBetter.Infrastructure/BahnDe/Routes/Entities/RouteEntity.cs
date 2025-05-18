@@ -10,7 +10,7 @@ public class RouteEntity
     
     public JourneyId JourneyId { get; private set; }
     
-    public RouteInformation Information { get; private set; }
+    public ServiceInformation Information { get; private set; }
     
     /// <summary>
     /// Indicates that some information about the train run are missing and should be scraped
@@ -27,7 +27,7 @@ public class RouteEntity
     public RouteEntity(
         RouteId id,
         JourneyId journeyId,
-        RouteInformation information)
+        ServiceInformation information)
     {
         Id = id;
         JourneyId = journeyId;

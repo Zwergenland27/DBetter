@@ -37,25 +37,16 @@ public class TransportSegmentDto : SegmentDto
     public required string? Destination { get; set; }
     
     /// <summary>
-    /// The transport service category
+    /// The transport category
     /// </summary>
-    /// <example>RE</example>
-    public required string ServiceCategory { get; set; }
-    
-    /// <summary>
-    /// Indicates that this is a replacement service
-    /// </summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public required bool ReplacementService { get; set; }
+    /// <example>HighSpeedTrains</example>
+    public required string TransportCategory { get; set; }
     
     /// <summary>
     /// Line number
     /// </summary>
-    /// <remarks>
-    /// For long distance trains the train number will be used
-    /// </remarks>
-    /// <example>2</example>
-    public required string? Number { get; set; }
+    /// <example>RE 2</example>
+    public required string? Line { get; set; }
     
     /// <summary>
     /// Information about bike carriage

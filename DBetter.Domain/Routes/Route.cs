@@ -18,7 +18,7 @@ public class Route : AggregateRoot<RouteId>
     
     public BikeCarriageInformation BikeCarriage { get; private init; }
     
-    public RouteInformation RouteInfos { get; private init; }
+    public ServiceInformation ServiceInfos { get; private init; }
     
     public IReadOnlyList<Stop> Stops => _stops.AsReadOnly();
     
@@ -27,13 +27,13 @@ public class Route : AggregateRoot<RouteId>
     public Route(
         RouteId id,
         List<RoutePassengerInformation> messages,
-        RouteInformation routeInfos,
+        ServiceInformation serviceInfos,
         CateringInformation catering,
         BikeCarriageInformation bikeCarriage,
         List<Stop> stops) : base(id)
     {
         _messages = messages;
-        RouteInfos = routeInfos;
+        ServiceInfos = serviceInfos;
         Catering = catering;
         BikeCarriage = bikeCarriage;
         _stops = stops;
