@@ -11,6 +11,7 @@ using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
+using DBetter.Infrastructure.Repositories;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
@@ -25,7 +26,12 @@ public interface IConnectionsExistingRoutesSelectionStage
 
 public interface IConnectionsExistingStationsSelectionStage
 {
-    IConnectionsFactory WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
+    IConnectionsServiceCategoryProviderSelectionStage WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
+}
+
+public interface IConnectionsServiceCategoryProviderSelectionStage
+{
+    IConnectionsFactory UseServiceCategoryProvider(ServiceCategoryProvider serviceCategoryProvider);
 }
 
 public interface IConnectionsFactory {
@@ -49,7 +55,12 @@ public interface IConnectionExistingRoutesSelectionStage
 
 public interface IConnectionExistingStationsSelectionStage
 {
-    IConnectionFactory WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
+    IConnectionServiceCategoryProviderSelectionStage WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
+}
+
+public interface IConnectionServiceCategoryProviderSelectionStage
+{
+    IConnectionFactory UseServiceCategoryProvider(ServiceCategoryProvider serviceCategoryProvider);
 }
 
 public interface IConnectionFactory {
@@ -63,9 +74,10 @@ public interface IConnectionFactory {
 }
 
 public class ConnectionFactory :
-    IConnectionsRequestIdSelectionStage, IConnectionsExistingRoutesSelectionStage, IConnectionsExistingStationsSelectionStage, IConnectionsFactory,
-    IConnectionRequestIdSelectionStage, IConnectionExistingRoutesSelectionStage, IConnectionExistingStationsSelectionStage, IConnectionFactory
+    IConnectionsRequestIdSelectionStage, IConnectionsExistingRoutesSelectionStage, IConnectionsExistingStationsSelectionStage, IConnectionsServiceCategoryProviderSelectionStage, IConnectionsFactory,
+    IConnectionRequestIdSelectionStage, IConnectionExistingRoutesSelectionStage, IConnectionExistingStationsSelectionStage, IConnectionServiceCategoryProviderSelectionStage,  IConnectionFactory
 {
+    private ServiceCategoryProvider _serviceCategories;
     private List<Station> _stationsToCreate = [];
     private List<RouteEntity> _routesToCreate = [];
     private List<ConnectionEntity> _connectionsToCreate = [];
@@ -128,23 +140,36 @@ public class ConnectionFactory :
         return this;
     }
 
-    IConnectionsFactory IConnectionsExistingStationsSelectionStage.WithExistingStations(Dictionary<EvaNumber, Station> existingStations)
+    IConnectionsServiceCategoryProviderSelectionStage IConnectionsExistingStationsSelectionStage.WithExistingStations(Dictionary<EvaNumber, Station> existingStations)
     {
         _existingStations = existingStations;
+        return this;
+    }
 
+    IConnectionServiceCategoryProviderSelectionStage IConnectionExistingStationsSelectionStage.WithExistingStations(Dictionary<EvaNumber, Station> existingStations){
+        _existingStations = existingStations;
+        
+        return this;
+    }
+
+    IConnectionsFactory IConnectionsServiceCategoryProviderSelectionStage.UseServiceCategoryProvider(ServiceCategoryProvider serviceCategoryProvider)
+    {
+        _serviceCategories = serviceCategoryProvider;
+        
         SuggestionsDto = new ConnectionSuggestionsDto
         {
             Connections = GetConnections(),
             PageEarlier = _fahrplan!.VerbindungReference.Earlier,
             PageLater = _fahrplan!.VerbindungReference.Later,
         };
-        
+
         return this;
     }
 
-    IConnectionFactory IConnectionExistingStationsSelectionStage.WithExistingStations(Dictionary<EvaNumber, Station> existingStations){
-        _existingStations = existingStations;
-
+    IConnectionFactory IConnectionServiceCategoryProviderSelectionStage.UseServiceCategoryProvider(ServiceCategoryProvider serviceCategoryProvider)
+    {
+        _serviceCategories = serviceCategoryProvider;
+        
         ConnectionDto = ToDto(_teilstrecke!.Verbindung);
         return this;
     }
@@ -217,6 +242,7 @@ public class ConnectionFactory :
         if (!routeExists)
         {
             var routeInformation = RouteInformationFactory.Create(
+                _serviceCategories,
                 verbindungsabschnitt.Verkehrsmittel.MittelText!, 
                 verbindungsabschnitt.Verkehrsmittel.LangText!,
                 verbindungsabschnitt.Verkehrsmittel.ProduktGattung is Produktgattung.ERSATZVERKEHR)[0];
@@ -243,17 +269,18 @@ public class ConnectionFactory :
             Demand = verbindungsabschnitt.GetDemand().ToDto(),
             Operator = RouteInformationFactory.GetOperator(verbindungsabschnitt.Verkehrsmittel!.Zugattribute),
             Destination = station?.Name.Value,
-            Product = route.Information.Product.ToString(),
+            ServiceCategory = route.Information.ServiceCategory,
             ReplacementService = route.Information.ReplacementService,
-            Number = route.Information.GetBookingRelevantNumber(),
+            Number = route.Information.GetBookingRelevantNumber(_serviceCategories),
             BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(
                 verbindungsabschnitt.Verkehrsmittel!.Zugattribute,
                 verbindungsabschnitt.HimMeldungen,
                 verbindungsabschnitt.Halte)
                 .ToDto(),
             Catering = RouteInformationFactory.CreateCateringInformation(
-                verbindungsabschnitt.Verkehrsmittel!.Zugattribute,
-                route.Information.Product,
+                    _serviceCategories,
+                verbindungsabschnitt.Verkehrsmittel.Zugattribute,
+                route.Information.ServiceCategory,
                 verbindungsabschnitt.Halte
                 )
                 .ToDto(),

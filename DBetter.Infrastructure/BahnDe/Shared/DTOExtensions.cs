@@ -6,6 +6,7 @@ using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
+using DBetter.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
@@ -158,12 +159,12 @@ public static class DTOExtensions
         return new StopIndex(stop.RouteIdx);
     }
 
-    public static string GetBookingRelevantNumber(this RouteInformation information){
-        if(RouteInformationFactory.ServiceNumberIsLineNumber(information.Product)){
+    public static string? GetBookingRelevantNumber(this RouteInformation information, ServiceCategoryProvider serviceCategoryProvider){
+        if(serviceCategoryProvider.UseServiceNumberAsLineNumber(information.ServiceCategory)){
             return information.ServiceNumber!.Value.ToString();
         }
 
-        return information.LineNumber!.Value;
+        return information.LineNumber?.Value;
     }
 
         public static ComfortClass ToComfortClass(this Klasse klasse)

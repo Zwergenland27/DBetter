@@ -37,10 +37,10 @@ public class TransportSegmentDto : SegmentDto
     public required string? Destination { get; set; }
     
     /// <summary>
-    /// The transport product
+    /// The transport service category
     /// </summary>
-    /// <example>RegionalExpress</example>
-    public required string Product { get; set; }
+    /// <example>RE</example>
+    public required string ServiceCategory { get; set; }
     
     /// <summary>
     /// Indicates that this is a replacement service
@@ -55,7 +55,7 @@ public class TransportSegmentDto : SegmentDto
     /// For long distance trains the train number will be used
     /// </remarks>
     /// <example>2</example>
-    public required string Number { get; set; }
+    public required string? Number { get; set; }
     
     /// <summary>
     /// Information about bike carriage

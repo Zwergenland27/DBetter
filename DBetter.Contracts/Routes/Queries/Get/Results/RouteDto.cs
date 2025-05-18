@@ -23,8 +23,8 @@ public class RouteDto {
     /// <summary>
     /// The transport product
     /// </summary>
-    /// <example>RegionalExpress</example>
-    public required string Product { get; set; }
+    /// <example>RE</example>
+    public required string ServiceCategory { get; set; }
     
     /// <summary>
     /// Stops of the route

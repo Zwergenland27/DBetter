@@ -32,7 +32,7 @@ public class RouteMapping : IEntityTypeConfiguration<RouteEntity>
         
         builder.OwnsOne(x => x.Information, tib =>
         {
-            tib.Property(x => x.Product);
+            tib.Property(x => x.ServiceCategory);
 
             tib.Property(x => x.ReplacementService);
 

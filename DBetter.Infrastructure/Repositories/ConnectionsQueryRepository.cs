@@ -20,7 +20,8 @@ namespace DBetter.Infrastructure.Repositories;
 
 public class ConnectionsQueryRepository(
     DBetterContext context,
-    ConnectionService connectionService) : IConnectionsQueryRepository
+    ConnectionService connectionService,
+    ServiceCategoryProvider serviceCategoryProvider) : IConnectionsQueryRepository
 {
     public async Task<ConnectionSuggestionsDto> GetConnectionSuggestionsAsync(ConnectionRequest request, string? page)
     {
@@ -51,7 +52,8 @@ public class ConnectionsQueryRepository(
             .CreateFrom(fahrplan)
             .WithRequestId(request.Id)
             .WithExistingRoutes(existingRoutes)
-            .WithExistingStations(existingStations);
+            .WithExistingStations(existingStations)
+            .UseServiceCategoryProvider(serviceCategoryProvider);
         
         RouteScraperJob.AddRoutes(connectionFactory.RoutesToCreate
             .Where(tr => tr.ScrapingRequired)
@@ -113,7 +115,8 @@ public class ConnectionsQueryRepository(
             .CreateFrom(teilstrecke)
             .WithRequestId(originalConnection.RequestId)
             .WithExistingRoutes(existingRoutes)
-            .WithExistingStations(existingStations);
+            .WithExistingStations(existingStations)
+            .UseServiceCategoryProvider(serviceCategoryProvider);
         
         RouteScraperJob.AddRoutes(connectionFactory.RoutesToCreate
             .Where(tr => tr.ScrapingRequired)

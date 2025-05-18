@@ -1,34 +1,37 @@
 using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.ServiceCategories;
+using DBetter.Infrastructure.Repositories;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
 public class RouteInformationFactory
 {
-    private static RouteInformation Create(string fullName, bool replacementService)
+    
+    private static RouteInformation Create(ServiceCategoryProvider serviceCategoryProvider, string fullName, bool replacementService)
     {
         var information = fullName.Split(' ');
 
-        string productInfo = "";
+        string serviceCategory = "";
         string? trainLineInfo = null;
         string? numberInfo = null;
         
         //Currently just ferry
         if (information.Length == 1)
         {
-            productInfo = information[0];
+            serviceCategory = information[0];
         }
         
         //Trains without dedicated train number
         if (information.Length == 2 && information[0].All(char.IsLetter))
         {
-            productInfo = information[0];
+            serviceCategory = information[0];
             trainLineInfo = information[1];
         }
         
         //Trains with train number
         if (information.Length == 2 && information[0].Any(char.IsDigit))
         {
-            productInfo = new string(information[0].Where(char.IsLetter).ToArray());
+            serviceCategory = new string(information[0].Where(char.IsLetter).ToArray());
             trainLineInfo = new string(information[0].Where(char.IsDigit).ToArray());
             numberInfo = new string(information[1].Where(char.IsDigit).ToArray());
         }
@@ -36,7 +39,7 @@ public class RouteInformationFactory
         //Trains with train number and without any additional naming
         if (information.Length == 3 && information[1].All(char.IsDigit))
         {
-            productInfo = information[0];
+            serviceCategory = information[0];
             trainLineInfo = information[1];
             numberInfo = new string(information[2].Where(char.IsDigit).ToArray());
         }
@@ -44,16 +47,15 @@ public class RouteInformationFactory
         //Trains with train number that contain an additional name (for example TL for trilex)
         if (information.Length == 3 && information[1].Any(char.IsLetter))
         {
-            productInfo = new string(information[1].Where(char.IsLetter).ToArray());
+            serviceCategory = new string(information[1].Where(char.IsLetter).ToArray());
             trainLineInfo = new string(information[1].Where(char.IsDigit).ToArray());
             numberInfo = new string(information[2].Where(char.IsDigit).ToArray());
         }
         
-        var product = GetTransportProduct(productInfo);
         LineNumber? trainLine = null;
         ServiceNumber? trainNumber;
         
-        if (ServiceNumberIsLineNumber(product))
+        if (serviceCategoryProvider.UseServiceNumberAsLineNumber(serviceCategory))
         {
             trainNumber = GetServiceNumber(trainLineInfo);
         }
@@ -63,112 +65,18 @@ public class RouteInformationFactory
             trainNumber = GetServiceNumber(numberInfo);
         }
         
-        return new RouteInformation(product, replacementService, trainLine, trainNumber);
+        return new RouteInformation(serviceCategory, replacementService, trainLine, trainNumber);
     }
 
-    public static List<RouteInformation> Create(string leadingVehicleName, string fullName, bool replacementService)
+    public static List<RouteInformation> Create(ServiceCategoryProvider serviceCategoryProvider, string leadingVehicleName, string fullName, bool replacementService)
     {
         var fullNames = fullName.Split(" / ")
             .OrderBy(n => !n.Contains(leadingVehicleName))
             .ToList();
-        return fullNames.Select(name => Create(name, replacementService)).ToList();
+        return fullNames.Select(name => Create(serviceCategoryProvider, name, replacementService)).ToList();
     }
     
-    private static TransportProduct GetTransportProduct(string info)
-    {
-        return info switch
-        {
-            "ICE" => TransportProduct.InterCityExpress,
-            "IC" => TransportProduct.InterCity,
-            "EC" => TransportProduct.EuroCity,
-            "ECD" => TransportProduct.EuroCityDirect,
-            "EN" => TransportProduct.EuroNight,
-            "ES" => TransportProduct.EuropeanSleeper,
-            "RJ" => TransportProduct.RailJet,
-            "RJX" => TransportProduct.RailJetExpress,
-            "NJ" => TransportProduct.NightJet,
-            "TGV" => TransportProduct.TrainAGrandeVitesse,
-            "WB" => TransportProduct.WestBahn,
-            "EST" => TransportProduct.Eurostar,
-            "FLX" => TransportProduct.FlixTrain,
-            "IRE" => TransportProduct.InterRegioExpress,
-            "MEX" => TransportProduct.MetropolExpress,
-            "FEX" => TransportProduct.FlughafenExpress,
-            "RE" => TransportProduct.RegionalExpress,
-            "RB" => TransportProduct.Regional,
-            "S" => TransportProduct.Suburban,
-            "Fähre" => TransportProduct.Ferry,
-            "U" => TransportProduct.Underground,
-            "STR" => TransportProduct.Tram,
-            "Bus" => TransportProduct.Bus,
-            _ => TransportProduct.Unknown
-        };
-    }
-
-    public static bool ServiceNumberIsLineNumber(TransportProduct transportProduct)
-    {
-        return transportProduct switch
-        {
-            TransportProduct.InterCityExpress => true,
-            TransportProduct.InterCity => true,
-            TransportProduct.EuroCity => true,
-            TransportProduct.EuroCityDirect => true,
-            TransportProduct.EuroNight => true,
-            TransportProduct.EuropeanSleeper => true,
-            TransportProduct.RailJet => true,
-            TransportProduct.RailJetExpress => true,
-            TransportProduct.NightJet => true,
-            TransportProduct.TrainAGrandeVitesse => true,
-            TransportProduct.WestBahn => true,
-            TransportProduct.Eurostar => true,
-            TransportProduct.FlixTrain => true,
-            TransportProduct.InterRegioExpress => false,
-            TransportProduct.MetropolExpress => false,
-            TransportProduct.FlughafenExpress => false,
-            TransportProduct.RegionalExpress => false,
-            TransportProduct.Regional => false,
-            TransportProduct.Suburban => false,
-            TransportProduct.Ferry => false,
-            TransportProduct.Underground => false,
-            TransportProduct.Tram => false,
-            TransportProduct.Bus => false,
-            TransportProduct.Unknown => false,
-            _ => false
-        };
-    }
-
-    private static bool HasCatering(TransportProduct transportProduct)
-    {
-        return transportProduct switch
-        {
-            TransportProduct.InterCityExpress => true,
-            TransportProduct.InterCity => true,
-            TransportProduct.EuroCity => true,
-            TransportProduct.EuroNight => true,
-            TransportProduct.EuropeanSleeper => true,
-            TransportProduct.RailJet => true,
-            TransportProduct.RailJetExpress => true,
-            TransportProduct.NightJet => true,
-            TransportProduct.TrainAGrandeVitesse => true,
-            TransportProduct.WestBahn => true,
-            TransportProduct.Eurostar => true,
-            TransportProduct.FlixTrain => true,
-            TransportProduct.InterRegioExpress => false,
-            TransportProduct.MetropolExpress => false,
-            TransportProduct.FlughafenExpress => false,
-            TransportProduct.RegionalExpress => false,
-            TransportProduct.Regional => false,
-            TransportProduct.Suburban => false,
-            TransportProduct.Ferry => false,
-            TransportProduct.Underground => false,
-            TransportProduct.Tram => false,
-            TransportProduct.Bus => false,
-            TransportProduct.Unknown => false,
-            _ => false
-        };
-    }
-    
-    public static CateringInformation CreateCateringInformation(List<Zugattribut>  zugattribute, TransportProduct product, IEnumerable<IRouteStop> stopInfos)
+    public static CateringInformation CreateCateringInformation(ServiceCategoryProvider serviceCategoryProvider, List<Zugattribut>  zugattribute, string serviceCategory, IEnumerable<IRouteStop> stopInfos)
     {
         string? validityText = null;
         CateringType type = CateringType.NoInfo;
@@ -203,7 +111,7 @@ public class RouteInformationFactory
             validityText = zugattribute.First(a => a.Key is "KG").Teilstreckenhinweis;
         }
 
-        if (HasCatering(product))
+        if (serviceCategoryProvider.CateringExpected(serviceCategory))
         {
             type =  CateringType.None;
         }

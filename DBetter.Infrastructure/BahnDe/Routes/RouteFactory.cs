@@ -6,6 +6,7 @@ using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
+using DBetter.Infrastructure.Repositories;
 
 namespace DBetter.Infrastructure.BahnDe.Routes;
 
@@ -17,11 +18,18 @@ public interface IExistingInformationSelectionStage
 
 public interface IExistingStationsSelectionStage
 {
-    RouteFactory WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
+    IServiceCategoryProviderSelectionStage WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
 }
 
-public class RouteFactory : IExistingInformationSelectionStage, IExistingStationsSelectionStage
+public interface IServiceCategoryProviderSelectionStage
 {
+    RouteFactory UseServiceCategoryProvider(ServiceCategoryProvider serviceCategoryProvider);
+}
+
+public class RouteFactory : IExistingInformationSelectionStage, IExistingStationsSelectionStage, IServiceCategoryProviderSelectionStage
+{
+    private ServiceCategoryProvider _serviceCategoryProvider;
+    
     private List<Station> _stationsToCreate = [];
 
     private Fahrt _fahrt;
@@ -51,24 +59,31 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
     }
 
 
-    public RouteFactory WithExistingStations(Dictionary<EvaNumber, Station> existingStations)
+    public IServiceCategoryProviderSelectionStage WithExistingStations(Dictionary<EvaNumber, Station> existingStations)
     {
         _existingStations = existingStations;
+
+        return this;
+    }
+
+    public RouteFactory UseServiceCategoryProvider(ServiceCategoryProvider serviceCategoryProvider)
+    {
+        _serviceCategoryProvider = serviceCategoryProvider;
 
         var serviceNummer = _fahrt.Halte[0].Nummer;
 
         RouteDto = new RouteDto
         {
             RouteId = _route!.Id.Value.ToString(),
-            Product = _route!.Information.Product.ToString(),
+            ServiceCategory = _route!.Information.ServiceCategory.ToString(),
             Stops = GetStops(_fahrt),
             Operator = RouteInformationFactory.GetOperator(_fahrt.Zugattribute),
             LineNumber = _route!.Information.LineNumber?.ToString(),
             ServiceNumber = RouteInformationFactory.GetServiceNumber(serviceNummer)?.ToString(),
             BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(_fahrt.Zugattribute, _fahrt.HimMeldungen, _fahrt.Halte).ToDto(),
-            Catering = RouteInformationFactory.CreateCateringInformation(_fahrt.Zugattribute, _route!.Information.Product, _fahrt.Halte).ToDto()
+            Catering = RouteInformationFactory.CreateCateringInformation(serviceCategoryProvider, _fahrt.Zugattribute, _route!.Information.ServiceCategory, _fahrt.Halte).ToDto()
         };
-
+        
         return this;
     }
 
