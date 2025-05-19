@@ -59,7 +59,7 @@ public class ConnectionsQueryRepository(
 
         var connectionFactory = ConnectionFactory
             .CreateFrom(fahrplan)
-            .WithRequestId(id)
+            .WithRequest(id, anfrage)
             .WithExistingRoutes(existingRoutes)
             .WithExistingStations(existingStations);
         
@@ -120,7 +120,7 @@ public class ConnectionsQueryRepository(
 
         var connectionFactory = ConnectionFactory
             .CreateFrom(teilstrecke)
-            .WithRequestId(originalConnection.RequestId)
+            .WithRequest(originalConnection.RequestId)
             .WithExistingRoutes(existingRoutes)
             .WithExistingStations(existingStations);
         

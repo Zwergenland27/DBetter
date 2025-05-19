@@ -195,7 +195,6 @@ public static class DTOExtensions
 
         return line;
     }
-
     public static ComfortClass ToComfortClass(this Klasse klasse)
     {
         return klasse switch

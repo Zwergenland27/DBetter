@@ -16,7 +16,7 @@ using DBetter.Infrastructure.Repositories;
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
 public interface IConnectionsRequestIdSelectionStage {
-    IConnectionsExistingRoutesSelectionStage WithRequestId(ConnectionRequestId id);
+    IConnectionsExistingRoutesSelectionStage WithRequest(ConnectionRequestId id, ReiseAnfrage anfrage);
 }
 
 public interface IConnectionsExistingRoutesSelectionStage
@@ -40,7 +40,7 @@ public interface IConnectionsFactory {
 }
 
 public interface IConnectionRequestIdSelectionStage {
-    IConnectionExistingRoutesSelectionStage WithRequestId(ConnectionRequestId id);
+    IConnectionExistingRoutesSelectionStage WithRequest(ConnectionRequestId id);
 }
 
 public interface IConnectionExistingRoutesSelectionStage
@@ -75,6 +75,7 @@ public class ConnectionFactory :
     private Teilstrecke? _teilstrecke;
 
     private ConnectionRequestId? _requestId;
+    private ReiseAnfrage? _anfrage;
 
     private Dictionary<JourneyId, RouteEntity> _existingRoutes = [];
     private Dictionary<EvaNumber, Station> _existingStations = [];
@@ -106,13 +107,14 @@ public class ConnectionFactory :
         return new ConnectionFactory(teilstrecke);
     }
 
-    IConnectionsExistingRoutesSelectionStage IConnectionsRequestIdSelectionStage.WithRequestId(ConnectionRequestId id)
+    IConnectionsExistingRoutesSelectionStage IConnectionsRequestIdSelectionStage.WithRequest(ConnectionRequestId id, ReiseAnfrage anfrage)
     {
         _requestId = id;
+        _anfrage = anfrage;
         return this;
     }
 
-    IConnectionExistingRoutesSelectionStage IConnectionRequestIdSelectionStage.WithRequestId(ConnectionRequestId id)
+    IConnectionExistingRoutesSelectionStage IConnectionRequestIdSelectionStage.WithRequest(ConnectionRequestId id)
     {
         _requestId = id;
         return this;
@@ -204,6 +206,10 @@ public class ConnectionFactory :
         return new ConnectionDto
             {
                 Id = connectionId.Value.ToString(),
+                BahnDeUrl = BahnDeUrlFactory.FromRequest(_anfrage!)
+                    .WithStations(_existingStations.Select(kvp => kvp.Value).ToList())
+                    .ForConnection(verbindung.CtxRecon)
+                    .BahnDeUrl,
                 Demand = verbindung.GetDemand().ToDto(),
                 Segments = segments,
                 Offer = offer

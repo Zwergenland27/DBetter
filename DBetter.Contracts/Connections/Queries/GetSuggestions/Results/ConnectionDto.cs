@@ -26,4 +26,9 @@ public class ConnectionDto
     /// Offer for the section, if available
     /// </summary>
     public required OfferDto? Offer { get; set; }
+    
+    /// <summary>
+    /// Url to bahn.de to view and buy the connection
+    /// </summary>
+    public required string BahnDeUrl { get; set; }
 }
