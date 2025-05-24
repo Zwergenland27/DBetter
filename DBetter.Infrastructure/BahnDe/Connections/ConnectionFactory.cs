@@ -239,9 +239,15 @@ public class ConnectionFactory :
             _existingRoutes.Add(journeyId, route);
         }
 
-        var destinationStationExists = _existingStations.TryGetValue(destinationEvaNumber, out var station);
-        if(!destinationStationExists){
-            route!.DestinationStationMissing();
+        var destination = verbindungsabschnitt.Verkehrsmittel.Richtung;
+        if (destination is null || destination.All(char.IsUpper))
+        {
+            var destinationStationExists = _existingStations.TryGetValue(destinationEvaNumber, out var station);
+            if(!destinationStationExists){
+                route!.DestinationStationMissing();
+            }
+
+            destination = station?.Name.Value;
         }
         
         return new TransportSegmentDto
@@ -251,7 +257,7 @@ public class ConnectionFactory :
             RouteId = route!.Id.Value.ToString(),
             Demand = verbindungsabschnitt.GetDemand().ToDto(),
             Operator = RouteInformationFactory.GetOperator(verbindungsabschnitt.Verkehrsmittel!.Zugattribute),
-            Destination = station?.Name.Value,
+            Destination = destination,
             TransportCategory = route.Information.TransportCategory.ToString(),
             Line = route.Information.GetLine(),
             BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(
