@@ -157,13 +157,18 @@ public static class DTOExtensions
     }
 
     public static Platform? GetPlatform(this IRouteStop stop){
-        if(stop.Gleis is null) return null;
+        if(stop.Gleis is null && stop.EzGleis is null) return null;
 
         var platformType = stop.HaltTyp switch {
             HaltTyp.PL => PlatformType.Platform,
             HaltTyp.ST => PlatformType.BusPlatform,
             _ => PlatformType.Unknown
         };
+
+        if (stop.Gleis is null)
+        {
+            return new Platform(stop.EzGleis!, null, platformType);
+        }
 
         return new Platform(stop.Gleis, stop.EzGleis, platformType);
     }
