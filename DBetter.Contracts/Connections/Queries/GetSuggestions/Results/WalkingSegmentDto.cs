@@ -1,9 +1,9 @@
 namespace DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
 
 /// <summary>
-/// Longer walking segment
+/// Transfer segment with longer walking distance
 /// </summary>
-public class WalkingSegmentDto : SegmentDto
+public class WalkingSegmentDto : TransferSegmentDto
 {
     /// <summary>
     /// Estimated walking distance in meters
@@ -13,5 +13,5 @@ public class WalkingSegmentDto : SegmentDto
     /// <summary>
     /// Estimated walking duration in minutes
     /// </summary>
-    public required int Duration { get; set; }
+    public required int WalkDuration { get; set; }
 }

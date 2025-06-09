@@ -183,13 +183,16 @@ public class ConnectionFactory :
             {
                 segments.Add(new WalkingSegmentDto
                 {
-                    DepartureTime = abschnitt.GetDepartureTime().ToDto()!,
-                    ArrivalTime = abschnitt.GetArrivalTime().ToDto()!,
                     Distance = abschnitt.Distanz!.Value,
-                    Duration = abschnitt.AbschnittsDauer
+                    WalkDuration = abschnitt.AbschnittsDauer
                 });
                 
                 continue;
+            }
+            
+            if (segments.LastOrDefault() is TransportSegmentDto)
+            {
+                segments.Add(new TransferSegmentDto());
             }
             
             segments.Add(GetTransportSegment(abschnitt));
