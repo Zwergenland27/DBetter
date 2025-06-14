@@ -292,7 +292,7 @@ public static class ParameterExtensions
             
             zwischenhalte.Add(new Zwischenhalt
             {
-                Aufenthaltsdauer = stopover.LengthOfStay,
+                Aufenthaltsdauer = stopover.LengthOfStay > 0 ? stopover.LengthOfStay : null,
                 Id = requestStationEvas[stopover.StationId].AsFuzzy(),
                 VerkehrsmittelOfNextAbschnitt = meansOfTransport.GetProduktgattung()
             });
