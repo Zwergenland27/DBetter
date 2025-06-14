@@ -12,6 +12,7 @@ using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace DBetter.Infrastructure;
 
@@ -20,7 +21,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddRepositories();
-        services.AddPostgres("Host=localhost;Database=DBetter;Username=user;Password=password");
+        services.AddPostgres(configuration);
         services.AddJwtAuthentication(configuration);
         services.AddBahnApi();
         services.AddBackgroundJobs();
