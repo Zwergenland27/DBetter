@@ -8,7 +8,7 @@ public class Zwischenhalt
     /// <summary>
     /// Duration of stay in minutes
     /// </summary>
-    public required int? AufenthaltsDauer { get; set; }
+    public required int? Aufenthaltsdauer { get; set; }
     
     /// <summary>
     /// Fuzzy station id

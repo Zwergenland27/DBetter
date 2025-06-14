@@ -153,7 +153,7 @@ public class BahnDeUrlFactory : IStationSelectionStage
             .First(s => s.EvaNumber.AsFuzzy() == stopover.Id)
             .Name.Value;
         return
-            $"[\"{stopover.Id}\",\"{name}\",{stopover.AufenthaltsDauer},\"{GenerateAllowedMeansOfTransport(stopover.VerkehrsmittelOfNextAbschnitt)}\"]";
+            $"[\"{stopover.Id}\",\"{name}\",{stopover.Aufenthaltsdauer},\"{GenerateAllowedMeansOfTransport(stopover.VerkehrsmittelOfNextAbschnitt)}\"]";
     }
 
     private static string GenerateAllowedMeansOfTransport(List<Produktgattung> produktgattungen)
