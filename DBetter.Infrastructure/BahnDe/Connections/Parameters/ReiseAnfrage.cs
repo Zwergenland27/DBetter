@@ -1,3 +1,5 @@
+using DBetter.Domain.Stations.ValueObjects;
+
 namespace DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 /// <summary>
@@ -90,4 +92,13 @@ public class ReiseAnfrage
     /// Pagination reference for earlier and later connections
     /// </summary>
     public required string? PagingReference { get; set; }
+
+    internal List<EvaNumber> GetEvaNumbers()
+    {
+        List<EvaNumber> evaNumbers = [];
+        evaNumbers.Add(EvaNumber.Create(AbfahrtsHalt).Value);
+        evaNumbers.Add(EvaNumber.Create(AnkunftsHalt).Value);
+        evaNumbers.AddRange(Zwischenhalte.Select(stopover => EvaNumber.Create(stopover.Id).Value));
+        return evaNumbers;
+    }
 }

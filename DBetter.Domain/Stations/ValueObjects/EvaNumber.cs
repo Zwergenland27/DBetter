@@ -18,6 +18,10 @@ public record EvaNumber
 
     public static CanFail<EvaNumber> Create(string value)
     {
+        if (value.StartsWith("@L="))
+        {
+            value = value.Substring(3);
+        }
         if (int.TryParse(value, out _))
         {
             return new EvaNumber(value);

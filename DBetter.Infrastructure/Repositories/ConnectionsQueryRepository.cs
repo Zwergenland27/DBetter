@@ -46,6 +46,8 @@ public class ConnectionsQueryRepository(
 
         var journeyIds = fahrplan.GetJourneyIds();
         var stopEvas = fahrplan.GetEvaNumbers(journeyIds);
+        stopEvas.AddRange(anfrage.GetEvaNumbers());
+        stopEvas = stopEvas.Distinct().ToList();
 
         var existingRoutes = await context.Routes
             .AsNoTracking()
