@@ -78,5 +78,5 @@ app.AddAuthenticationEndpoints();
 app.AddConnectionEndpoints();
 app.AddRouteEndpoints();
 
-app.UseMonitoring();
+app.MapDefaultEndpoints();
 app.Run();
