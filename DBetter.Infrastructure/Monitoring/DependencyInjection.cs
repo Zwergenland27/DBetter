@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -14,13 +13,12 @@ public static class DependencyInjection
 {
     public static IHostApplicationBuilder AddMonitoring(this IHostApplicationBuilder builder)
     {
-        var otelSettings = new OtelSettings();
-        builder.Configuration.Bind(OtelSettings.SectionName, otelSettings); 
-        
-        builder.Logging.AddOpenTelemetry(config =>
+        //builder.Logging.ClearProviders();
+        builder.Logging.AddOpenTelemetry(logging =>
         {
-            config.IncludeScopes = true;
-            config.IncludeFormattedMessage = true;
+            logging.IncludeFormattedMessage = true;
+            logging.IncludeScopes = true;
+            logging.AddOtlpExporter();
         });
         
         builder.Services.AddTransient<MetricHttpHandler>();
@@ -33,24 +31,16 @@ public static class DependencyInjection
         {
             metrics.AddAspNetCoreInstrumentation();
             metrics.AddMeter(MetricHttpHandler.Metername);
-            metrics.AddPrometheusExporter();
+            metrics.AddOtlpExporter();
         });
         
         otel.WithTracing(tracing =>
         {
             tracing.AddHttpClientInstrumentation();
+            tracing.AddAspNetCoreInstrumentation();
             tracing.AddEntityFrameworkCoreInstrumentation();
-            tracing.AddOtlpExporter(options =>
-            {
-                options.Endpoint = new Uri(otelSettings.Endpoint);
-            });
+            tracing.AddOtlpExporter();
         });
         return builder;
-    }
-
-    public static WebApplication MapDefaultEndpoints(this WebApplication app)
-    {
-        app.MapPrometheusScrapingEndpoint().DisableHttpMetrics();
-        return app;
     }
 }

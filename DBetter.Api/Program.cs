@@ -40,6 +40,13 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
+    options.AddPolicy("prod", policyBuilder =>
+    {
+        policyBuilder.WithOrigins("https://www.dbetter.de", "https://dbetter.de")
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 builder.Services.AddProblemDetails(options =>
@@ -50,7 +57,7 @@ builder.Services.AddProblemDetails(options =>
         context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
 
         var activity = context.HttpContext.Features.Get<IHttpActivityFeature>()?.Activity;
-        context.ProblemDetails.Extensions.Add("traceId", activity?.TraceId);
+        context.ProblemDetails.Extensions.TryAdd("traceId", activity?.TraceId);
     };
 });
 
@@ -69,6 +76,7 @@ if (app.Environment.IsDevelopment())
     app.UseCors("dev");   
 }
 
+app.UseCors("prod");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -78,5 +86,4 @@ app.AddAuthenticationEndpoints();
 app.AddConnectionEndpoints();
 app.AddRouteEndpoints();
 
-app.MapDefaultEndpoints();
 app.Run();
