@@ -35,6 +35,12 @@ public class StopDto
     public required string Name { get; set; }
     
     /// <summary>
+    /// Ril100 identifier of station
+    /// </summary>
+    /// <example>DH</example>
+    public required string? Ril100 { get; set; }
+    
+    /// <summary>
     /// Platform
     /// </summary>
     public required PlatformDto? Platform { get; set; }
