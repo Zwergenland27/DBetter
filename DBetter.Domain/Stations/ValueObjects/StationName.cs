@@ -12,7 +12,9 @@ namespace DBetter.Domain.Stations.ValueObjects;
 /// <example>Dresden Hbf</example>
 public record StationName
 {
-    public string Value { get; init; }
+    public string Value { get; private init; }
+
+    public string NormalizedValue => Normalize(Value);
 
     private StationName(string value)
     {
@@ -22,7 +24,6 @@ public record StationName
     public static CanFail<StationName> Create(string stationName)
     {
         if (IsMetaStation(stationName)) return DomainErrors.Station.Name.MetaStation(stationName);
-        stationName = Normalize(stationName);
         return new StationName(stationName);
     }
 

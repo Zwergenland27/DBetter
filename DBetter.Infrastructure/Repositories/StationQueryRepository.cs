@@ -20,7 +20,7 @@ public class StationQueryRepository(
             .OfType<Station>()
             .ToList();
 
-        var stations = await InsertOrUpdateStations(recievedStations);
+        var stations = await InsertStations(recievedStations);
         
         await context.SaveChangesAsync();
         
@@ -31,10 +31,11 @@ public class StationQueryRepository(
         }).ToList();
     }
 
-    private async Task<List<Station>> InsertOrUpdateStations(List<Station> fetchedStations)
+    private async Task<List<Station>> InsertStations(List<Station> fetchedStations)
     {
         var stationEvaNumbers = fetchedStations.Select(s => s.EvaNumber).ToList();
         var existingStations = await context.Stations
+            .AsNoTracking()
             .Where(station => stationEvaNumbers.Contains(station.EvaNumber))
             .ToListAsync();
 
@@ -47,10 +48,6 @@ public class StationQueryRepository(
             {
                 await context.Stations.AddAsync(station);
                 stations.Add(station);
-            }
-            else if(station.Position is not null)
-            {
-                existingStation.UpdatePosition(station.Position);
             }
         }
 

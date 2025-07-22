@@ -12,6 +12,10 @@ public class Station : AggregateRoot<StationId>
     public Coordinates? Position { get; private set; }
     
     public StationInfoId? InfoId { get; private set; }
+    
+    public Ril100? Ril100 { get; private set; }
+    
+    public DateTime? LastScrapedAt { get; private set; }
 
     public Station(
         StationId id,
@@ -31,8 +35,14 @@ public class Station : AggregateRoot<StationId>
         
     }
 
-    public void UpdatePosition(Coordinates position)
+    public void UpdateScrapedInformation(
+        Coordinates? position,
+        StationInfoId? infoId,
+        Ril100? ril100)
     {
         Position = position;
+        InfoId = infoId;
+        Ril100 = ril100;
+        LastScrapedAt = DateTime.UtcNow;
     }
 }
