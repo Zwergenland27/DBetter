@@ -21,6 +21,12 @@ public static class DependencyInjection
                     .ForJob(DatabaseRoutesScrapingScheduler.JobKey)
                     .WithSimpleSchedule(schedule => schedule.WithIntervalInMinutes(5).RepeatForever())
                     );
+
+            options.AddJob<StationScraperJob>(StationScraperJob.JobKey)
+                .AddTrigger(trigger => trigger
+                    .ForJob(StationScraperJob.JobKey)
+                    .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(10).RepeatForever())
+                );
         });
 
         services.AddQuartzHostedService();

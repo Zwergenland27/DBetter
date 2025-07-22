@@ -5,6 +5,7 @@ using DBetter.Application.Stations;
 using DBetter.Application.Users;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Users;
+using DBetter.Infrastructure.ApiMarketplace;
 using DBetter.Infrastructure.Authentication;
 using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe;
@@ -24,6 +25,7 @@ public static class DependencyInjection
         services.AddPostgres(configuration);
         services.AddJwtAuthentication(configuration);
         services.AddBahnApi();
+        services.AddApiMarketplace(configuration);
         services.AddBackgroundJobs();
         return services;
     }
