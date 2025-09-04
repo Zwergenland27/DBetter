@@ -17,7 +17,10 @@ public class TimetablesService(HttpClient http)
             
             var result = serializer.Deserialize(stream) as MultipleStationData;
             if (result is null) return [];
-            return result.Stations;
+            
+            return result.Stations
+                .Where(s => !s.Ds100.Any(char.IsDigit))
+                .ToList();
         }
         catch (Exception e)
         {
