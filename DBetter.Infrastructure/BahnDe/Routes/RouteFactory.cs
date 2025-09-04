@@ -101,7 +101,7 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
             DepartureTime = halt.GetDepartureTime().ToDto(),
             ArrivalTime = halt.GetArrivalTime().ToDto(),
             Demand = halt.GetDemand().ToDto(),
-            Name = station!.Name.Value,
+            Name = station.Name.NormalizedValue,
             Platform = halt.GetPlatform().ToDto(),
             IsAdditional = halt.IsAdditional(),
             IsCancelled = halt.IsCancelled(),

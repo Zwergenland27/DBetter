@@ -1,5 +1,6 @@
 using DBetter.Application.Stations;
 using DBetter.Domain.Stations;
+using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Stations;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
@@ -23,11 +24,19 @@ public class StationQueryRepository(
         var stations = await InsertStations(recievedStations);
         
         await context.SaveChangesAsync();
+
+        var ril100MatchingStation = await context.Stations
+            .FirstOrDefaultAsync(station => station.Ril100 == Ril100.Create(query));
+        if (ril100MatchingStation is not null)
+        {
+            stations.Insert(0, ril100MatchingStation);
+        }
         
         return stations.Select(station => new StationDto
         {
             Id = station.Id.Value.ToString(),
-            Name = station.Name.Value,
+            Name = station.Name.NormalizedValue,
+            Ril100 = station.Ril100?.Value,
         }).ToList();
     }
 

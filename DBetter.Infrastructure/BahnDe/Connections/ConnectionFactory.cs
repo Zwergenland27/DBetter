@@ -250,7 +250,7 @@ public class ConnectionFactory :
                 route!.DestinationStationMissing();
             }
 
-            destination = station?.Name.Value;
+            destination = station?.Name.NormalizedValue;
         }
         
         return new TransportSegmentDto
@@ -304,7 +304,7 @@ public class ConnectionFactory :
             DepartureTime = halt.GetDepartureTime().ToDto(),
             ArrivalTime = halt.GetArrivalTime().ToDto(),
             Demand = halt.GetDemand().ToDto(),
-            Name = station.Name.Value,
+            Name = station.Name.NormalizedValue,
             Ril100 = station.Ril100?.Value,
             Platform = halt.GetPlatform().ToDto(),
             IsAdditional = halt.IsAdditional(),
