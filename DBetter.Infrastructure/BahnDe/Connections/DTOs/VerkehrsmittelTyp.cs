@@ -13,5 +13,10 @@ public enum VerkehrsmittelTyp
     /// <summary>
     /// Public transport section
     /// </summary>
-    PUBLICTRANSPORT
+    PUBLICTRANSPORT,
+    
+    /// <summary>
+    /// Longer walking section?
+    /// </summary>
+    TRANSFER
 }

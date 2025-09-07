@@ -179,7 +179,7 @@ public class ConnectionFactory :
 
         foreach (var abschnitt in verbindung.VerbindungsAbschnitte)
         {
-            if (abschnitt.Verkehrsmittel.Typ is VerkehrsmittelTyp.WALK)
+            if (abschnitt.Verkehrsmittel.Typ is VerkehrsmittelTyp.WALK or VerkehrsmittelTyp.TRANSFER)
             {
                 segments.Add(new WalkingSegmentDto
                 {
