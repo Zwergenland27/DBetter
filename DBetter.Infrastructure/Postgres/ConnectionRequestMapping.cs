@@ -141,8 +141,15 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
                     id => id.Value,
                     value => new StationId(value));
 
-            rb.Property(r => r.MaxTransfers);
-            rb.Property(r => r.MinTransferTime);
+            rb.Property(r => r.MaxTransfers)
+                .HasConversion(
+                    transferAmount => transferAmount.Value,
+                    value => TransferAmount.Create(value).Value);
+            
+            rb.Property(r => r.MinTransferTime)
+                .HasConversion(
+                    transferTime => transferTime.Value,
+                    value => TransferTime.Create(value).Value);
         });
     }
 }

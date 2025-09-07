@@ -251,12 +251,12 @@ public static class ParameterExtensions
     
     private static int GetMaxUmstiege(this ConnectionRequest request)
     {
-        return request.Route.MaxTransfers;
+        return request.Route.MaxTransfers.Value;
     }
 
     private static int GetMinUmstiegszeit(this ConnectionRequest request)
     {
-        return request.Route.MinTransferTime;
+        return request.Route.MinTransferTime.Value;
     }
 
     private static bool AnyBikeCarriage(this ConnectionRequest request)

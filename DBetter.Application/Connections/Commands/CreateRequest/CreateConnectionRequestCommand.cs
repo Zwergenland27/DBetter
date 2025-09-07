@@ -123,13 +123,13 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
             .Required()
             .Map(p => p.DestinationStationId, StationId.Create);
 
-        var maxTransfers = builder.StructProperty(r => r.MaxTransfers)
+        var maxTransfers = builder.ClassProperty(r => r.MaxTransfers)
             .Required()
-            .Map(p => p.MaxTransfers);
+            .Map(p => p.MaxTransfers, TransferAmount.Create);
         
-        var minTransferTime = builder.StructProperty(r => r.MinTransferTime)
+        var minTransferTime = builder.ClassProperty(r => r.MinTransferTime)
             .Required()
-            .Map(p => p.MinTransferTime);
+            .Map(p => p.MinTransferTime, TransferTime.Create);
         
         return builder.Build(() => Route.Create(
             originStationId,

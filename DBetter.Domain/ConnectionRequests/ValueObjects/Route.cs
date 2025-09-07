@@ -16,9 +16,9 @@ public class Route
     
     public StationId DestinationStationId  { get; private init; }
     
-    public int MaxTransfers { get; private init; }
+    public TransferAmount MaxTransfers { get; private init; }
     
-    public int MinTransferTime { get; private init; }
+    public TransferTime MinTransferTime { get; private init; }
 
     private Route(){}
 
@@ -28,8 +28,8 @@ public class Route
         Stopover? firstStopover,
         Stopover? secondStopover,
         StationId destinationStationId,
-        int maxTransfers,
-        int minTransferTime)
+        TransferAmount maxTransfers,
+        TransferTime minTransferTime)
     {
         OriginStationId = originStationId;
         MeansOfTransportFirstSection = meansOfTransportFirstSection;
@@ -46,47 +46,32 @@ public class Route
         Stopover? firstStopOver,
         Stopover? secondStopOver,
         StationId destinationStationId,
-        int maxTransfers,
-        int minTransferTime)
+        TransferAmount maxTransfers,
+        TransferTime minTransferTime)
     {
-        CanFail<Route> transferOptionsResult = new CanFail<Route>();
-        if (maxTransfers < 0)
-        {
-            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MaxTransfers.NegativeNotAllowed);
-        }
-        else if (maxTransfers > 10)
-        {
-            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MaxTransfers.Max10);
-        }
-        
-        if (minTransferTime < 0)
-        {
-            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MinTransferTime.NegativeNotAllowed);
-        }
-        else if (minTransferTime > 43)
-        {
-            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.MinTransferTime.Max43);
-        }
+        CanFail<Route> transferOptionsResult = new ();
         
         if (firstStopOver is null && secondStopOver is not null)
         {
-            return DomainErrors.ConnectionRequest.Route.FirstStopoverMissing;
+            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.FirstStopoverMissing);
         }
         
         if (!onFirstSection.AnySelected ||
             (firstStopOver is not null && !firstStopOver.MeansOfTransportNextSection.AnySelected) ||
             (secondStopOver is not null && !secondStopOver.MeansOfTransportNextSection.AnySelected))
         {
-            return DomainErrors.ConnectionRequest.Route.NoVehicleAllowed;
+            transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.NoVehicleAllowed);
         }
         
-        return new Route(
+        transferOptionsResult.Succeeded(new Route(
             originStationId,
             onFirstSection,
             firstStopOver,
             secondStopOver,
             destinationStationId,
             maxTransfers,
-            minTransferTime);
+            minTransferTime));
+        
+        return transferOptionsResult;
     }
 }
