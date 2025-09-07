@@ -26,7 +26,7 @@ public class StationQueryRepository(
         await context.SaveChangesAsync();
 
         var ril100MatchingStation = await context.Stations
-            .FirstOrDefaultAsync(station => station.Ril100 == Ril100.Create(query));
+            .FirstOrDefaultAsync(station => station.Ril100 == Ril100.Create(query.ToUpper()));
         if (ril100MatchingStation is not null)
         {
             stations.Insert(0, ril100MatchingStation);
