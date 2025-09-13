@@ -176,16 +176,24 @@ public class ConnectionFactory :
         }
 
         List<SegmentDto> segments = [];
+        var differentOrigin = false;
 
         foreach (var abschnitt in verbindung.VerbindungsAbschnitte)
         {
             if (abschnitt.Verkehrsmittel.Typ is VerkehrsmittelTyp.WALK or VerkehrsmittelTyp.TRANSFER)
             {
-                segments.Add(new WalkingSegmentDto
+                if (segments.Count > 0)
                 {
-                    Distance = abschnitt.Distanz!.Value,
-                    WalkDuration = abschnitt.AbschnittsDauer
-                });
+                    segments.Add(new WalkingSegmentDto
+                    {
+                        Distance = abschnitt.Distanz!.Value,
+                        WalkDuration = abschnitt.AbschnittsDauer
+                    });   
+                }
+                else
+                {
+                    differentOrigin = true;
+                }
                 
                 continue;
             }
@@ -209,6 +217,7 @@ public class ConnectionFactory :
         return new ConnectionDto
             {
                 Id = connectionId.Value.ToString(),
+                DifferentOrigin = differentOrigin,
                 BahnDeUrl = BahnDeUrlFactory.FromRequest(_anfrage!)
                     .WithStations(_existingStations.Select(kvp => kvp.Value).ToList())
                     .ForConnection(verbindung.CtxRecon)

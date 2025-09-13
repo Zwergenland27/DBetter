@@ -13,6 +13,11 @@ public class ConnectionDto
     public required string Id { get; set; }
     
     /// <summary>
+    /// Indicates that the connection starts from a different station then requested
+    /// </summary>
+    public required bool DifferentOrigin { get; set; }
+    
+    /// <summary>
     /// Demand information
     /// </summary>
     public required DemandDto Demand { get; set; }
