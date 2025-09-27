@@ -45,6 +45,7 @@ public static class ParameterExtensions
             SchnelleVerbindungen = false,
             SitzplatzOnly = false,
             BikeCarriage = request.AnyBikeCarriage(),
+            DeutschlandTicketVorhanden = request.Passengers.All(p => p.OwnsDeutschlandTicket),
             NurDeutschlandTicketVerbindungen = false,
             Zwischenhalte = request.GetZwischenhalte(requestStationEvas),
             PagingReference = null,

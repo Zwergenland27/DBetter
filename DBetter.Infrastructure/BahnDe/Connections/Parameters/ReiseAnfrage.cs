@@ -79,6 +79,11 @@ public class ReiseAnfrage
     public required bool BikeCarriage { get; set; }
 
     /// <summary>
+    /// Indicates that all passengers own a DeutschlandTicket
+    /// </summary>
+    public required bool DeutschlandTicketVorhanden { get; set; }
+    
+    /// <summary>
     /// Only show connections that can be used with the "Deutschlandticket"
     /// </summary>
     public bool NurDeutschlandTicketVerbindungen { get; set; } = false;

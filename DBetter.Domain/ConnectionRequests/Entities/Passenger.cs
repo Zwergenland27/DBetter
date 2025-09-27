@@ -11,17 +11,19 @@ public class Passenger : Entity<PassengerId>
 {
     private List<PassengerDiscount> _discounts;
     
-    public UserId? UserId { get; set; }
+    public UserId? UserId { get; private set; }
     
-    public PassengerName? Name { get; set; }
+    public PassengerName? Name { get; private set; }
     
-    public Birthday? Birthday { get; set; }
+    public Birthday? Birthday { get; private set; }
     
-    public int? Age { get; set; }
+    public int? Age { get; private set; }
     
-    public int Bikes { get; set; }
+    public bool OwnsDeutschlandTicket { get; private set; }
     
-    public int Dogs { get; set; }
+    public int Bikes { get; private set; }
+    
+    public int Dogs { get; private set; }
     
     public IReadOnlyList<PassengerDiscount> Discounts => _discounts.AsReadOnly();
 
@@ -33,6 +35,7 @@ public class Passenger : Entity<PassengerId>
         PassengerName? name,
         Birthday? birthday,
         int? age,
+        bool hasDeutschlandTicket,
         int bikes,
         int dogs,
         List<PassengerDiscount> discounts) : base(id)
@@ -52,6 +55,7 @@ public class Passenger : Entity<PassengerId>
         PassengerName? name,
         Birthday? birthday,
         int? age,
+        bool hasDeutschlandTicket,
         int bikes,
         int dogs,
         List<PassengerDiscount> discounts)
@@ -62,6 +66,6 @@ public class Passenger : Entity<PassengerId>
         if (discounts.Distinct().Count() != discounts.Count())
             return DomainErrors.ConnectionRequest.Passenger.DuplicateDiscounts(id);
         
-        return new Passenger(id, userId, name, birthday, age, bikes, dogs, discounts);
+        return new Passenger(id, userId, name, birthday, age, hasDeutschlandTicket, bikes, dogs, discounts);
     }
 }

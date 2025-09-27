@@ -42,6 +42,11 @@ public class PassengerParameters : IParameters
     public int? Age { get; set; }
 
     /// <summary>
+    /// Indicates that the passenger owns a DeutschlandTicket
+    /// </summary>
+    public bool? OwnsDeutschlandTicket { get; set; }
+    
+    /// <summary>
     /// Number of bikes the passenger will carry
     /// </summary>
     /// <example>0</example>
