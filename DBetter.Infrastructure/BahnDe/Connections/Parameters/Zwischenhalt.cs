@@ -8,6 +8,9 @@ public class Zwischenhalt
     /// <summary>
     /// Duration of stay in minutes
     /// </summary>
+    /// <remarks>
+    /// When the duration is zero, this field must be null or an error is thrown
+    /// </remarks>
     public required int? Aufenthaltsdauer { get; set; }
     
     /// <summary>
