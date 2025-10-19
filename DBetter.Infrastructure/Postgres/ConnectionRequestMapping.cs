@@ -84,7 +84,6 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
                 
                 db.Property(discount => discount.Type);
                 db.Property(discount => discount.ComfortClass);
-                db.Property(discount => discount.ValidUntil);
                 
             }).UsePropertyAccessMode(PropertyAccessMode.Field);
         })

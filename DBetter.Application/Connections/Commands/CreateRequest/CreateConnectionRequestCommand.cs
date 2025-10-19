@@ -94,11 +94,7 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
                     .Required()
                     .Map(r => r.ComfortClass, DomainErrors.Shared.ComfortClass.Invalid);
                 
-                var validUntil = dBuilder.StructProperty(r => r.ValidUntil)
-                    .Optional()
-                    .Map(r => r.ValidUntil, DateTimeFactory.CreateFromIso8601);
-                
-                return dBuilder.Build(() => new PassengerDiscount(type, comfortClass, validUntil));
+                return dBuilder.Build(() => new PassengerDiscount(type, comfortClass));
             });
 
         return builder.Build(() => Passenger.Create(id, userId, name, birthday, age, hasDeutschlandTicket, bikes, dogs, discounts.ToList()));

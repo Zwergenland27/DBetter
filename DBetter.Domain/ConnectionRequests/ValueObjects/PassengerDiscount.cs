@@ -3,4 +3,4 @@ using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Domain.ConnectionRequests.ValueObjects;
 
-public record PassengerDiscount(DiscountType Type, ComfortClass ComfortClass, DateTime? ValidUntil);
+public record PassengerDiscount(DiscountType Type, ComfortClass ComfortClass);

@@ -227,7 +227,6 @@ public static class ParameterExtensions
 
     private static Ermaessigung ToErmaessigung(this PassengerDiscount discount)
     {
-        if(discount.ValidUntil is not null) throw new BahnDeException("ConnectionService.ToErmaessigung", "Discount with validity date is not supported yet");
         ArtErmaessigung art = discount.Type switch
         {
             DiscountType.BahnCard25 => ArtErmaessigung.BAHNCARD25,

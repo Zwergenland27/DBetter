@@ -15,9 +15,4 @@ public class PassengerDiscountParameters : IParameters
     /// </summary>
     /// <example>Second</example>
     public string? ComfortClass { get; set; }
-    
-    /// <summary>
-    /// Utc date of expiration
-    /// </summary>
-    public string? ValidUntil { get; set; }
 }
