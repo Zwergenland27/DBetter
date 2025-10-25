@@ -18,8 +18,8 @@ public class Passenger : Entity<PassengerId>
     public Birthday? Birthday { get; private set; }
     
     public int? Age { get; private set; }
-    
-    public bool OwnsDeutschlandTicket { get; private set; }
+
+    public bool OwnsDeutschlandTicket => Discounts.Any(d => d.Type is DiscountType.DeutschlandTicket);
     
     public int Bikes { get; private set; }
     
@@ -35,7 +35,6 @@ public class Passenger : Entity<PassengerId>
         PassengerName? name,
         Birthday? birthday,
         int? age,
-        bool hasDeutschlandTicket,
         int bikes,
         int dogs,
         List<PassengerDiscount> discounts) : base(id)
@@ -55,17 +54,19 @@ public class Passenger : Entity<PassengerId>
         PassengerName? name,
         Birthday? birthday,
         int? age,
-        bool hasDeutschlandTicket,
         int bikes,
         int dogs,
         List<PassengerDiscount> discounts)
     {
         if (birthday is null && age is null) return DomainErrors.ConnectionRequest.Passenger.MissingAgeField(id);
-        if(discounts.Count() > 4) return DomainErrors.ConnectionRequest.Passenger.Max4Discounts(id);
 
-        if (discounts.Distinct().Count() != discounts.Count())
+        var discountsAdditionalToDeutschlandTicket = discounts.Count(d => d.Type is not DiscountType.DeutschlandTicket);
+        
+        if(discountsAdditionalToDeutschlandTicket > 4) return DomainErrors.ConnectionRequest.Passenger.Max4Discounts(id);
+
+        if (discounts.Distinct().Count() != discounts.Count)
             return DomainErrors.ConnectionRequest.Passenger.DuplicateDiscounts(id);
         
-        return new Passenger(id, userId, name, birthday, age, hasDeutschlandTicket, bikes, dogs, discounts);
+        return new Passenger(id, userId, name, birthday, age, bikes, dogs, discounts);
     }
 }

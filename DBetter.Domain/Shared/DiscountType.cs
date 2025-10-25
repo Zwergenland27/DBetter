@@ -5,6 +5,12 @@ public enum DiscountType
     BahnCard25,
     BahnCard25Business,
     BahnCard50,
-    BahNCard50Business,
-    BahnCard100
+    BahnCard50Business,
+    BahnCard100,
+    CHGeneralAbonnement,
+    HalbtaxAbo,
+    VorteilsCardAu,
+    Nl40,
+    KlimaTicketAu,
+    DeutschlandTicket,
 }

@@ -69,10 +69,6 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
         var age = builder.StructProperty(r => r.Age)
             .Optional()
             .Map(p => p.Age);
-
-        var hasDeutschlandTicket = builder.StructProperty(r => r.OwnsDeutschlandTicket)
-            .WithDefault(false)
-            .Map(p => p.OwnsDeutschlandTicket);
         
         var bikes = builder.StructProperty(r => r.Bikes)
             .Required()
@@ -94,10 +90,10 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
                     .Required()
                     .Map(r => r.ComfortClass, DomainErrors.Shared.ComfortClass.Invalid);
                 
-                return dBuilder.Build(() => new PassengerDiscount(type, comfortClass));
+                return dBuilder.Build(() => PassengerDiscount.Create(type, comfortClass));
             });
 
-        return builder.Build(() => Passenger.Create(id, userId, name, birthday, age, hasDeutschlandTicket, bikes, dogs, discounts.ToList()));
+        return builder.Build(() => Passenger.Create(id, userId, name, birthday, age, bikes, dogs, discounts.ToList()));
     }
 
     private ValidatedRequiredProperty<Route> MapRoute(

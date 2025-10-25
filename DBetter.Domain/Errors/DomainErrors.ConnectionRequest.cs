@@ -1,5 +1,6 @@
 using CleanDomainValidation.Domain;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Shared;
 
 namespace DBetter.Domain.Errors;
 
@@ -28,11 +29,19 @@ public static partial class DomainErrors
 
             public static Error Max4Discounts(PassengerId passengerId) => Error.Validation(
                 "ConnectionRequest.Passenger.Max4Discounts",
-                $"Passenger {passengerId.Value} cannot have more then 4 discounts");
+                $"Passenger {passengerId.Value} cannot have more then 4 discounts beside the DeutschlandTicket");
 
             public static Error DuplicateDiscounts(PassengerId passengerId) => Error.Validation(
                 "ConnectionRequest.Passenger.DuplicateDiscounts",
                 $"Passenger {passengerId.Value} cannot have a discount twice");
+
+            public static class Discount
+            {
+                public static Error InvalidCombination(DiscountType type, ComfortClass comfortClass) => Error.Conflict(
+                    "ConnectionRequest.Passenger.Discount.InvalidCombination",
+                    $"Discount of type {type} does not exist for comfort class {comfortClass}");
+            }
+            
             public static class Id
             {
                 public static Error Invalid(string value) => Error.Validation("ConnectionRequest.Passenger.Id.Invalid", $"{value} is no valid guid.");
