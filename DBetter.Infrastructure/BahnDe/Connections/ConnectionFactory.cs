@@ -205,6 +205,14 @@ public class ConnectionFactory :
             
             segments.Add(GetTransportSegment(abschnitt));
         }
+        
+        var differentDestination = false;
+        var lastSegment = segments.LastOrDefault();
+        if (lastSegment is WalkingSegmentDto)
+        {
+            segments.Remove(lastSegment);
+            differentDestination = true;
+        }
 
         var connectionId = ConnectionId.CreateNew();
 
@@ -218,6 +226,7 @@ public class ConnectionFactory :
             {
                 Id = connectionId.Value.ToString(),
                 DifferentOrigin = differentOrigin,
+                DifferentDestination = differentDestination,
                 BahnDeUrl = BahnDeUrlFactory.FromRequest(_anfrage!)
                     .WithStations(_existingStations.Select(kvp => kvp.Value).ToList())
                     .ForConnection(verbindung.CtxRecon)

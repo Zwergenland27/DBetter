@@ -18,6 +18,11 @@ public class ConnectionDto
     public required bool DifferentOrigin { get; set; }
     
     /// <summary>
+    /// Indicates that the connection ends at a different station then requested
+    /// </summary>
+    public required bool DifferentDestination { get; set; }
+    
+    /// <summary>
     /// Demand information
     /// </summary>
     public required DemandDto Demand { get; set; }
