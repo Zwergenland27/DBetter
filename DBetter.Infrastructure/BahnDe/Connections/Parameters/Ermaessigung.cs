@@ -1,3 +1,6 @@
+using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Shared;
+
 namespace DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 /// <summary>
@@ -8,19 +11,28 @@ public class Ermaessigung
     /// <summary>
     /// Discount type
     /// </summary>
-    public required ArtErmaessigung Art { get; set; }
+    public required string Art { get; set; }
     
     /// <summary>
     /// Comfort class where the discount is valid
     /// </summary>
-    public required KlasseErmaessigung Klasse { get; set; }
+    public required string Klasse { get; set; }
 
-    public static Ermaessigung Keine()
+    public static Ermaessigung None()
     {
         return new Ermaessigung
         {
-            Art = ArtErmaessigung.KEINE_ERMAESSIGUNG,
-            Klasse = KlasseErmaessigung.KLASSENLOS
+            Art = ArtErmaessigung.None,
+            Klasse = KlasseErmaessigung.GetAliasFromComfortClass(ComfortClass.Unknown)
+        };
+    }
+
+    public static Ermaessigung Create(PassengerDiscount discount)
+    {
+        return new Ermaessigung
+        {
+            Art = ArtErmaessigung.GetAliasFromType(discount.Type),
+            Klasse = KlasseErmaessigung.GetAliasFromComfortClass(discount.ComfortClass)
         };
     }
 }

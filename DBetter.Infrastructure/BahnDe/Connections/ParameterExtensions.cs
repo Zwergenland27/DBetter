@@ -158,7 +158,7 @@ public static class ParameterExtensions
                 {
                     Alter = [],
                     Anzahl = 1,
-                    Ermaessigungen = [Ermaessigung.Keine()],
+                    Ermaessigungen = [Ermaessigung.None()],
                     Typ = ReisenderTyp.ERWACHSENER
                 }
             ];
@@ -175,7 +175,7 @@ public static class ParameterExtensions
             {
                 Alter = [],
                 Anzahl = bikes,
-                Ermaessigungen = [Ermaessigung.Keine()],
+                Ermaessigungen = [Ermaessigung.None()],
                 Typ = ReisenderTyp.FAHRRAD
             });
         }
@@ -186,7 +186,7 @@ public static class ParameterExtensions
             {
                 Alter = [],
                 Anzahl = dogs,
-                Ermaessigungen = [Ermaessigung.Keine()],
+                Ermaessigungen = [Ermaessigung.None()],
                 Typ = ReisenderTyp.HUND
             });
         }
@@ -220,33 +220,11 @@ public static class ParameterExtensions
 
     private static List<Ermaessigung> ToErmaessigungen(this IEnumerable<PassengerDiscount> discounts)
     {
-        var ermaessigungen = discounts.Select(discount => discount.ToErmaessigung()).ToList();
+        var ermaessigungen = discounts
+            .Where(d => d.Type is not DiscountType.DeutschlandTicket)
+            .Select(Ermaessigung.Create).ToList();
 
-        return ermaessigungen.Any() ? ermaessigungen : [Ermaessigung.Keine()];
-    }
-
-    private static Ermaessigung ToErmaessigung(this PassengerDiscount discount)
-    {
-        ArtErmaessigung art = discount.Type switch
-        {
-            DiscountType.BahnCard25 => ArtErmaessigung.BAHNCARD25,
-            DiscountType.BahnCard50 => ArtErmaessigung.BAHNCARD50,
-            DiscountType.BahnCard100 => ArtErmaessigung.BAHNCARD100,
-            _ => throw new BahnDeException("ConnectionService.ToErmaessigung", "Unknown discount type")
-        };
-
-        KlasseErmaessigung klasse = discount.ComfortClass switch
-        {
-            ComfortClass.First => KlasseErmaessigung.KLASSE_1,
-            ComfortClass.Second => KlasseErmaessigung.KLASSE_2,
-            _ => throw new BahnDeException("ConnectionService.ToErmaessigung", "Unknown comfort class")
-        };
-
-        return new Ermaessigung
-        {
-            Art = art,
-            Klasse = klasse,
-        };
+        return ermaessigungen.Any() ? ermaessigungen : [Ermaessigung.None()];
     }
     
     private static int GetMaxUmstiege(this ConnectionRequest request)

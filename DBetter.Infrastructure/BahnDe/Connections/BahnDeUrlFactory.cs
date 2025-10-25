@@ -82,24 +82,8 @@ public class BahnDeUrlFactory : IStationSelectionStage
 
     private static string GenerateUriDiscount(Ermaessigung discount)
     {
-        var type = discount.Art switch
-        {
-            ArtErmaessigung.KEINE_ERMAESSIGUNG => "16",
-            ArtErmaessigung.BAHNCARD25 => "17",
-            ArtErmaessigung.BAHNCARD50 => "23",
-            ArtErmaessigung.BAHNCARD100 => "24",
-            _ => throw new InvalidDataException()
-        };
-        
-        var comfortClass = discount.Klasse switch
-        {
-            KlasseErmaessigung.KLASSENLOS => "KLASSENLOS",
-            KlasseErmaessigung.KLASSE_1 => "KLASSE_1",
-            KlasseErmaessigung.KLASSE_2 => "KLASSE_2",
-            _ => throw new InvalidDataException()
-        };
-
-        return $"{type}:{comfortClass}";
+        var type = ArtErmaessigung.GetUrlIdFromAlias(discount.Art);
+        return $"{type}:{discount.Klasse}";
     }
 
     private void SetOrigin()
@@ -216,7 +200,7 @@ public class BahnDeUrlFactory : IStationSelectionStage
     
     private void SetDeutschlandTicketExists()
     {
-        _parameters["dltv"] = "false";
+        _parameters["dltv"] = _request.DeutschlandTicketVorhanden ? "true" : "false";
     }
 
     public BahnDeUrlFactory WithStations(List<Station> stations)
