@@ -13,12 +13,14 @@ public class ConnectionService(HttpClient http)
         var rq = JsonSerializer.Serialize(request, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Converters = { new JsonStringEnumConverter() }
         });
         
         var response = await http.PostAsJsonAsync("angebote/fahrplan", request, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Converters = {new  JsonStringEnumConverter()}
         });
 
