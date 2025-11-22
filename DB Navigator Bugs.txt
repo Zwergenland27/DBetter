@@ -1,0 +1,7 @@
+DB Navigator Bugs:
+"nach ..." Information fehlt bei einigen Zügen, oder ist teilweise ungünstig formuliert (z.B. nach KÖLN bedeutet über Köln (in dem Fall nach Karlsruhe)) 
+Macnhmal wird die JourneyId des Vortages generiert, wenn es sich um eine Nachtverbindung handelt z.B. Pennrich Gleisschleife -> Gorbitz um 00:26
+Verbindungsdetails werden für den Vortag angezeigt
+Suche nach einer Direktverbindung mit Zwischenhalt zeigt auch keine Direktverbindungen an
+Beim verlängern der Umstiegszeit wird der Parameter "minUmstiegszeit" und "maxUmstiege" nicht gesetzt und damit auch nicht bei der neuen Suche berücksichtigt
+Wenn man eine Verbindung mit Walking Section hat, und die Mindestumstiegszeit > Laufzeit ist, wird die Laufzeit auf die Mindestumstiegszeit gesetzt. Z.B. Leipzig Hbf -> Leipzig Hbf Tief (9min) mit 20Min Umstiegszeit: "Weite Anreise zur Station"
