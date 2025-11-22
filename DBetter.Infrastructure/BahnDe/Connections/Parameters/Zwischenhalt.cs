@@ -22,5 +22,6 @@ public class Zwischenhalt
     /// <summary>
     /// Allowed vehicles for the next section
     /// </summary>
-    public required List<Produktgattung> VerkehrsmittelOfNextAbschnitt  { get; set; }
+    /// <see cref="Produktgattung"/>
+    public required List<string> VerkehrsmittelOfNextAbschnitt  { get; set; }
 }

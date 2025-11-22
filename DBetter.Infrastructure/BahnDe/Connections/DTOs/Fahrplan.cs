@@ -19,14 +19,14 @@ public class Fahrplan
     /// </summary>
     public required VerbindungsReference VerbindungReference { get; set; }
 
-    public List<JourneyId> GetJourneyIds()
+    public List<BahnJourneyId> GetBahnJourneyIds()
     {
         return Verbindungen
             .SelectMany(v => v.GetJourneyIds())
             .ToList();
     }
 
-    public List<EvaNumber> GetEvaNumbers(List<JourneyId> journeyIds)
+    public List<EvaNumber> GetEvaNumbers(List<BahnJourneyId> journeyIds)
     {
         return Verbindungen
             .SelectMany(v => v.GetEvaNumbers())

@@ -19,10 +19,18 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     public DateTime? ArrivalTime { get; private set; }
     
     public IReadOnlyList<Passenger> Passengers => _passengers.AsReadOnly();
+
+    public bool AllPassengersOwnDeutschlandTicket => Passengers.All(p => p.OwnsDeutschlandTicket);
+
+    public bool AnyBikes => Passengers.Any(p => p.Bikes > 0);
     
     public ComfortClass ComfortClass { get; private set; }
     
     public Route Route { get; private set; }
+    
+    public PaginationReference? EarlierReference { get; private set; }
+    
+    public PaginationReference? LaterReference { get; private set; }
 
     private ConnectionRequest() : base(null!){}
     
@@ -44,6 +52,7 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     }
 
     public static CanFail<ConnectionRequest> Create(
+        ConnectionRequestId id,
         UserId? ownerId,
         DateTime? departureTime,
         DateTime? arrivalTime,
@@ -52,6 +61,26 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
         Route route)
     {
         if (departureTime is null && arrivalTime is null) return DomainErrors.ConnectionRequest.NoTimeSpecified;
-        return new ConnectionRequest(ConnectionRequestId.CreateNew(), ownerId, departureTime, arrivalTime, passengers, comfortClass, route);
+        return new ConnectionRequest(id, ownerId, departureTime, arrivalTime, passengers, comfortClass, route);
+    }
+
+    public void InitializeLaterReference(string earlierRef, string laterRef)
+    {
+        EarlierReference = PaginationReference.Create(laterRef);
+        LaterReference = PaginationReference.Create(laterRef);
+    }
+
+    public CanFail EarlierUsed(string earlierRef)
+    {
+        if (EarlierReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
+        EarlierReference = PaginationReference.Create(earlierRef);
+        return CanFail.Success;
+    }
+    
+    public CanFail LaterUsed(string laterRef)
+    {
+        if (EarlierReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
+        EarlierReference = PaginationReference.Create(laterRef);
+        return CanFail.Success;
     }
 }

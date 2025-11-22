@@ -11,7 +11,8 @@ public class AuslastungsMeldung
     /// <summary>
     /// Comfort Class of the occupancy value
     /// </summary>
-    public required Klasse Klasse { get; set; }
+    /// <see cref="Klasse"/>
+    public required string Klasse { get; set; }
     
     /// <summary>
     /// Demand

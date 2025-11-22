@@ -20,7 +20,7 @@ public class RouteQueryRepository(
         
         routeInfos.Scraped();
         
-        var fahrt = await service.GetFahrtAsync(routeInfos.JourneyId.Value);
+        var fahrt = await service.GetFahrtAsync(routeInfos.BahnJourneyId.Value);
 
         if (fahrt is null) return null;
 

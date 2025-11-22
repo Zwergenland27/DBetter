@@ -84,7 +84,8 @@ public class Verbindung : IHasMessage, IHasDemandInformation
     /// <summary>
     /// Price category of the price offer
     /// </summary>
-    public Klasse? AngebotsPreisKlasse { get; set; }
+    /// <see cref="Klasse"/>
+    public string? AngebotsPreisKlasse { get; set; }
     
     /// <summary>
     /// Indicates wether the price is only for a part of the route
@@ -96,7 +97,7 @@ public class Verbindung : IHasMessage, IHasDemandInformation
     /// </summary>
     public List<Meldung>? MeldungenAsObject { get; set; }
 
-    public List<JourneyId> GetJourneyIds(){
+    public List<BahnJourneyId> GetJourneyIds(){
         return VerbindungsAbschnitte
             .Where(va => va.JourneyId is not null)
             .Select(va => va.GetJourneyId())

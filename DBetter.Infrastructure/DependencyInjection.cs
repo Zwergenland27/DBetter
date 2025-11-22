@@ -1,9 +1,8 @@
 using DBetter.Application.Abstractions.Persistence;
-using DBetter.Application.Connections;
+using DBetter.Application.Requests;
 using DBetter.Application.Routes;
 using DBetter.Application.Stations;
 using DBetter.Application.Users;
-using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.ApiMarketplace;
 using DBetter.Infrastructure.Authentication;
@@ -13,7 +12,6 @@ using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace DBetter.Infrastructure;
 
@@ -36,7 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
         services.AddScoped<IStationQueryRepository, StationQueryRepository>();
-        services.AddScoped<IConnectionsQueryRepository, ConnectionsQueryRepository>();
+        services.AddScoped<IConnectionSuggestionService, ConnectionSuggestionService>();
         services.AddScoped<IRouteQueryRepository, RouteQueryRepository>();
         return services;
     }

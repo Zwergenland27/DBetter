@@ -8,7 +8,7 @@ namespace DBetter.Infrastructure.BahnDe.Connections.Parameters;
 public static class KlasseErmaessigung
 {
     private record ComfortClassWithAlias(string Alias, ComfortClass ComfortClass);
-    private static List<ComfortClassWithAlias> _comfortClasses =
+    private static readonly ComfortClassWithAlias[] ComfortClasses =
     [
         new("KLASSE_1", ComfortClass.First),
         new("KLASSE_2", ComfortClass.Second),
@@ -17,7 +17,7 @@ public static class KlasseErmaessigung
     
     public static ComfortClass GetComfortClassFromAlias(string alias)
     {
-        var result = _comfortClasses.FirstOrDefault(x => x.Alias == alias);
+        var result = ComfortClasses.FirstOrDefault(x => x.Alias == alias);
 
         if (result is null)
         {
@@ -29,7 +29,7 @@ public static class KlasseErmaessigung
 
     public static string GetAliasFromComfortClass(ComfortClass comfortClass)
     {
-        var result = _comfortClasses.FirstOrDefault(x => x.ComfortClass == comfortClass);
+        var result = ComfortClasses.FirstOrDefault(x => x.ComfortClass == comfortClass);
 
         if (result is null)
         {

@@ -1,181 +1,68 @@
-using DBetter.Contracts.Connections.Queries.GetSuggestions.Results;
-using DBetter.Contracts.Shared.DTOs;
-using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
+using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
-using DBetter.Infrastructure.BahnDe.Connections.Entities;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
-using DBetter.Infrastructure.Repositories;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
-public interface IConnectionsRequestIdSelectionStage {
-    IConnectionsExistingRoutesSelectionStage WithRequest(ConnectionRequestId id, ReiseAnfrage anfrage);
-}
-
-public interface IConnectionsExistingRoutesSelectionStage
-{
-    IConnectionsExistingStationsSelectionStage WithExistingRoutes(Dictionary<JourneyId, RouteEntity> existingRoutes);
-}
-
-public interface IConnectionsExistingStationsSelectionStage
-{
-    IConnectionsFactory WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
-}
-
-public interface IConnectionsFactory {
-    IReadOnlyList<Station> StationsToCreate { get; }
-
-    IReadOnlyList<RouteEntity> RoutesToCreate { get; }
-
-    IReadOnlyList<ConnectionEntity> ConnectionsToCreate { get; }
-
-    public ConnectionSuggestionsDto SuggestionsDto { get; }
-}
-
-public interface IConnectionRequestIdSelectionStage {
-    IConnectionExistingRoutesSelectionStage WithRequest(ConnectionRequestId id);
-}
-
-public interface IConnectionExistingRoutesSelectionStage
-{
-    IConnectionExistingStationsSelectionStage WithExistingRoutes(Dictionary<JourneyId, RouteEntity> existingRoutes);
-}
-
-public interface IConnectionExistingStationsSelectionStage
-{
-    IConnectionFactory WithExistingStations(Dictionary<EvaNumber, Station> existingStations);
-}
-
-public interface IConnectionFactory {
-    IReadOnlyList<Station> StationsToCreate { get; }
-
-    IReadOnlyList<RouteEntity> RoutesToCreate { get; }
-
-    IReadOnlyList<ConnectionEntity> ConnectionsToCreate { get; }
-
-    public ConnectionDto ConnectionDto { get; }
-}
-
-public class ConnectionFactory :
-    IConnectionsRequestIdSelectionStage, IConnectionsExistingRoutesSelectionStage, IConnectionsExistingStationsSelectionStage, IConnectionsFactory,
-    IConnectionRequestIdSelectionStage, IConnectionExistingRoutesSelectionStage, IConnectionExistingStationsSelectionStage,  IConnectionFactory
+public class ConnectionFactory
 {
     private List<Station> _stationsToCreate = [];
     private List<RouteEntity> _routesToCreate = [];
-    private List<ConnectionEntity> _connectionsToCreate = [];
     
-    private Fahrplan? _fahrplan;
-    private Teilstrecke? _teilstrecke;
+    private List<Verbindung> _verbindungen;
+    private BahnDeUrlFactory _urlFactory;
 
-    private ConnectionRequestId? _requestId;
-    private ReiseAnfrage? _anfrage;
-
-    private Dictionary<JourneyId, RouteEntity> _existingRoutes = [];
+    private Dictionary<BahnJourneyId, RouteEntity> _existingRoutes = [];
     private Dictionary<EvaNumber, Station> _existingStations = [];
 
-    private ConnectionFactory(Fahrplan fahrplan)
+    public ConnectionFactory(
+        List<Verbindung> verbindungen,
+        ReiseAnfrage originalRequest,
+        Dictionary<BahnJourneyId, RouteEntity> existingRoutes,
+        Dictionary<EvaNumber, Station> existingStations)
     {
-        _fahrplan = fahrplan;
+        _verbindungen = verbindungen;
+        _urlFactory = BahnDeUrlFactory
+            .CreateFrom(originalRequest)
+            .WithStations(existingStations.Select(d => d.Value).ToList());
+        _existingRoutes = existingRoutes;
+        _existingStations = existingStations;
     }
-
-    private ConnectionFactory(Teilstrecke teilstrecke)
-    {
-        _teilstrecke = teilstrecke;
-    }
+    
     
     public IReadOnlyList<Station> StationsToCreate => _stationsToCreate.AsReadOnly();
     public IReadOnlyList<RouteEntity> RoutesToCreate => _routesToCreate.AsReadOnly();
-    public IReadOnlyList<ConnectionEntity> ConnectionsToCreate => _connectionsToCreate.AsReadOnly();
 
-    public ConnectionSuggestionsDto SuggestionsDto { get; private set; } = null!;
-
-    public ConnectionDto ConnectionDto {get; private set; } = null!;
-    
-    public static IConnectionsRequestIdSelectionStage CreateFrom(Fahrplan fahrplan)
+    public List<ConnectionResponse> GetConnections()
     {
-        return new ConnectionFactory(fahrplan);
-    }
-
-    public static IConnectionRequestIdSelectionStage CreateFrom(Teilstrecke teilstrecke){
-        return new ConnectionFactory(teilstrecke);
-    }
-
-    IConnectionsExistingRoutesSelectionStage IConnectionsRequestIdSelectionStage.WithRequest(ConnectionRequestId id, ReiseAnfrage anfrage)
-    {
-        _requestId = id;
-        _anfrage = anfrage;
-        return this;
-    }
-
-    IConnectionExistingRoutesSelectionStage IConnectionRequestIdSelectionStage.WithRequest(ConnectionRequestId id)
-    {
-        _requestId = id;
-        return this;
-    }
-
-    IConnectionsExistingStationsSelectionStage IConnectionsExistingRoutesSelectionStage.WithExistingRoutes(Dictionary<JourneyId, RouteEntity> existingRoutes)
-    {
-        _existingRoutes = existingRoutes;
-        return this;
-    }
-
-    IConnectionExistingStationsSelectionStage IConnectionExistingRoutesSelectionStage.WithExistingRoutes(Dictionary<JourneyId, RouteEntity> existingRoutes){
-        _existingRoutes = existingRoutes;
-        return this;
-    }
-
-    IConnectionsFactory IConnectionsExistingStationsSelectionStage.WithExistingStations(Dictionary<EvaNumber, Station> existingStations)
-    {
-        _existingStations = existingStations;
-        
-        SuggestionsDto = new ConnectionSuggestionsDto
-        {
-            RequestId = _requestId!.Value.ToString(),
-            Connections = GetConnections(),
-            PageEarlier = _fahrplan!.VerbindungReference.Earlier,
-            PageLater = _fahrplan!.VerbindungReference.Later,
-        };
-
-        return this;
-    }
-
-    IConnectionFactory IConnectionExistingStationsSelectionStage.WithExistingStations(Dictionary<EvaNumber, Station> existingStations){
-        _existingStations = existingStations;
-        
-        ConnectionDto = ToDto(_teilstrecke!.Verbindung);
-        
-        return this;
-    }
-
-    private List<ConnectionDto> GetConnections()
-    {
-        return _fahrplan!.Verbindungen
+        return _verbindungen
             .Select(ToDto)
             .ToList();
     }
 
-    private ConnectionDto ToDto(Verbindung verbindung)
+    private ConnectionResponse ToDto(Verbindung verbindung)
     {
-        OfferDto? offer = null;
+        OfferResponse? offer = null;
         if (verbindung.AngebotsPreis is not null)
         {
-            offer = new OfferDto
+            offer = new OfferResponse
             {
-                ComfortClass = verbindung.AngebotsPreisKlasse!.Value.ToComfortClass().ToString(),
+                ComfortClass = Klasse.GetComfortClassFromAlias(verbindung.AngebotsPreisKlasse!).ToString(),
                 Price = verbindung.AngebotsPreis.Betrag,
                 Currency = verbindung.AngebotsPreis.Waehrung.ToCurrency().ToString(),
                 Partial = verbindung.HasTeilpreis
             };
         }
 
-        List<SegmentDto> segments = [];
+        List<SegmentResponse> segments = [];
         var differentOrigin = false;
 
         foreach (var abschnitt in verbindung.VerbindungsAbschnitte)
@@ -184,7 +71,7 @@ public class ConnectionFactory :
             {
                 if (segments.Count > 0)
                 {
-                    segments.Add(new WalkingSegmentDto
+                    segments.Add(new WalkingSegmentResponse
                     {
                         Distance = abschnitt.Distanz!.Value,
                         WalkDuration = abschnitt.AbschnittsDauer
@@ -198,9 +85,9 @@ public class ConnectionFactory :
                 continue;
             }
             
-            if (segments.LastOrDefault() is TransportSegmentDto)
+            if (segments.LastOrDefault() is TransportSegmentResponse)
             {
-                segments.Add(new TransferSegmentDto());
+                segments.Add(new TransferSegmentResponse());
             }
             
             segments.Add(GetTransportSegment(abschnitt));
@@ -208,38 +95,27 @@ public class ConnectionFactory :
         
         var differentDestination = false;
         var lastSegment = segments.LastOrDefault();
-        if (lastSegment is WalkingSegmentDto)
+        if (lastSegment is WalkingSegmentResponse)
         {
             segments.Remove(lastSegment);
             differentDestination = true;
         }
 
-        var connectionId = ConnectionId.CreateNew();
-
-        _connectionsToCreate.Add(new ConnectionEntity(
-            connectionId,
-            _requestId!,
-            verbindung.CtxRecon
-        ));
-
-        return new ConnectionDto
+        return new ConnectionResponse
             {
-                Id = connectionId.Value.ToString(),
+                Id = ConnectionId.CreateNew().Value.ToString(),
                 DifferentOrigin = differentOrigin,
                 DifferentDestination = differentDestination,
-                BahnDeUrl = BahnDeUrlFactory.FromRequest(_anfrage!)
-                    .WithStations(_existingStations.Select(kvp => kvp.Value).ToList())
-                    .ForConnection(verbindung.CtxRecon)
-                    .BahnDeUrl,
+                BahnDeUrl = _urlFactory.ForConnection(verbindung.CtxRecon),
                 Demand = verbindung.GetDemand().ToDto(),
                 Segments = segments,
                 Offer = offer
             };
     }
 
-    private TransportSegmentDto GetTransportSegment(VerbindungsAbschnitt verbindungsabschnitt)
+    private TransportSegmentResponse GetTransportSegment(VerbindungsAbschnitt verbindungsabschnitt)
     {
-        var journeyId = new JourneyId(verbindungsabschnitt.JourneyId!);
+        var journeyId = new BahnJourneyId(verbindungsabschnitt.JourneyId!);
 
         var destinationEvaNumber = journeyId.GetDestinationEvaNumber();
         
@@ -247,7 +123,7 @@ public class ConnectionFactory :
         if (!routeExists)
         {
             var routeInformation = RouteInformationFactory.Create(
-                verbindungsabschnitt.Verkehrsmittel.ProduktGattung!.Value,
+                Produktgattung.GetTransportCategoryFromAlias(verbindungsabschnitt.Verkehrsmittel.ProduktGattung!),
                 verbindungsabschnitt.Verkehrsmittel.MittelText!, 
                 verbindungsabschnitt.Verkehrsmittel.LangText!)[0];
             
@@ -271,7 +147,7 @@ public class ConnectionFactory :
             destination = station?.Name.NormalizedValue;
         }
         
-        return new TransportSegmentDto
+        return new TransportSegmentResponse
         {
             DepartureTime = verbindungsabschnitt.GetDepartureTime().ToDto()!,
             ArrivalTime = verbindungsabschnitt.GetArrivalTime().ToDto()!,
@@ -295,13 +171,13 @@ public class ConnectionFactory :
         };
     }
 
-    private List<StopDto> GetStops(VerbindungsAbschnitt verbindungsabschnitt){
+    private List<StopResponse> GetStops(VerbindungsAbschnitt verbindungsabschnitt){
         return verbindungsabschnitt.Halte
             .Select(ToDto)
             .ToList();
     }
 
-    private StopDto ToDto(DTOs.Halt halt){
+    private StopResponse ToDto(DTOs.Halt halt){
         var evaNumber = EvaNumber.Create(halt.ExtId).Value;
         var stationExists = _existingStations.TryGetValue(evaNumber, out var station);
         if(!stationExists){
@@ -317,7 +193,7 @@ public class ConnectionFactory :
             _existingStations.Add(evaNumber, station);
         }
 
-        return new StopDto {
+        return new StopResponse {
             Id = station!.Id.Value.ToString(),
             DepartureTime = halt.GetDepartureTime().ToDto(),
             ArrivalTime = halt.GetArrivalTime().ToDto(),

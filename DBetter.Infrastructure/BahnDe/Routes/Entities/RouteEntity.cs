@@ -8,7 +8,7 @@ public class RouteEntity
     private bool _hasBeenScraped = false;
     public RouteId Id { get; private set; }
     
-    public JourneyId JourneyId { get; private set; }
+    public BahnJourneyId BahnJourneyId { get; private set; }
     
     public ServiceInformation Information { get; private set; }
     
@@ -26,11 +26,11 @@ public class RouteEntity
 
     public RouteEntity(
         RouteId id,
-        JourneyId journeyId,
+        BahnJourneyId bahnJourneyId,
         ServiceInformation information)
     {
         Id = id;
-        JourneyId = journeyId;
+        BahnJourneyId = bahnJourneyId;
         Information = information;
     }
 

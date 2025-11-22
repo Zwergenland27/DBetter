@@ -10,15 +10,10 @@ public class ConnectionService(HttpClient http)
 {
     public async Task<Fahrplan> GetSuggestionsAsync(ReiseAnfrage request)
     {
-        var rq = JsonSerializer.Serialize(request, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter() }
-        });
-        
         var response = await http.PostAsJsonAsync("angebote/fahrplan", request, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Converters = {new  JsonStringEnumConverter()}
         });
 

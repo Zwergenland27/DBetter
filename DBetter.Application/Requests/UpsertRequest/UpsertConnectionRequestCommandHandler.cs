@@ -1,0 +1,30 @@
+using CleanDomainValidation.Domain;
+using DBetter.Application.Abstractions.Messaging;
+using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
+using DBetter.Domain.ConnectionRequests;
+
+namespace DBetter.Application.Requests.UpsertRequest;
+
+public class UpsertConnectionRequestCommandHandler(
+    IConnectionSuggestionService suggestionService,
+    IConnectionRequestRepository connectionRequestRepository) : ICommandHandler<UpsertConnectionRequestCommand, List<ConnectionResponse>>
+{
+    public async Task<CanFail<List<ConnectionResponse>>> Handle(UpsertConnectionRequestCommand request, CancellationToken cancellationToken)
+    {
+        var connectionRequest = request.Request;
+        
+        var suggestionsDto = await suggestionService.GetConnectionSuggestionsAsync(connectionRequest, SuggestionMode.Normal);
+
+        var earlierRef = suggestionsDto.EarlierRef;
+        var laterRef = suggestionsDto.LaterRef;
+        
+        if (earlierRef is not null && laterRef is not null)
+        {
+            connectionRequest.InitializeLaterReference(earlierRef,  laterRef);
+        }
+        
+        connectionRequestRepository.Store(connectionRequest);
+        
+        return suggestionsDto.Connections;
+    }
+}

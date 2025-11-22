@@ -1,14 +1,11 @@
-using System.ComponentModel;
-using System.Threading.RateLimiting;
 using DBetter.Domain.Routes.ValueObjects;
-using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
 public class RouteInformationFactory
 {
     
-    private static ServiceInformation Create(Produktgattung gattung, string fullName)
+    private static ServiceInformation Create(TransportCategory category, string fullName)
     {
         var information = fullName.Split(' ');
 
@@ -66,10 +63,10 @@ public class RouteInformationFactory
             trainNumber = GetServiceNumber(numberInfo);
         }
         
-        return new ServiceInformation(gattung.AsDomain(), productClass, trainLine, trainNumber);
+        return new ServiceInformation(category, productClass, trainLine, trainNumber);
     }
 
-    public static List<ServiceInformation> Create(Produktgattung transportCategory, string leadingVehicleName, string fullName)
+    public static List<ServiceInformation> Create(TransportCategory transportCategory, string leadingVehicleName, string fullName)
     {
         var fullNames = fullName.Split(" / ")
             .OrderBy(n => !n.Contains(leadingVehicleName))

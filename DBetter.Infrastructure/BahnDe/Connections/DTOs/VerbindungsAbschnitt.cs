@@ -147,9 +147,9 @@ public class VerbindungsAbschnitt : IHasMessage, IHasDemandInformation
     /// <example>116</example>
     public int? Distanz { get; set; }
 
-    public JourneyId GetJourneyId(){
+    public BahnJourneyId GetJourneyId(){
         if(JourneyId is null) throw new BahnDeException("Verbindungsabschnitt", "A walking section does not have a journeyId");
-        return new JourneyId(JourneyId);
+        return new BahnJourneyId(JourneyId);
     }
 
     public List<EvaNumber> GetEvaNumbers(){

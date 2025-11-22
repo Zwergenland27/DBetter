@@ -30,5 +30,30 @@ public class Reisender
     /// <summary>
     /// Type of the passenger
     /// </summary>
-    public required ReisenderTyp Typ { get; set; }
+    /// <remarks>Use <see cref="ReisenderTyp"/> to serialize / deserialize this string</remarks>
+    public required string Typ { get; set; }
+
+    public static Reisender Default => new()
+    {
+        Alter = [],
+        Anzahl = 1,
+        Ermaessigungen = [Ermaessigung.None()],
+        Typ = ReisenderTyp.GetTypeFromAge(30)
+    };
+
+    public static Reisender Bikes(int number) => new()
+    {
+        Alter = [],
+        Anzahl = number,
+        Ermaessigungen = [Ermaessigung.None()],
+        Typ = ReisenderTyp.GetBikeAlias()
+    };
+    
+    public static Reisender Dogs(int number) => new()
+    {
+        Alter = [],
+        Anzahl = number,
+        Ermaessigungen = [Ermaessigung.None()],
+        Typ = ReisenderTyp.GetDogAlias()
+    };
 }

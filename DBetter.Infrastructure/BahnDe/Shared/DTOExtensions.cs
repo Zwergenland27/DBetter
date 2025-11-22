@@ -27,24 +27,6 @@ public static class DTOExtensions
         return [];
     }
     
-    public static TransportCategory AsDomain(this Produktgattung gattung)
-    {
-        return gattung switch
-        {
-            Produktgattung.ICE => TransportCategory.HighSpeedTrain,
-            Produktgattung.EC_IC => TransportCategory.FastTrain,
-            Produktgattung.IR => TransportCategory.FastTrain,
-            Produktgattung.REGIONAL => TransportCategory.RegionalTrain,
-            Produktgattung.SBAHN => TransportCategory.SuburbanTrain,
-            Produktgattung.BUS => TransportCategory.Bus,
-            Produktgattung.SCHIFF => TransportCategory.Boat,
-            Produktgattung.UBAHN => TransportCategory.UndergroundTrain,
-            Produktgattung.TRAM => TransportCategory.Tram,
-            Produktgattung.ERSATZVERKEHR => TransportCategory.Replacement,
-            Produktgattung.ANRUFPFLICHTIG => TransportCategory.CallService,
-            _ => throw new InvalidDataException()
-        };
-    }
     
     public static DateTime? ConvertToDateTime(this string? bahnDateString)
     {
@@ -58,12 +40,12 @@ public static class DTOExtensions
     public static Demand GetDemand(this IHasDemandInformation auslastung)
     {
         var firstClassDemand = auslastung.Auslastungsmeldungen
-            .Where(m => m.Klasse == Klasse.KLASSE_1)
+            .Where(m => m.Klasse == Klasse.GetAliasFromComfortClass(ComfortClass.First))
             .Select(a => a.Stufe)
             .FirstOrDefault();
         
         var secondClassDemand = auslastung.Auslastungsmeldungen
-            .Where(m => m.Klasse == Klasse.KLASSE_2)
+            .Where(m => m.Klasse == Klasse.GetAliasFromComfortClass(ComfortClass.Second))
             .Select(a => a.Stufe)
             .FirstOrDefault();
 
@@ -199,15 +181,6 @@ public static class DTOExtensions
         }
 
         return line;
-    }
-    public static ComfortClass ToComfortClass(this Klasse klasse)
-    {
-        return klasse switch
-        {
-            Klasse.KLASSE_1 => ComfortClass.First,
-            Klasse.KLASSE_2 => ComfortClass.Second,
-            _ => ComfortClass.Unknown
-        };
     }
 
     public static Currency ToCurrency(this Waehrung currency)

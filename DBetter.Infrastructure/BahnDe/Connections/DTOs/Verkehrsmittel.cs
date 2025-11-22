@@ -14,7 +14,8 @@ public class Verkehrsmittel
     /// <remarks>
     /// Null if <see cref="Typ"/> is <see cref="VerkehrsmittelTyp.WALK"/>
     /// </remarks>
-    public Produktgattung?  ProduktGattung { get; set; }
+    /// <see cref="ProduktGattung"/>
+    public string?  ProduktGattung { get; set; }
     
     /// <summary>
     /// Name

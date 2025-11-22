@@ -83,7 +83,7 @@ app.UseAuthorization();
 app.AddStationEndpoints();
 app.AddUserEndpoints();
 app.AddAuthenticationEndpoints();
-app.AddConnectionEndpoints();
+app.AddRequestEndpoints();
 app.AddRouteEndpoints();
 
 app.Run();

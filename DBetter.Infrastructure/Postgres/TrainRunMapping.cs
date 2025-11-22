@@ -14,7 +14,7 @@ public class RouteMapping : IEntityTypeConfiguration<RouteEntity>
         
         builder.HasKey(x => x.Id);
         
-        builder.HasIndex(x => x.JourneyId)
+        builder.HasIndex(x => x.BahnJourneyId)
             .IsUnique();
         
         builder.Property(x => x.Id)
@@ -22,10 +22,10 @@ public class RouteMapping : IEntityTypeConfiguration<RouteEntity>
                 id => id.Value,
                 value => new RouteId(value));
 
-        builder.Property(x => x.JourneyId)
+        builder.Property(x => x.BahnJourneyId)
             .HasConversion(
                 id => id.Value,
-                value => new JourneyId(value));
+                value => new BahnJourneyId(value));
         
         builder.OwnsOne(x => x.Information, tib =>
         {

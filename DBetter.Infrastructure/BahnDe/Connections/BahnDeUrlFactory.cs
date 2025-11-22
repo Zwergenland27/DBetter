@@ -1,59 +1,89 @@
 using System.Web;
 using DBetter.Domain.Stations;
-using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
-public interface IStationSelectionStage
+public interface IBahnDeUrlFactoryStationSelectionStage
 {
     BahnDeUrlFactory WithStations(List<Station> stations);
 }
 
-public class BahnDeUrlFactory : IStationSelectionStage
+public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
 {
     private const string BaseUrl = "https://www.bahn.de/buchung/fahrplan/suche#";
 
 
-    private ReiseAnfrage _request;
-    private List<Station>? _stations;
+    private readonly ReiseAnfrage _request;
+    private List<Station> _stations;
+    
     private Dictionary<string, string> _parameters = [];
-    private string UrlParameters => string.Join("&", _parameters.Select(kvp => $"{kvp.Key}={HttpUtility.UrlEncode(kvp.Value)}"));
-    public string BahnDeUrl => BaseUrl + UrlParameters;
+    public string GenericUrl { get; private set; }
 
     private BahnDeUrlFactory(ReiseAnfrage request)
     {
         _request = request;
     }
 
-    public static IStationSelectionStage FromRequest(ReiseAnfrage request)
+    public static IBahnDeUrlFactoryStationSelectionStage CreateFrom(ReiseAnfrage request)
     {
         return new BahnDeUrlFactory(request);
+    }
+    
+    public BahnDeUrlFactory WithStations(List<Station> stations)
+    {
+        _stations = stations;
+        GenericUrl = Build();
+        return this;
+    }
+
+    public string ForConnection(string ctxRecon)
+    {
+        return $"{GenericUrl}&gh={ctxRecon}&cbs=true";
+    }
+
+    private string Build()
+    {
+        SetComfortClass();
+        SetPassengers();
+        SetOrigin();
+        SetDestination();
+    
+        if (_request.AnkunftSuche == AnkunftSuche.Departure)
+        {
+            SetDepartureTime();
+        }
+        else
+        {
+            SetArrivalTime();
+        }
+        
+        SetStopovers();
+        SetSeatReservationOnly();
+        SetFastConnectionsOnly();
+        SetDirectConnectionsOnly();
+        SetBikeCarriage();
+        SetMinTransferTime();
+        SetShowBestPrices();
+        SetDeutschlandTicketExists();
+        SetDeutschlandTicketOnly();
+        
+        return string.Join("&", _parameters.Select(kvp => $"{kvp.Key}={HttpUtility.UrlEncode(kvp.Value)}"));
     }
 
     private void SetComfortClass()
     {
-        _parameters["kl"] = _request.Klasse is Klasse.KLASSE_1 ? "1" : "2";
+        _parameters["kl"] = Klasse.GetUrlAliasFromAlias(_request.Klasse);
     }
 
     private void SetPassengers()
     {
-        _parameters["r"] = string.Join(',', _request.Reisende.Select(GeneratePassenger));
+        _parameters["r"] = string.Join(',', _request.Reisende.Select(ToReisender));
     }
     
-    private static string GeneratePassenger(Reisender passenger)
+    private static string ToReisender(Reisender passenger)
     {
-        var type = passenger.Typ switch
-        {
-            ReisenderTyp.FAHRRAD => 3,
-            ReisenderTyp.HUND => 14,
-            ReisenderTyp.KLEINKIND => 8,
-            ReisenderTyp.FAMILIENKIND => 11,
-            ReisenderTyp.JUGENDLICHER => 9,
-            ReisenderTyp.ERWACHSENER => 13,
-            ReisenderTyp.SENIOR => 12,
-            _ => throw new InvalidDataException()
-        };
+        var type = ReisenderTyp.GetUrlIdFromType(passenger.Typ);
 
         var count = passenger.Anzahl;
 
@@ -88,8 +118,6 @@ public class BahnDeUrlFactory : IStationSelectionStage
 
     private void SetOrigin()
     {
-        if(_stations is null) throw new InvalidOperationException("Cannot set origin without .WithStations being called");
-        
         _parameters["sot"] = "ST";
         var name = _stations
             .First(s => s.EvaNumber.AsFuzzy() == _request.AbfahrtsHalt)
@@ -140,27 +168,9 @@ public class BahnDeUrlFactory : IStationSelectionStage
             $"[\"{stopover.Id}\",\"{name}\",{stopover.Aufenthaltsdauer ?? 0},\"{GenerateAllowedMeansOfTransport(stopover.VerkehrsmittelOfNextAbschnitt)}\"]";
     }
 
-    private static string GenerateAllowedMeansOfTransport(List<Produktgattung> produktgattungen)
+    private static string GenerateAllowedMeansOfTransport(List<string> produktgattungen)
     {
-        return string.Join(',', produktgattungen.Select(GenerateMeansOfTransportUriNumber));
-    }
-
-    private static string GenerateMeansOfTransportUriNumber(Produktgattung produktgattung)
-    {
-        return produktgattung switch
-        {
-            Produktgattung.ICE => "00",
-            Produktgattung.EC_IC => "01",
-            Produktgattung.IR => "02",
-            Produktgattung.REGIONAL => "03",
-            Produktgattung.SBAHN => "04",
-            Produktgattung.BUS => "05",
-            Produktgattung.SCHIFF => "06",
-            Produktgattung.UBAHN => "07",
-            Produktgattung.TRAM => "08",
-            Produktgattung.ANRUFPFLICHTIG => "09",
-            _ => throw new InvalidDataException()
-        };
+        return string.Join(',', produktgattungen.Select(Produktgattung.GetUrlIdsFromAlias));
     }
 
     private void SetSeatReservationOnly()
@@ -201,41 +211,5 @@ public class BahnDeUrlFactory : IStationSelectionStage
     private void SetDeutschlandTicketExists()
     {
         _parameters["dltv"] = _request.DeutschlandTicketVorhanden ? "true" : "false";
-    }
-
-    public BahnDeUrlFactory WithStations(List<Station> stations)
-    {
-        _stations = stations;
-        SetComfortClass();
-        SetPassengers();
-        SetOrigin();
-        SetDestination();
-
-        if (_request.AnkunftSuche is AnkunftSuche.ABFAHRT)
-        {
-            SetDepartureTime();
-        }
-        else
-        {
-            SetArrivalTime();
-        }
-        
-        SetStopovers();
-        SetSeatReservationOnly();
-        SetFastConnectionsOnly();
-        SetDirectConnectionsOnly();
-        SetBikeCarriage();
-        SetMinTransferTime();
-        SetShowBestPrices();
-        SetDeutschlandTicketExists();
-        SetDeutschlandTicketOnly();
-        return this;
-    }
-
-    public BahnDeUrlFactory ForConnection(string ctxRecon)
-    {
-        _parameters["gh"] = ctxRecon;
-        _parameters["cbs"] = "true";
-        return this;
     }
 }

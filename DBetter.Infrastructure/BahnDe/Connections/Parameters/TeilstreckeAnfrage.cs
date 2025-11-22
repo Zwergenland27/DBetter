@@ -7,17 +7,20 @@ public class TeilstreckeAnfrage
     /// <summary>
     /// Comfort Class of travel
     /// </summary>
-    public required Klasse Klasse { get; set; }
+    /// <see cref="Klasse"/>
+    public required string Klasse { get; set; }
     
     /// <summary>
     /// Sets the <see cref="AnfrageZeitpunkt"/> to departure or arrival
     /// </summary>
-    public required AnkunftSuche AnkunftSuche { get; set; }
+    /// <remarks>Either "ANKUNFT" or "ABFAHRT"</remarks>
+    public required string AnkunftSuche { get; set; }
     
     /// <summary>
     /// Allowed vehicles for the journey
     /// </summary>
-    public required List<Produktgattung> Produktgattungen { get; set; }
+    /// <see cref="Produktgattungen"/>
+    public required List<string> Produktgattungen { get; set; }
     
     /// <summary>
     /// Passengers
