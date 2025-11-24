@@ -8,6 +8,7 @@ using DBetter.Infrastructure.ApiMarketplace;
 using DBetter.Infrastructure.Authentication;
 using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe;
+using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,7 @@ public static class DependencyInjection
     {
         services.AddRepositories();
         services.AddPostgres(configuration);
+        services.AddOutbox();
         services.AddJwtAuthentication(configuration);
         services.AddBahnApi();
         services.AddApiMarketplace(configuration);
