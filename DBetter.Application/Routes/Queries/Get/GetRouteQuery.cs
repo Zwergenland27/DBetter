@@ -1,8 +1,7 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
-using DBetter.Application.Abstractions.Messaging;
+using CleanMediator.Commands;
 using DBetter.Contracts.Routes.Queries.Get;
-using DBetter.Domain.Routes;
 using DBetter.Domain.Routes.ValueObjects;
 
 namespace DBetter.Application.Routes.Queries.Get;

@@ -1,5 +1,5 @@
-using MediatR;
+using CleanMediator.Events;
 
 namespace DBetter.Domain.Abstractions;
 
-public interface IDomainEvent : INotification;
+public interface IDomainEvent : IEvent;

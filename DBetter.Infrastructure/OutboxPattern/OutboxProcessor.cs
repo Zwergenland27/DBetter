@@ -1,6 +1,7 @@
+using CleanMediator;
+using CleanMediator.Events;
 using DBetter.Domain.Abstractions;
 using DBetter.Infrastructure.Postgres;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 
@@ -23,7 +24,7 @@ public class OutboxProcessor(
         foreach (var message in messages)
         {
             IDomainEvent @event = message.ExtractEvent();
-            await mediator.Publish(@event);
+            var result = await mediator.PublishAsync(@event);
             message.Processed();
         }
         

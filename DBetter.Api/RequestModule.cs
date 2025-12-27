@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using CleanDomainValidation.Application;
+using CleanMediator;
 using DBetter.Application.Requests;
 using DBetter.Application.Requests.GetSuggestions;
 using DBetter.Application.Requests.UpsertRequest;
 using DBetter.Contracts.Requests.CreateRequest;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Parameters;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
-using MediatR;
 
 namespace DBetter.Api;
 

@@ -1,6 +1,6 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
-using DBetter.Application.Abstractions.Messaging;
+using CleanMediator.Commands;
 using DBetter.Contracts.Users.Commands.Login;
 using DBetter.Domain.Users.ValueObjects;
 

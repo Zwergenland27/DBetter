@@ -1,7 +1,7 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
 using CleanDomainValidation.Domain;
-using DBetter.Application.Abstractions.Messaging;
+using CleanMediator.Queries;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Parameters;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests.ValueObjects;

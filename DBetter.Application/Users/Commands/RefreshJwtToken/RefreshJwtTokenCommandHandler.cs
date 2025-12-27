@@ -1,7 +1,6 @@
 using CleanDomainValidation.Domain;
+using CleanMediator.Commands;
 using DBetter.Application.Abstractions.Authentication;
-using DBetter.Application.Abstractions.Messaging;
-using DBetter.Contracts.Users.Commands.RefreshJwtTokenParameters;
 using DBetter.Domain.Errors;
 using DBetter.Domain.Users;
 using DBetter.Domain.Users.ValueObjects;
@@ -10,9 +9,9 @@ namespace DBetter.Application.Users.Commands.RefreshJwtToken;
 
 public class RefreshJwtTokenCommandHandler(
     IUserRepository repository,
-    ITokenGenerator tokenGenerator) : ICommandHandler<RefreshJwtTokenCommand, Tuple<String, RefreshToken>>
+    ITokenGenerator tokenGenerator) : CommandHandlerBase<RefreshJwtTokenCommand, Tuple<String, RefreshToken>>
 {
-    public async Task<CanFail<Tuple<String, RefreshToken>>> Handle(RefreshJwtTokenCommand request, CancellationToken cancellationToken)
+    public override async Task<CanFail<Tuple<String, RefreshToken>>> Handle(RefreshJwtTokenCommand request, CancellationToken cancellationToken)
     {
         var user = await repository.GetAsync(request.Id);
         if(user is null) return DomainErrors.User.InvalidCredentials;

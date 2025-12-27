@@ -1,5 +1,5 @@
 using CleanDomainValidation.Domain;
-using DBetter.Application.Abstractions.Messaging;
+using CleanMediator.Commands;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 
@@ -7,9 +7,9 @@ namespace DBetter.Application.Requests.UpsertRequest;
 
 public class UpsertConnectionRequestCommandHandler(
     IConnectionSuggestionService suggestionService,
-    IConnectionRequestRepository connectionRequestRepository) : ICommandHandler<UpsertConnectionRequestCommand, List<ConnectionResponse>>
+    IConnectionRequestRepository connectionRequestRepository) : CommandHandlerBase<UpsertConnectionRequestCommand, List<ConnectionResponse>>
 {
-    public async Task<CanFail<List<ConnectionResponse>>> Handle(UpsertConnectionRequestCommand request, CancellationToken cancellationToken)
+    public override async Task<CanFail<List<ConnectionResponse>>> Handle(UpsertConnectionRequestCommand request, CancellationToken cancellationToken)
     {
         var connectionRequest = request.Request;
         

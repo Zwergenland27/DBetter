@@ -1,7 +1,7 @@
 using CleanDomainValidation.Application;
+using CleanMediator;
 using DBetter.Application.Stations.Queries.Find;
 using DBetter.Contracts.Stations.Queries.Find;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DBetter.Api;

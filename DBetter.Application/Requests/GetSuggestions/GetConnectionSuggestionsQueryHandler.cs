@@ -1,5 +1,5 @@
 using CleanDomainValidation.Domain;
-using DBetter.Application.Abstractions.Messaging;
+using CleanMediator.Queries;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Errors;
@@ -8,9 +8,9 @@ namespace DBetter.Application.Requests.GetSuggestions;
 
 public class GetConnectionSuggestionsQueryHandler(
     IConnectionSuggestionService suggestionService,
-    IConnectionRequestRepository connectionRequestRepository) : IQueryHandler<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
+    IConnectionRequestRepository connectionRequestRepository) : QueryHandlerBase<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
 {
-    public async Task<CanFail<List<ConnectionResponse>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
+    public override async Task<CanFail<List<ConnectionResponse>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
         var connectionRequest = await connectionRequestRepository.GetById(request.Id);
         if (connectionRequest is null) return DomainErrors.ConnectionRequest.NotFound;
