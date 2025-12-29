@@ -1,4 +1,3 @@
-using DBetter.Infrastructure.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +11,7 @@ public static class DependencyInjection
     {
         var settings = new PostgreSqlSettings();
         configuration.Bind(PostgreSqlSettings.SectionName, settings);
+
         services.AddDbContext<DBetterContext>(options =>
         {
             options.UseNpgsql(settings.ConnectionString);

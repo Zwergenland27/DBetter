@@ -1,3 +1,4 @@
+using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
@@ -6,12 +7,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DBetter.Infrastructure.Postgres;
 
-public class DBetterContext(
-    DbContextOptions<DBetterContext> options) : DbContext(options)
+public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContext(options)
 {
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     
     public DbSet<User> Users { get; set; }
+    
+    public DbSet<ConnectionRequest> ConnectionRequests { get; set; }
     
     public DbSet<Station> Stations { get; set; }
     

@@ -4,5 +4,5 @@ namespace DBetter.Domain.Stations;
 
 public interface IStationRepository
 {
-    Task<Station> GetAsync(StationId id);
+    Task<Station?> GetAsync(StationId id);
 }

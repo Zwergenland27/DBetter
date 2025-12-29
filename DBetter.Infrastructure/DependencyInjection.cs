@@ -1,8 +1,12 @@
+using CleanMessageBus.Abstractions.DependencyInjection;
+using CleanMessageBus.RabbitMQ.DependencyInjection;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Requests;
 using DBetter.Application.Routes;
 using DBetter.Application.Stations;
 using DBetter.Application.Users;
+using DBetter.Domain.Abstractions;
+using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.ApiMarketplace;
@@ -26,6 +30,15 @@ public static class DependencyInjection
         services.AddJwtAuthentication(configuration);
         services.AddBahnApi();
         services.AddApiMarketplace(configuration);
+        services.AddCleanMessageBus(cfg =>
+        {
+            cfg.RegisterDomainEventsFromAssembly(typeof(AggregateRoot<>).Assembly);
+            cfg.RegisterHandlersFromAssembly(typeof(Application.DependencyInjection).Assembly);
+            cfg.UseRabbitMq(config =>
+            {
+                config.WithHostname("localhost");
+            });
+        });
         return services;
     }
     
@@ -38,6 +51,8 @@ public static class DependencyInjection
         services.AddScoped<IConnectionSuggestionService, ConnectionSuggestionService>();
         services.AddScoped<IRouteQueryRepository, RouteQueryRepository>();
         services.AddScoped<IStationInfoProvider, StationInfoProvider>();
+        services.AddScoped<IStationRepository, StationRepository>();
+        services.AddScoped<IConnectionRequestRepository, ConnectionRequestRepository>();
         return services;
     }
 }
