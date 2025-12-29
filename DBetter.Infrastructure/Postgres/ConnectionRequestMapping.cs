@@ -150,5 +150,15 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
                     transferTime => transferTime.Value,
                     value => TransferTime.Create(value).Value);
         });
+
+        builder.Property(x => x.EarlierReference)
+            .HasConversion(
+                reference => reference != null ? reference.ToString() : null,
+                value => value != null ? PaginationReference.Create(value) : null);
+        
+        builder.Property(x => x.LaterReference)
+            .HasConversion(
+                reference => reference != null ? reference.ToString() : null,
+                value => value != null ? PaginationReference.Create(value) : null);
     }
 }
