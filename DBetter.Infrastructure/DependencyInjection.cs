@@ -3,10 +3,10 @@ using DBetter.Application.Requests;
 using DBetter.Application.Routes;
 using DBetter.Application.Stations;
 using DBetter.Application.Users;
+using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.ApiMarketplace;
 using DBetter.Infrastructure.Authentication;
-using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe;
 using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
@@ -26,7 +26,6 @@ public static class DependencyInjection
         services.AddJwtAuthentication(configuration);
         services.AddBahnApi();
         services.AddApiMarketplace(configuration);
-        services.AddBackgroundJobs();
         return services;
     }
     
@@ -38,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IStationQueryRepository, StationQueryRepository>();
         services.AddScoped<IConnectionSuggestionService, ConnectionSuggestionService>();
         services.AddScoped<IRouteQueryRepository, RouteQueryRepository>();
+        services.AddScoped<IStationInfoProvider, StationInfoProvider>();
         return services;
     }
 }

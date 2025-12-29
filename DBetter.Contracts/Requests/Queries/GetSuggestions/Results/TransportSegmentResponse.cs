@@ -45,6 +45,12 @@ public class TransportSegmentResponse : SegmentResponse
     public required string? Destination { get; set; }
     
     /// <summary>
+    /// Origin if available
+    /// </summary>
+    /// <example>Dresden Hbf</example>
+    public required string? Origin { get; set; }
+    
+    /// <summary>
     /// The transport category
     /// </summary>
     /// <example>HighSpeedTrains</example>

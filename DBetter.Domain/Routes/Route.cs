@@ -1,4 +1,5 @@
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.Routes.Events;
 using DBetter.Domain.Routes.ValueObjects;
 
 namespace DBetter.Domain.Routes;
@@ -10,32 +11,49 @@ public class Route : AggregateRoot<RouteId>
 {
     private readonly List<RoutePassengerInformation> _messages = [];
     
-    private readonly List<Stop> _stops = [];
+    public BahnJourneyId JourneyId { get; private init; }
     
     public IReadOnlyList<RoutePassengerInformation> Messages => _messages.AsReadOnly();
     
-    public CateringInformation Catering { get; private init; }
+    public CateringInformation Catering  { get; private set; }
     
-    public BikeCarriageInformation BikeCarriage { get; private init; }
+    public BikeCarriageInformation BikeCarriage { get; private set; }
     
-    public ServiceInformation ServiceInfos { get; private init; }
-    
-    public IReadOnlyList<Stop> Stops => _stops.AsReadOnly();
+    public ServiceInformation ServiceInformation { get; private init; }
     
     private Route() : base(null!){}
 
-    public Route(
+    private Route(
         RouteId id,
+        BahnJourneyId journeyId,
         List<RoutePassengerInformation> messages,
-        ServiceInformation serviceInfos,
-        CateringInformation catering,
-        BikeCarriageInformation bikeCarriage,
-        List<Stop> stops) : base(id)
+        ServiceInformation serviceInformation,
+        CateringInformation cateringInformation,
+        BikeCarriageInformation bikeCarriageInformation) : base(id)
     {
+        JourneyId = journeyId;
         _messages = messages;
-        ServiceInfos = serviceInfos;
-        Catering = catering;
-        BikeCarriage = bikeCarriage;
-        _stops = stops;
+        ServiceInformation = serviceInformation;
+        Catering = cateringInformation;
+        BikeCarriage = bikeCarriageInformation;
+    }
+
+    public static Route CreateNew(
+        BahnJourneyId journeyId,
+        List<RoutePassengerInformation> messages,
+        ServiceInformation serviceInformation,
+        CateringInformation cateringInformation,
+        BikeCarriageInformation bikeCarriageInformation,
+        bool stationsMissing)
+    {
+        var route = new Route(RouteId.CreateNew(), journeyId, messages, serviceInformation, cateringInformation,
+            bikeCarriageInformation);
+
+        if (stationsMissing)
+        {
+            route.RaiseDomainEvent(new RouteScrapingScheduledEvent(route.Id));   
+        }
+        
+        return route;
     }
 }

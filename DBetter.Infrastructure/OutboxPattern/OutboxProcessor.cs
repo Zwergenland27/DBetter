@@ -1,6 +1,6 @@
 using CleanMediator;
 using CleanMediator.Events;
-using DBetter.Domain.Abstractions;
+using CleanMessageBus.Abstractions;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
@@ -9,7 +9,7 @@ namespace DBetter.Infrastructure.OutboxPattern;
 
 [DisallowConcurrentExecution]
 public class OutboxProcessor(
-    IMediator mediator,
+    IMessageBus bus,
     DBetterContext db) : IJob
 {
     public static JobKey JobKey => new(nameof(OutboxProcessor));
@@ -24,7 +24,7 @@ public class OutboxProcessor(
         foreach (var message in messages)
         {
             IDomainEvent @event = message.ExtractEvent();
-            var result = await mediator.PublishAsync(@event);
+            await bus.PublishAsync(@event);
             message.Processed();
         }
         

@@ -1,6 +1,5 @@
 using DBetter.Application.Requests;
 using DBetter.Domain.ConnectionRequests;
-using DBetter.Infrastructure.BackgroundJobs;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
@@ -29,14 +28,14 @@ public class ConnectionSuggestionService(
         var fahrplan = await connectionService.GetSuggestionsAsync(anfrage);
 
         var bahnJourneyIds = fahrplan.GetBahnJourneyIds();
-        var stopEvas = fahrplan.GetEvaNumbers(bahnJourneyIds);
+        var stopEvas = fahrplan.GetEvaNumbers();
         stopEvas.AddRange(requestStationEvas.Select(station => station.EvaNumber));
         stopEvas = stopEvas.Distinct().ToList();
 
         var existingRoutes = await context.Routes
             .AsNoTracking()
-            .Where(tr => bahnJourneyIds.Contains(tr.BahnJourneyId))
-            .ToDictionaryAsync(tr => tr.BahnJourneyId, tr => tr);
+            .Where(tr => bahnJourneyIds.Contains(tr.JourneyId))
+            .ToDictionaryAsync(tr => tr.JourneyId, tr => tr);
         
         var existingStations = await context.Stations
             .AsNoTracking()
@@ -50,11 +49,6 @@ public class ConnectionSuggestionService(
                 existingStations);
         
         var connections = connectionFactory.GetConnections();
-        
-        RouteScraperJob.AddRoutes(connectionFactory.RoutesToCreate
-            .Where(tr => tr.ScrapingRequired)
-            .Select(tr => tr.Id)
-            .ToList());
         
         await context.Stations.AddRangeAsync(connectionFactory.StationsToCreate);
         await context.Routes.AddRangeAsync(connectionFactory.RoutesToCreate);

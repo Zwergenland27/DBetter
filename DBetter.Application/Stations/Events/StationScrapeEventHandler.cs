@@ -1,26 +1,23 @@
 using CleanDomainValidation.Domain;
 using CleanMessageBus.Abstractions;
+using CleanMessageBus.Abstractions.Attributes;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.Events;
 
 namespace DBetter.Application.Stations.Events;
 
+[Throttled(RequestInterval = 1000)]
 public class StationScrapeEventHandler(
     IUnitOfWork unitOfWork,
     IStationRepository stationRepository,
-    IStationInfoProvider stationInfoProvider) : IntegrationEventHandlerBase<UnknownStationCreatedEvent>
+    IStationInfoProvider stationInfoProvider) : DomainEventHandlerBase<UnknownStationCreatedEvent>
 {
     public override async Task<CanFail> Handle(UnknownStationCreatedEvent @event, CancellationToken cancellationToken)
     {
         await unitOfWork.BeginTransaction(cancellationToken);
         var station = await stationRepository.GetAsync(@event.StationId);
         var stationInfos = await stationInfoProvider.GetStationInfoAsync(station.EvaNumber);
-
-        if (stationInfos is null)
-        {
-            throw new NotImplementedException("TODO: Error handling");
-        }
         
         station.UpdateInformation(stationInfos);
         await unitOfWork.CommitAsync(cancellationToken);

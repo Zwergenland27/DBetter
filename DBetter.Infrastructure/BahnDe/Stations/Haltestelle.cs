@@ -38,8 +38,10 @@ public class Haltestelle
         var name = StationName.Create(Name);
         if (name.HasFailed) return null;
 
-        var coordinates = new Coordinates(Lat, Lon);
+        var location = new Coordinates(Lat, Lon);
 
-        return new Station(StationId.CreateNew(), evaNumber.Value, name.Value, coordinates, null);
+        var newStation = Station.CreateWithLocation(evaNumber.Value, name.Value, location);
+
+        return newStation;
     }
 }

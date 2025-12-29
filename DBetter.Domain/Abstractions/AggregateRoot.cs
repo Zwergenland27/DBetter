@@ -1,3 +1,5 @@
+using CleanMessageBus.Abstractions;
+
 namespace DBetter.Domain.Abstractions;
 
 public class AggregateRoot<TId> : Entity<TId>, IHasDomainEvent

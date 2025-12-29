@@ -1,5 +1,5 @@
 using System.Reflection;
-using DBetter.Application.Abstractions.Behaviours;
+using CleanMediator;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DBetter.Application;
@@ -15,10 +15,9 @@ public static class DependencyInjection
     
     private static IServiceCollection AddMediator(this IServiceCollection services)
     {
-        services.AddMediatR(options =>
+        services.AddCleanMediator(options =>
         {
             options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-            options.AddOpenBehavior(typeof(TransactionalPipelineBehaviour<,>));
         });
 
         return services;

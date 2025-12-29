@@ -1,3 +1,4 @@
+using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
@@ -26,13 +27,22 @@ public class Fahrplan
             .ToList();
     }
 
-    public List<EvaNumber> GetEvaNumbers(List<BahnJourneyId> journeyIds)
+    public List<EvaNumber> GetEvaNumbers()
     {
         return Verbindungen
             .SelectMany(v => v.GetEvaNumbers())
             .Distinct()
             .Union(
-                journeyIds.Select(id => id.GetDestinationEvaNumber())
+                GetBahnJourneyIds()
+                    .SelectMany(id =>
+                    {
+                        var parser = new JourneyIdParser(id.Value);
+                        return new[]
+                        {
+                            parser.OriginEvaNumber,
+                            parser.DestinationEvaNumber
+                        };
+                    })
                     .Distinct())
             .ToList();
     }

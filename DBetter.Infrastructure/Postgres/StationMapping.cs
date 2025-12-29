@@ -43,8 +43,6 @@ public class StationMapping : IEntityTypeConfiguration<Station>
                 rl100 => rl100 != null ? rl100.Value : null,
                 value => value != null ? Ril100.Create(value) : null);
 
-        builder.Property(station => station.LastScrapedAt);
-
-        builder.OwnsOne(station => station.Position);
+        builder.OwnsOne(station => station.Location);
     }
 }

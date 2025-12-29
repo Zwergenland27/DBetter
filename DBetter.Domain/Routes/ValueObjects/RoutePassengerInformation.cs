@@ -1,20 +1,33 @@
-using DBetter.Domain.Shared;
-
 namespace DBetter.Domain.Routes.ValueObjects;
 
-public class RoutePassengerInformation : PassengerInfo
+public record RoutePassengerInformation
 {
-    public StopIndex? FromStopIndex { get; set; }
+    /// <summary>
+    /// Custom mapped code
+    /// </summary>
+    /// <remarks>
+    /// For unknown / yet unmapped codes, the field will be set to FreeText
+    /// </remarks>
+    public PassengerInformationCode Code { get; private init; }
     
-    public StopIndex? ToStopIndex { get; set; }
+    /// <summary>
+    /// Default text from the API when no code could be extracted
+    /// </summary>
+    /// <example>
+    /// The connection has been cancelled.
+    /// </example>
+    public string? Text { get; private init; }
 
     private RoutePassengerInformation(
-        string code,
-        string defaultText,
-        StopIndex? fromStopIndex,
-        StopIndex? toStopIndex) : base(code, defaultText)
+        PassengerInformationCode code)
     {
-        FromStopIndex = fromStopIndex;
-        ToStopIndex = toStopIndex;
+        Code = code;
+    }
+
+    private RoutePassengerInformation(
+        string text)
+    {
+        Code = PassengerInformationCode.FreeText;
+        Text = text;
     }
 }

@@ -17,10 +17,6 @@ public static class DTOExtensions
         "STR",
         "Fähre"
     ];
-    public static List<PassengerInfo> GetDomainMessages(this IHasMessage obj)
-    {
-        return [];
-    }
     
     public static List<RoutePassengerInformation> GetDomainSectionMessages(this IHasMessage obj)
     {
@@ -194,7 +190,7 @@ public static class DTOExtensions
 
     public static BikeCarriageInformationDto ToDto(this BikeCarriageInformation bikeCarriage){
         return new BikeCarriageInformationDto{
-            Status = bikeCarriage.CarriageStatus.ToString(),
+            Status = bikeCarriage.Status.ToString(),
             FromStopIndex = bikeCarriage.FromStopIndex.Value,
             ToStopIndex = bikeCarriage.ToStopIndex.Value
         };

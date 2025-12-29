@@ -1,4 +1,6 @@
+using System.Runtime.InteropServices;
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.Stations.Events;
 using DBetter.Domain.Stations.ValueObjects;
 
 namespace DBetter.Domain.Stations;
@@ -9,40 +11,65 @@ public class Station : AggregateRoot<StationId>
     
     public StationName Name { get; private set; }
     
-    public Coordinates? Position { get; private set; }
+    public Coordinates? Location { get; private set; }
     
     public StationInfoId? InfoId { get; private set; }
     
     public Ril100? Ril100 { get; private set; }
-    
-    public DateTime? LastScrapedAt { get; private set; }
 
-    public Station(
+    private Station(
         StationId id,
         EvaNumber evaNumber,
         StationName name,
-        Coordinates? position,
         StationInfoId? infoId) : base(id)
     {
         EvaNumber = evaNumber;
         Name = name;
-        Position = position;
         InfoId = infoId;
     }
-
-    private Station(StationId id) : base(id)
+    
+    private Station(
+        StationId id,
+        EvaNumber evaNumber,
+        StationName name,
+        Coordinates location) : base(id)
     {
-        
+        EvaNumber = evaNumber;
+        Name = name;
+        Location = location;
     }
 
-    public void UpdateScrapedInformation(
-        Coordinates? position,
-        StationInfoId? infoId,
-        Ril100? ril100)
+    private Station() : base(null!){}
+
+    public static Station CreateFromRoute(EvaNumber evaNumber, StationName name, StationInfoId? infoId)
     {
-        Position = position;
-        InfoId = infoId;
-        Ril100 = ril100;
-        LastScrapedAt = DateTime.UtcNow;
+        var station = new Station(StationId.CreateNew(), evaNumber, name, infoId);
+        station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
+        return station;
+    }
+    
+    public static Station CreateWithLocation(EvaNumber evaNumber, StationName name, Coordinates location)
+    {
+        var station = new Station(StationId.CreateNew(), evaNumber, name, location);
+        station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
+        return station;
+    }
+
+    public void UpdateInformation(StationInformation stationInformation)
+    {
+        if (stationInformation.Position is not null)
+        {
+            Location = stationInformation.Position;
+        }
+
+        if (stationInformation.InfoId is not null)
+        {
+            InfoId = stationInformation.InfoId;
+        }
+
+        if (stationInformation.Ril100 is not null)
+        {
+            Ril100 = stationInformation.Ril100;
+        }
     }
 }

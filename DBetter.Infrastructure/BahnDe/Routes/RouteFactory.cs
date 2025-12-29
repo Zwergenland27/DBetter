@@ -1,19 +1,17 @@
 using DBetter.Contracts.Routes.Queries.Get;
 using DBetter.Contracts.Routes.Queries.Get.Results;
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
-using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
-using DBetter.Infrastructure.Repositories;
 
 namespace DBetter.Infrastructure.BahnDe.Routes;
 
 
 public interface IExistingInformationSelectionStage
 {
-    IExistingStationsSelectionStage WithExistingInformation(RouteEntity route);
+    IExistingStationsSelectionStage WithExistingInformation(Route route);
 }
 
 public interface IExistingStationsSelectionStage
@@ -27,7 +25,7 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
 
     private Fahrt _fahrt;
 
-    private RouteEntity? _route = null!;
+    private Route? _route = null!;
 
     private Dictionary<EvaNumber, Station> _existingStations = [];
 
@@ -45,7 +43,7 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
         return new RouteFactory(fahrt);
     }
 
-    public IExistingStationsSelectionStage WithExistingInformation(RouteEntity route)
+    public IExistingStationsSelectionStage WithExistingInformation(Route route)
     {
         _route = route;
         return this;
@@ -61,10 +59,10 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
         RouteDto = new RouteDto
         {
             RouteId = _route!.Id.Value.ToString(),
-            ServiceCategory = _route!.Information.ProductClass,
+            ServiceCategory = _route!.ServiceInformation.ProductClass,
             Stops = GetStops(_fahrt),
             Operator = RouteInformationFactory.GetOperator(_fahrt.Zugattribute),
-            LineNumber = _route!.Information.LineNumber?.ToString(),
+            LineNumber = _route!.ServiceInformation.LineNumber?.ToString(),
             ServiceNumber = RouteInformationFactory.GetServiceNumber(serviceNummer)?.ToString(),
             BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(_fahrt.Zugattribute, _fahrt.HimMeldungen, _fahrt.Halte).ToDto(),
             Catering = RouteInformationFactory.CreateCateringInformation(_fahrt.Zugattribute, _fahrt.Halte).ToDto()
@@ -83,13 +81,7 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
         var evaNumber = EvaNumber.Create(halt.ExtId).Value;
         var stationExists = _existingStations.TryGetValue(evaNumber, out var station);
         if(!stationExists){
-            station = new Station(
-                StationId.CreateNew(),
-                evaNumber,
-                halt.GetStationName(),
-                null,
-                halt.GetStationInfoId()
-            );
+            station = Station.CreateFromRoute(evaNumber, halt.GetStationName(), halt.GetStationInfoId());
 
             _stationsToCreate.Add(station);
             _existingStations.Add(evaNumber, station);

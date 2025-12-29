@@ -1,13 +1,12 @@
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
-using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections.ValueObjects;
+using DBetter.Domain.Routes;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
-using DBetter.Infrastructure.BahnDe.Routes.Entities;
 using DBetter.Infrastructure.BahnDe.Shared;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
@@ -15,18 +14,18 @@ namespace DBetter.Infrastructure.BahnDe.Connections;
 public class ConnectionFactory
 {
     private List<Station> _stationsToCreate = [];
-    private List<RouteEntity> _routesToCreate = [];
+    private List<Route> _routesToCreate = [];
     
     private List<Verbindung> _verbindungen;
     private BahnDeUrlFactory _urlFactory;
 
-    private Dictionary<BahnJourneyId, RouteEntity> _existingRoutes = [];
+    private Dictionary<BahnJourneyId, Route> _existingRoutes = [];
     private Dictionary<EvaNumber, Station> _existingStations = [];
 
     public ConnectionFactory(
         List<Verbindung> verbindungen,
         ReiseAnfrage originalRequest,
-        Dictionary<BahnJourneyId, RouteEntity> existingRoutes,
+        Dictionary<BahnJourneyId, Route> existingRoutes,
         Dictionary<EvaNumber, Station> existingStations)
     {
         _verbindungen = verbindungen;
@@ -39,7 +38,7 @@ public class ConnectionFactory
     
     
     public IReadOnlyList<Station> StationsToCreate => _stationsToCreate.AsReadOnly();
-    public IReadOnlyList<RouteEntity> RoutesToCreate => _routesToCreate.AsReadOnly();
+    public IReadOnlyList<Route> RoutesToCreate => _routesToCreate.AsReadOnly();
 
     public List<ConnectionResponse> GetConnections()
     {
@@ -115,11 +114,27 @@ public class ConnectionFactory
 
     private TransportSegmentResponse GetTransportSegment(VerbindungsAbschnitt verbindungsabschnitt)
     {
-        var journeyId = new BahnJourneyId(verbindungsabschnitt.JourneyId!);
+        var journeyIdParser = new JourneyIdParser(verbindungsabschnitt.JourneyId!);
+        var journeyId = journeyIdParser.ToDomain();
 
-        var destinationEvaNumber = journeyId.GetDestinationEvaNumber();
+        var originEvaNumber = journeyIdParser.OriginEvaNumber;
+        var destinationEvaNumber = journeyIdParser.DestinationEvaNumber;
         
         var routeExists = _existingRoutes.TryGetValue(journeyId, out var route);
+
+        var originStationExists = _existingStations.TryGetValue(originEvaNumber, out var originStation);
+        var origin = originStation?.Name.NormalizedValue;
+        
+        var destinationStationExists = _existingStations.TryGetValue(destinationEvaNumber, out var destinationStation);
+        var destination = destinationStation?.Name.NormalizedValue;
+
+        var givenDestination = verbindungsabschnitt.Verkehrsmittel.Richtung;
+
+        if (destination is null && givenDestination is not null && !givenDestination.All(char.IsUpper))
+        {
+            destination = givenDestination;
+        }
+        
         if (!routeExists)
         {
             var routeInformation = RouteInformationFactory.Create(
@@ -127,24 +142,18 @@ public class ConnectionFactory
                 verbindungsabschnitt.Verkehrsmittel.MittelText!, 
                 verbindungsabschnitt.Verkehrsmittel.LangText!)[0];
             
-            route = new RouteEntity(
-                RouteId.CreateNew(),
+            var stationDataMissing = !originStationExists || !destinationStationExists;
+            
+            route = Route.CreateNew(
                 journeyId,
-                routeInformation);
+                [],
+                routeInformation,
+                null,
+                null,
+                stationDataMissing);
             
             _routesToCreate.Add(route);
             _existingRoutes.Add(journeyId, route);
-        }
-
-        var destination = verbindungsabschnitt.Verkehrsmittel.Richtung;
-        if (destination is null || destination.All(char.IsUpper))
-        {
-            var destinationStationExists = _existingStations.TryGetValue(destinationEvaNumber, out var station);
-            if(!destinationStationExists){
-                route!.DestinationStationMissing();
-            }
-
-            destination = station?.Name.NormalizedValue;
         }
         
         return new TransportSegmentResponse
@@ -154,9 +163,10 @@ public class ConnectionFactory
             RouteId = route!.Id.Value.ToString(),
             Demand = verbindungsabschnitt.GetDemand().ToDto(),
             Operator = RouteInformationFactory.GetOperator(verbindungsabschnitt.Verkehrsmittel!.Zugattribute),
+            Origin = origin,
             Destination = destination,
-            TransportCategory = route.Information.TransportCategory.ToString(),
-            Line = route.Information.GetLine(),
+            TransportCategory = route.ServiceInformation.TransportCategory.ToString(),
+            Line = route.ServiceInformation.GetLine(),
             BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(
                 verbindungsabschnitt.Verkehrsmittel!.Zugattribute,
                 verbindungsabschnitt.HimMeldungen,
@@ -181,13 +191,7 @@ public class ConnectionFactory
         var evaNumber = EvaNumber.Create(halt.ExtId).Value;
         var stationExists = _existingStations.TryGetValue(evaNumber, out var station);
         if(!stationExists){
-            station = new Station(
-                StationId.CreateNew(),
-                evaNumber,
-                halt.GetStationName(),
-                null,
-                halt.GetStationInfoId()
-            );
+            station = Station.CreateFromRoute(evaNumber, halt.GetStationName(), halt.GetStationInfoId());
 
             _stationsToCreate.Add(station);
             _existingStations.Add(evaNumber, station);

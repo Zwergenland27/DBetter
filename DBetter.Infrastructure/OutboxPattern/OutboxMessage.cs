@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CleanDomainValidation.Domain;
+using CleanMessageBus.Abstractions;
 using DBetter.Domain.Abstractions;
 
 namespace DBetter.Infrastructure.OutboxPattern;
