@@ -3,6 +3,7 @@ namespace DBetter.Domain.Routes.ValueObjects;
 public enum CateringType
 {
     None,
+    Closed,
     Restaurant,
     Bistro,
     /// <summary>

@@ -14,6 +14,7 @@ public class RouteInformationFactory
         string? numberInfo = null;
         
         //Currently just ferry
+        //TODO: Also s-bahnen (like S1)
         if (information.Length == 1)
         {
             productClass = information[0];

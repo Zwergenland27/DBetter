@@ -1,6 +1,6 @@
 namespace DBetter.Domain.Routes.ValueObjects;
 
-public record RoutePassengerInformation
+public record PassengerInformation
 {
     /// <summary>
     /// Custom mapped code
@@ -18,18 +18,28 @@ public record RoutePassengerInformation
     /// </example>
     public string? Text { get; private init; }
 
-    private RoutePassengerInformation(
+    private PassengerInformation(
         PassengerInformationCode code)
     {
         Code = code;
     }
 
-    private RoutePassengerInformation(
+    private PassengerInformation(
         string text)
     {
         Code = PassengerInformationCode.FreeText;
         Text = text;
     }
     
-    private RoutePassengerInformation(){}
+    private PassengerInformation(){}
+
+    public static PassengerInformation CreateFromCode(PassengerInformationCode code)
+    {
+        return new PassengerInformation(code);
+    }
+
+    public static PassengerInformation CreateUnknown(string text)
+    {
+        return new PassengerInformation(text);
+    }
 }

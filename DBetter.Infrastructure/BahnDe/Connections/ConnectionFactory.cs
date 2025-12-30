@@ -146,10 +146,10 @@ public class ConnectionFactory
             
             route = Route.CreateNew(
                 journeyId,
-                [],
+                new PassengerInformationFactory(verbindungsabschnitt).ExtractInformation(),
                 routeInformation,
-                null,
-                null,
+                new CateringInformationFactory(verbindungsabschnitt).ExtractInformation(),
+                new BikeCarriageInformationFactory(verbindungsabschnitt).ExtractInformation(),
                 stationDataMissing);
             
             _routesToCreate.Add(route);

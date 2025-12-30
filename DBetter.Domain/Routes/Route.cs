@@ -9,11 +9,11 @@ namespace DBetter.Domain.Routes;
 /// </summary>
 public class Route : AggregateRoot<RouteId>
 {
-    private readonly List<RoutePassengerInformation> _messages = [];
+    private readonly List<PassengerInformation> _messages = [];
     
     public BahnJourneyId JourneyId { get; private init; }
     
-    public IReadOnlyList<RoutePassengerInformation> Messages => _messages.AsReadOnly();
+    public IReadOnlyList<PassengerInformation> Messages => _messages.AsReadOnly();
     
     public CateringInformation Catering  { get; private set; }
     
@@ -26,7 +26,7 @@ public class Route : AggregateRoot<RouteId>
     private Route(
         RouteId id,
         BahnJourneyId journeyId,
-        List<RoutePassengerInformation> messages,
+        List<PassengerInformation> messages,
         ServiceInformation serviceInformation,
         CateringInformation cateringInformation,
         BikeCarriageInformation bikeCarriageInformation) : base(id)
@@ -40,7 +40,7 @@ public class Route : AggregateRoot<RouteId>
 
     public static Route CreateNew(
         BahnJourneyId journeyId,
-        List<RoutePassengerInformation> messages,
+        List<PassengerInformation> messages,
         ServiceInformation serviceInformation,
         CateringInformation cateringInformation,
         BikeCarriageInformation bikeCarriageInformation,

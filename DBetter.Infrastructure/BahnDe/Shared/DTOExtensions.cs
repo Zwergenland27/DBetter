@@ -18,7 +18,7 @@ public static class DTOExtensions
         "Fähre"
     ];
     
-    public static List<RoutePassengerInformation> GetDomainSectionMessages(this IHasMessage obj)
+    public static List<PassengerInformation> GetDomainSectionMessages(this IHasMessage obj)
     {
         return [];
     }
