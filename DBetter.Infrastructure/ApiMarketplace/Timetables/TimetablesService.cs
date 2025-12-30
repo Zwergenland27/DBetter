@@ -7,26 +7,18 @@ public class TimetablesService(HttpClient http)
 {
     public async Task<List<Station>> GetStationData(string evaNumber)
     {
-        try
-        {
-            var response = await http.GetAsync($"station/{evaNumber}");
-            response.EnsureSuccessStatusCode();
+        var response = await http.GetAsync($"station/{evaNumber}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return [];
+        response.EnsureSuccessStatusCode();
             
-            await using var stream = await response.Content.ReadAsStreamAsync();
-            var serializer = new XmlSerializer(typeof(MultipleStationData));
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var serializer = new XmlSerializer(typeof(MultipleStationData));
             
-            var result = serializer.Deserialize(stream) as MultipleStationData;
-            if (result is null) return [];
+        var result = serializer.Deserialize(stream) as MultipleStationData;
+        if (result is null) return [];
             
-            return result.Stations
-                .Where(s => !s.Ds100.Any(char.IsDigit))
-                .ToList();
-        }
-        catch (Exception e)
-        {
-            // ignored
-        }
-
-        return [];
+        return result.Stations
+            .Where(s => !s.Ds100.Any(char.IsDigit))
+            .ToList();
     }
 }
