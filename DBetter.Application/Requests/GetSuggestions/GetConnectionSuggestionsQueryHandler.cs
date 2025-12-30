@@ -1,5 +1,6 @@
 using CleanDomainValidation.Domain;
 using CleanMediator.Queries;
+using DBetter.Application.Abstractions.Persistence;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Errors;
@@ -7,11 +8,13 @@ using DBetter.Domain.Errors;
 namespace DBetter.Application.Requests.GetSuggestions;
 
 public class GetConnectionSuggestionsQueryHandler(
+    IUnitOfWork unitOfWork,
     IConnectionSuggestionService suggestionService,
     IConnectionRequestRepository connectionRequestRepository) : QueryHandlerBase<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
 {
     public override async Task<CanFail<List<ConnectionResponse>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
+        await unitOfWork.BeginTransaction(cancellationToken);
         var connectionRequest = await connectionRequestRepository.GetById(request.Id);
         if (connectionRequest is null) return DomainErrors.ConnectionRequest.NotFound;
 
@@ -38,6 +41,7 @@ public class GetConnectionSuggestionsQueryHandler(
         
         connectionRequestRepository.Store(connectionRequest);
         
+        await unitOfWork.CommitAsync(cancellationToken);
         return suggestionsDto.Connections;
     }
 }
