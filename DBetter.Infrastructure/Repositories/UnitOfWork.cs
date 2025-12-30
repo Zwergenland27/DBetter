@@ -27,8 +27,6 @@ public class UnitOfWork(DBetterContext context) : IUnitOfWork, IAsyncDisposable
             throw new InvalidOperationException("Cannot commit a transaction that has not been started.");
         }
         
-        await context.SaveChangesAsync(cancellationToken);
-        
         var outboxMessages = context.ChangeTracker
             .Entries<IHasDomainEvent>()
             .Select(x => x.Entity)
@@ -42,6 +40,8 @@ public class UnitOfWork(DBetterContext context) : IUnitOfWork, IAsyncDisposable
             .ToList();
         
         context.OutboxMessages.AddRange(outboxMessages);
+        
+        await context.SaveChangesAsync(cancellationToken);
         
         await _transaction.CommitAsync(cancellationToken);
         
