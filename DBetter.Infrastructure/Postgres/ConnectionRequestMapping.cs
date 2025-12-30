@@ -153,12 +153,12 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
 
         builder.Property(x => x.EarlierReference)
             .HasConversion(
-                reference => reference != null ? reference.ToString() : null,
+                reference => reference != null ? reference.Token.ToString() : null,
                 value => value != null ? PaginationReference.Create(value) : null);
         
         builder.Property(x => x.LaterReference)
             .HasConversion(
-                reference => reference != null ? reference.ToString() : null,
+                reference => reference != null ? reference.Token.ToString() : null,
                 value => value != null ? PaginationReference.Create(value) : null);
     }
 }

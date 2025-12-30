@@ -26,7 +26,8 @@ public class UpsertConnectionRequestCommandHandler(
             connectionRequest.InitializeLaterReference(earlierRef,  laterRef);
         }
         
-        connectionRequestRepository.Store(connectionRequest);
+        //TODO: Remove all "links" to the request that existed for the old request object
+        await connectionRequestRepository.StoreAsync(connectionRequest);
         
         await unitOfWork.CommitAsync(cancellationToken);
         return suggestionsDto.Connections;

@@ -18,7 +18,7 @@ public class GetConnectionSuggestionsQueryBuilder : IRequestBuilder<GetSuggestio
 
         var userId = builder.ClassProperty(r => r.UserId)
             .Optional()
-            .Map(p => p.Id, UserId.Create);
+            .Map(p => p.UserId, UserId.Create);
 
         var suggestionMode = builder.EnumProperty(r => r.SuggestionMode)
             .Required()

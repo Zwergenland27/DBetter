@@ -6,5 +6,5 @@ public interface IConnectionRequestRepository
 {
     Task<ConnectionRequest?> GetById(ConnectionRequestId id);
     
-    void Store(ConnectionRequest connectionRequest);
+    Task StoreAsync(ConnectionRequest connectionRequest);
 }

@@ -14,6 +14,7 @@ public class GetConnectionSuggestionsQueryHandler(
 {
     public override async Task<CanFail<List<ConnectionResponse>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
+        //TODO: possible add token to verify that server and client earlierRef expectations are in sync
         await unitOfWork.BeginTransaction(cancellationToken);
         var connectionRequest = await connectionRequestRepository.GetById(request.Id);
         if (connectionRequest is null) return DomainErrors.ConnectionRequest.NotFound;
@@ -38,8 +39,6 @@ public class GetConnectionSuggestionsQueryHandler(
         {
             connectionRequest.LaterUsed(laterRef);
         }
-        
-        connectionRequestRepository.Store(connectionRequest);
         
         await unitOfWork.CommitAsync(cancellationToken);
         return suggestionsDto.Connections;

@@ -10,7 +10,7 @@ public class JourneyIdParser
     
     public EvaNumber DestinationEvaNumber => EvaNumber.Create(_data["LS"]).Value;
     
-    public EvaNumber OriginEvaNumber => EvaNumber.Create(_data["S"]).Value;
+    public EvaNumber OriginEvaNumber => EvaNumber.Create(_data["1S"]).Value;
     
     public JourneyIdParser(string journeyId)
     {

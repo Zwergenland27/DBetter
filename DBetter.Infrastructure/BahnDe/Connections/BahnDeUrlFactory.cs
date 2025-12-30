@@ -33,7 +33,7 @@ public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
     public BahnDeUrlFactory WithStations(List<Station> stations)
     {
         _stations = stations;
-        GenericUrl = Build();
+        GenericUrl = $"{BaseUrl}/{Build()}";
         return this;
     }
 
@@ -170,7 +170,7 @@ public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
 
     private static string GenerateAllowedMeansOfTransport(List<string> produktgattungen)
     {
-        return string.Join(',', produktgattungen.Select(Produktgattung.GetUrlIdsFromAlias));
+        return string.Join(',', produktgattungen.SelectMany(Produktgattung.GetUrlIdsFromAlias));
     }
 
     private void SetSeatReservationOnly()

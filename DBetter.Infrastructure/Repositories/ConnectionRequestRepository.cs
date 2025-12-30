@@ -12,8 +12,13 @@ public class ConnectionRequestRepository(DBetterContext db) : IConnectionRequest
         return db.ConnectionRequests.FirstOrDefaultAsync(request => request.Id == id);
     }
 
-    public void Store(ConnectionRequest connectionRequest)
+    public async Task StoreAsync(ConnectionRequest connectionRequest)
     {
-        db.ConnectionRequests.Add(connectionRequest);
+        var existing = await db.ConnectionRequests.FirstOrDefaultAsync(request => request.Id == connectionRequest.Id);
+        if (existing is not null)
+        {
+            db.ConnectionRequests.Remove(existing);
+        }
+        db.ConnectionRequests.Add(connectionRequest);   
     }
 }

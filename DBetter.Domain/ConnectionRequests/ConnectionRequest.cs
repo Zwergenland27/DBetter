@@ -66,7 +66,7 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
 
     public void InitializeLaterReference(string earlierRef, string laterRef)
     {
-        EarlierReference = PaginationReference.Create(laterRef);
+        EarlierReference = PaginationReference.Create(earlierRef);
         LaterReference = PaginationReference.Create(laterRef);
     }
 
@@ -79,8 +79,8 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     
     public CanFail LaterUsed(string laterRef)
     {
-        if (EarlierReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
-        EarlierReference = PaginationReference.Create(laterRef);
+        if (LaterReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
+        LaterReference = PaginationReference.Create(laterRef);
         return CanFail.Success;
     }
 }
