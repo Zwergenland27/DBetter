@@ -9,7 +9,7 @@ public class PartialStopIndexFactory
     
     public StopIndex To { get; private init; }
     
-    public PartialStopIndexFactory(List<Halt> stops, string? partialInformation)
+    public PartialStopIndexFactory(List<IRouteStop> stops, string? partialInformation)
     {
         var firstStationIndex = stops[0].RouteIdx;
         var lastStationIndex = stops[^1].RouteIdx;

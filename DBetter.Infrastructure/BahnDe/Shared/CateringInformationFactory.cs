@@ -1,16 +1,36 @@
 using System.Diagnostics.CodeAnalysis;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
+using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
-public class CateringInformationFactory(VerbindungsAbschnitt abschnitt)
+public class CateringInformationFactory
 {
     private static readonly string[] ClosedTexts =
     [
         "Das Bordrestaurant/Bordbistro ist geschlossen.",
         "Zug verkehrt ohne gastronomische Bewirtschaftung."
     ];
+    
+    private readonly List<IRouteStop> _stops;
+    private readonly List<Zugattribut> _zugattribute;
+    private readonly List<PriorisierteMeldung> _prioritizedMessages;
+    
+    public CateringInformationFactory(VerbindungsAbschnitt abschnitt)
+    {
+        _stops = abschnitt.Halte.Select(halt => halt as IRouteStop).ToList();
+        _zugattribute = abschnitt.Verkehrsmittel.Zugattribute;
+        _prioritizedMessages = abschnitt.PriorisierteMeldungen;
+    }
+
+    public CateringInformationFactory(Fahrt fahrt)
+    {
+        _stops = fahrt.Halte.Select(halt => halt as IRouteStop).ToList();
+        _zugattribute = fahrt.Zugattribute;
+        _prioritizedMessages = fahrt.PriorisierteMeldungen;
+    }
+    
     public CateringInformation ExtractInformation()
     {
         var type = CateringType.None;
@@ -32,7 +52,7 @@ public class CateringInformationFactory(VerbindungsAbschnitt abschnitt)
             type = CateringType.Snack;
         }
 
-        var partialInformation = new PartialStopIndexFactory(abschnitt.Halte, attribute?.Teilstreckenhinweis);
+        var partialInformation = new PartialStopIndexFactory(_stops, attribute?.Teilstreckenhinweis);
         return new CateringInformation(
             type,
             partialInformation.From,
@@ -41,36 +61,35 @@ public class CateringInformationFactory(VerbindungsAbschnitt abschnitt)
 
     private bool IsClosed()
     {
-        return abschnitt.PriorisierteMeldungen.Any(m =>
+        return _prioritizedMessages.Any(m =>
             ClosedTexts.Any(text => m.Text.Contains(text)
             ));
     }
 
     private bool IsRestaurant([MaybeNullWhen(false) ]out Zugattribut attribute)
     {
-        attribute = abschnitt.Verkehrsmittel.Zugattribute.FirstOrDefault(attribute => attribute.Key == "BR");
+        attribute = _zugattribute.FirstOrDefault(attribute => attribute.Key == "BR");
         return attribute is not null;
     }
 
     private bool IsBistro([MaybeNullWhen(false) ]out Zugattribut attribute)
     {
-        attribute = abschnitt.Verkehrsmittel.Zugattribute.FirstOrDefault(attribute => attribute.Key == "QP");
+        attribute = _zugattribute.FirstOrDefault(attribute => attribute.Key == "QP");
         return attribute is not null;
     }
     
     private bool IsSnack([MaybeNullWhen(false) ]out Zugattribut attribute)
     {
-        //TODO: Find out what this is for
-        attribute = abschnitt.Verkehrsmittel.Zugattribute.FirstOrDefault(attribute => attribute.Key == "SN");
+        attribute =_zugattribute.FirstOrDefault(attribute => attribute.Key == "SN");
         return attribute is not null;
     }
 
     private bool IsSeatServed([MaybeNullWhen(false)] out Zugattribut attribute)
     {
-        attribute = abschnitt.Verkehrsmittel.Zugattribute.FirstOrDefault(attribute => attribute.Key == "MP");
+        attribute = _zugattribute.FirstOrDefault(attribute => attribute.Key == "MP");
         if (attribute is null)
         {
-            attribute = abschnitt.Verkehrsmittel.Zugattribute.FirstOrDefault(attribute => attribute.Key == "MN");
+            attribute = _zugattribute.FirstOrDefault(attribute => attribute.Key == "MN");
         }
         return attribute is not null;
     }

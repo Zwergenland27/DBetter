@@ -204,6 +204,21 @@ public static class DTOExtensions
         };
     }
 
+    public static List<string> ToDto(this IReadOnlyList<PassengerInformation> messages)
+    {
+        return messages.Select(message => message.ToDto()).ToList();
+    }
+    
+    public static string ToDto(this PassengerInformation message)
+    {
+        if (message.Code is PassengerInformationCode.FreeText)
+        {
+            return message.Text!;
+        }
+        
+        return message.Code.ToString();
+    }
+
     private static DemandStatus ToDomainDemandStatus(this AuslastungsStufe stufe)
     {
         return stufe switch

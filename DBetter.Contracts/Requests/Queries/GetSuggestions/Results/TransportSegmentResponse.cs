@@ -71,4 +71,9 @@ public class TransportSegmentResponse : SegmentResponse
     /// Information about catering in the vehicle
     /// </summary>
     public required CateringInformationDto Catering { get; set; }
+    
+    /// <summary>
+    /// Messages for passengers
+    /// </summary>
+    public required List<string> Messages { get; set; }
 }

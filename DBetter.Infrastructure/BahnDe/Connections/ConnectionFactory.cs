@@ -167,16 +167,9 @@ public class ConnectionFactory
             Destination = destination,
             TransportCategory = route.ServiceInformation.TransportCategory.ToString(),
             Line = route.ServiceInformation.GetLine(),
-            BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(
-                verbindungsabschnitt.Verkehrsmittel!.Zugattribute,
-                verbindungsabschnitt.HimMeldungen,
-                verbindungsabschnitt.Halte)
-                .ToDto(),
-            Catering = RouteInformationFactory.CreateCateringInformation(
-                    verbindungsabschnitt.Verkehrsmittel.Zugattribute,
-                verbindungsabschnitt.Halte
-                )
-                .ToDto(),
+            BikeCarriage = route.BikeCarriage.ToDto(),
+            Catering = route.Catering.ToDto(),
+            Messages = route.Messages.ToDto(),
             Stops = GetStops(verbindungsabschnitt)
         };
     }

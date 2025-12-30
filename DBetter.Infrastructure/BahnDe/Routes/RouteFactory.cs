@@ -64,8 +64,8 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
             Operator = RouteInformationFactory.GetOperator(_fahrt.Zugattribute),
             LineNumber = _route!.ServiceInformation.LineNumber?.ToString(),
             ServiceNumber = RouteInformationFactory.GetServiceNumber(serviceNummer)?.ToString(),
-            BikeCarriage = RouteInformationFactory.CreateBikeCarriageInformation(_fahrt.Zugattribute, _fahrt.HimMeldungen, _fahrt.Halte).ToDto(),
-            Catering = RouteInformationFactory.CreateCateringInformation(_fahrt.Zugattribute, _fahrt.Halte).ToDto()
+            BikeCarriage = new BikeCarriageInformationFactory(_fahrt).ExtractInformation().ToDto(),
+            Catering = new CateringInformationFactory(_fahrt).ExtractInformation().ToDto()
         };
         
         return this;
