@@ -61,7 +61,7 @@ public static class RequestModule
                 return Results.Ok(result);
             });
 
-        }).WithName("GetSuggestions")
+        }).WithName("GetEarlierSuggestions")
         .Produces<List<ConnectionResponse>>()
         .WithOpenApi();
         
@@ -87,7 +87,7 @@ public static class RequestModule
                     return Results.Ok(result);
                 });
 
-            }).WithName("GetSuggestions")
+            }).WithName("GetLaterSuggestions")
             .Produces<List<ConnectionResponse>>()
             .WithOpenApi();
         app.MapGet("requests/{id}/suggestions/later", async (
