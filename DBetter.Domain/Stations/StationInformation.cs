@@ -5,4 +5,4 @@ namespace DBetter.Domain.Stations;
 public record StationInformation(
     Coordinates? Position,
     StationInfoId? InfoId,
-    Ril100?  Ril100);
+    Ril100Identifier?  Ril100);
