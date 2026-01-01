@@ -1,6 +1,7 @@
 using DBetter.Contracts.Routes.Queries.Get;
 using DBetter.Contracts.Routes.Queries.Get.Results;
 using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
@@ -54,18 +55,28 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
     {
         _existingStations = existingStations;
 
-        var serviceNummer = _fahrt.Halte[0].Nummer;
-
+        var serviceNumber = _fahrt.Halte[0].Nummer;
+        if (serviceNumber is not null && int.TryParse(serviceNumber, out var number))
+        {
+            _route!.UpdateServiceNumber(new ServiceNumber(number));
+        }
+        
+        var bikeCarriageInformation = new BikeCarriageInformationFactory(_fahrt).ExtractInformation();
+        _route!.TryUpdateBikeCarriageInformation(bikeCarriageInformation);
+        
+        var cateringInformation = new CateringInformationFactory(_fahrt).ExtractInformation();
+        _route.TryUpdateCateringInformation(cateringInformation);
+        
         RouteDto = new RouteDto
         {
             RouteId = _route!.Id.Value.ToString(),
             ServiceCategory = _route!.ServiceInformation.ProductClass,
             Stops = GetStops(_fahrt),
-            Operator = RouteInformationFactory.GetOperator(_fahrt.Zugattribute),
+            Operator = _fahrt.Zugattribute.FirstOrDefault(a => a.Key is "BEF")?.Value,
             LineNumber = _route!.ServiceInformation.LineNumber?.ToString(),
-            ServiceNumber = RouteInformationFactory.GetServiceNumber(serviceNummer)?.ToString(),
-            BikeCarriage = new BikeCarriageInformationFactory(_fahrt).ExtractInformation().ToDto(),
-            Catering = new CateringInformationFactory(_fahrt).ExtractInformation().ToDto()
+            ServiceNumber = _route.ServiceInformation.ServiceNumber?.Value.ToString(),
+            BikeCarriage = _route.BikeCarriage.ToDto(),
+            Catering = _route.Catering.ToDto()
         };
         
         return this;

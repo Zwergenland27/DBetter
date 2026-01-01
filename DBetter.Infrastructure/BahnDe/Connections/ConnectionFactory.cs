@@ -137,17 +137,15 @@ public class ConnectionFactory
         
         if (!routeExists)
         {
-            var routeInformation = RouteInformationFactory.Create(
-                Produktgattung.GetTransportCategoryFromAlias(verbindungsabschnitt.Verkehrsmittel.ProduktGattung!),
-                verbindungsabschnitt.Verkehrsmittel.MittelText!, 
-                verbindungsabschnitt.Verkehrsmittel.LangText!)[0];
+            var routeInformationFactory = new RouteInformationFactory(verbindungsabschnitt.Verkehrsmittel);
+            var compositionInformation = routeInformationFactory.ExtractComposition();
             
             var stationDataMissing = !originStationExists || !destinationStationExists;
             
             route = Route.CreateNew(
                 journeyId,
                 new PassengerInformationFactory(verbindungsabschnitt).ExtractInformation(),
-                routeInformation,
+                compositionInformation[0],
                 new CateringInformationFactory(verbindungsabschnitt).ExtractInformation(),
                 new BikeCarriageInformationFactory(verbindungsabschnitt).ExtractInformation(),
                 stationDataMissing);
@@ -162,7 +160,7 @@ public class ConnectionFactory
             ArrivalTime = verbindungsabschnitt.GetArrivalTime().ToDto()!,
             RouteId = route!.Id.Value.ToString(),
             Demand = verbindungsabschnitt.GetDemand().ToDto(),
-            Operator = RouteInformationFactory.GetOperator(verbindungsabschnitt.Verkehrsmittel!.Zugattribute),
+            Operator = verbindungsabschnitt.Verkehrsmittel.Zugattribute.FirstOrDefault(a => a.Key is "BEF")?.Value,
             Origin = origin,
             Destination = destination,
             TransportCategory = route.ServiceInformation.TransportCategory.ToString(),

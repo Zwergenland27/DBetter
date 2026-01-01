@@ -19,7 +19,7 @@ public class Route : AggregateRoot<RouteId>
     
     public BikeCarriageInformation BikeCarriage { get; private set; }
     
-    public ServiceInformation ServiceInformation { get; private init; }
+    public ServiceInformation ServiceInformation { get; private set; }
     
     private Route() : base(null!){}
 
@@ -55,5 +55,20 @@ public class Route : AggregateRoot<RouteId>
         }
         
         return route;
+    }
+
+    public void UpdateServiceNumber(ServiceNumber newServiceNumber)
+    {
+        ServiceInformation = ServiceInformation.UpdateServiceNumber(newServiceNumber);
+    }
+
+    public void TryUpdateCateringInformation(CateringInformation newCateringInformation)
+    {
+        Catering = Catering.UpdateStopIndices(newCateringInformation.FromStopIndex, newCateringInformation.ToStopIndex);
+    }
+    
+    public void TryUpdateBikeCarriageInformation(BikeCarriageInformation newBikeCarriageInformation)
+    {
+        BikeCarriage = BikeCarriage.UpdateStopIndices(newBikeCarriageInformation.FromStopIndex, newBikeCarriageInformation.ToStopIndex);
     }
 }
