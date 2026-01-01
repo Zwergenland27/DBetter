@@ -17,6 +17,7 @@ public class StationScrapeEventHandler(
     {
         await unitOfWork.BeginTransaction(cancellationToken);
         var station = await stationRepository.GetAsync(@event.StationId);
+        if(station is null) return CanFail.Success;
         var stationInfos = await externalStationProvider.GetStationInfoAsync(station.EvaNumber);
         
         station.UpdateInformation(stationInfos);
