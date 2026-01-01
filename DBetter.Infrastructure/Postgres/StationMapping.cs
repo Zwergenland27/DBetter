@@ -41,7 +41,7 @@ public class StationMapping : IEntityTypeConfiguration<Station>
         builder.Property(station => station.Ril100)
             .HasConversion(
                 rl100 => rl100 != null ? rl100.Value : null,
-                value => value != null ? Ril100.Create(value) : null);
+                value => value != null ? Ril100Identifier.Create(value).Value : null);
 
         builder.OwnsOne(station => station.Location);
     }

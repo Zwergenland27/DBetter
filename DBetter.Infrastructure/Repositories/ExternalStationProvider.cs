@@ -1,4 +1,5 @@
 using DBetter.Domain.Stations;
+using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.ApiMarketplace.StaDa;
 using DBetter.Infrastructure.ApiMarketplace.Timetables;
@@ -6,16 +7,16 @@ using DBetter.Infrastructure.BahnDe.Stations;
 
 namespace DBetter.Infrastructure.Repositories;
 
-public class StationInfoProvider(
+public class ExternalStationProvider(
     StaDaService stada,
     TimetablesService timetables,
-    StationService stationService) : IStationInfoProvider
+    StationService stationService) : IStationExternalProvider
 {
     public async Task<StationInformation> GetStationInfoAsync(EvaNumber evaNumber)
     {
         Coordinates? location = null;
         StationInfoId? stationInfoId = null;
-        Ril100? ril100 = null;
+        Ril100Identifier? ril100 = null;
 
         var stadaResult = await TryGetStadaInformation(evaNumber);
 
@@ -35,7 +36,16 @@ public class StationInfoProvider(
             ril100);
     }
 
-    private async Task<(Coordinates? Position, StationInfoId? StationInfoId, Ril100? Ril100)?> TryGetStadaInformation(EvaNumber evaNumber)
+    public async Task<List<StationQuerySnapshot>> FindAsync(string query)
+    {
+        var haltestellen = await stationService.FindAsync(query, 5);
+        return haltestellen
+            .Select(halt => halt.ToSnapshot())
+            .OfType<StationQuerySnapshot>()
+            .ToList();
+    }
+
+    private async Task<(Coordinates? Position, StationInfoId? StationInfoId, Ril100Identifier? Ril100)?> TryGetStadaInformation(EvaNumber evaNumber)
     {
         var results = await stada.GetStationData(evaNumber.Value);
         if (results.Count < 1) return null;
@@ -43,7 +53,7 @@ public class StationInfoProvider(
         
         Coordinates? position = null;
         StationInfoId? stationInfoId = null;
-        Ril100? ril100 = null;
+        Ril100Identifier? ril100 = null;
         
         var coordinates = stadaInformation.EvaNumbers
             .FirstOrDefault(eva => eva.IsMain)
@@ -65,7 +75,9 @@ public class StationInfoProvider(
             ?.RilIdentifier;
         if (ril100Identifier is not null)
         {
-            ril100 = Ril100.Create(ril100Identifier);
+            var ril100Result =  Ril100Identifier.Create(ril100Identifier);
+            if (ril100Result.HasFailed) return null;
+            ril100 = ril100Result.Value;
         }
         
         return (position, stationInfoId, ril100);
@@ -86,7 +98,7 @@ public class StationInfoProvider(
             stationData.Lon);
     }
 
-    private async Task<Ril100?> TryGetRil100(EvaNumber evaNumber)
+    private async Task<Ril100Identifier?> TryGetRil100(EvaNumber evaNumber)
     {
         var timetablesResults = await timetables.GetStationData(evaNumber.Value);
         var timetableInformation = timetablesResults
@@ -94,7 +106,9 @@ public class StationInfoProvider(
         
         if (timetableInformation is not null)
         {
-            return Ril100.Create(timetableInformation.Ds100);
+            var ril100Result =  Ril100Identifier.Create(timetableInformation.Ds100);
+            if (ril100Result.HasFailed) return null;
+            return ril100Result.Value;
         }
 
         return null;

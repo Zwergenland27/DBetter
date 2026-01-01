@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.Stations.Events;
+using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 
 namespace DBetter.Domain.Stations;
@@ -15,7 +16,7 @@ public class Station : AggregateRoot<StationId>
     
     public StationInfoId? InfoId { get; private set; }
     
-    public Ril100? Ril100 { get; private set; }
+    public Ril100Identifier? Ril100 { get; private set; }
 
     private Station(
         StationId id,
@@ -41,16 +42,16 @@ public class Station : AggregateRoot<StationId>
 
     private Station() : base(null!){}
 
-    public static Station CreateFromRoute(EvaNumber evaNumber, StationName name, StationInfoId? infoId)
+    public static Station CreateFromSnapshot(StationRouteSnapshot snapshot)
     {
-        var station = new Station(StationId.CreateNew(), evaNumber, name, infoId);
+        var station = new Station(StationId.CreateNew(), snapshot.EvaNumber, snapshot.Name, snapshot.InfoId);
         station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
         return station;
     }
     
-    public static Station CreateWithLocation(EvaNumber evaNumber, StationName name, Coordinates location)
+    public static Station CreateFromSnapshot(StationQuerySnapshot snapshot)
     {
-        var station = new Station(StationId.CreateNew(), evaNumber, name, location);
+        var station = new Station(StationId.CreateNew(), snapshot.EvaNumber, snapshot.Name, snapshot.Location);
         station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
         return station;
     }

@@ -3,6 +3,7 @@ using DBetter.Contracts.Routes.Queries.Get.Results;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations;
+using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
@@ -91,8 +92,10 @@ public class RouteFactory : IExistingInformationSelectionStage, IExistingStation
     private StopDto ToDto(Halt halt){
         var evaNumber = EvaNumber.Create(halt.ExtId).Value;
         var stationExists = _existingStations.TryGetValue(evaNumber, out var station);
-        if(!stationExists){
-            station = Station.CreateFromRoute(evaNumber, halt.GetStationName(), halt.GetStationInfoId());
+        if(!stationExists)
+        {
+            var snapshot = new StationRouteSnapshot(evaNumber, halt.GetStationName(), halt.GetStationInfoId());
+            station = Station.CreateFromSnapshot(snapshot);
 
             _stationsToCreate.Add(station);
             _existingStations.Add(evaNumber, station);

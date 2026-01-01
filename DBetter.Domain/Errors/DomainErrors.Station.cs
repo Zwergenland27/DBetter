@@ -29,5 +29,16 @@ public static partial class DomainErrors
                 "Station.Name.MetaStation", 
                 $"{value} is a meta station that describes multiple stations and should not be used.");
         }
+
+        public static class Ril100
+        {
+            public static Error InvalidLength => Error.Validation(
+                "Station.Ril100.InvalidLength",
+                "The ril 100 must be between 2 and 5 characters long");
+
+            public static Error InvalidFormat => Error.Validation(
+                "Station.Ril100.InvalidFormat",
+                "The ril 100 can only contain characters and spaces");
+        }
     }
 }

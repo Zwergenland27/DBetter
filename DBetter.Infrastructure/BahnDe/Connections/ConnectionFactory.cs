@@ -3,6 +3,7 @@ using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations;
+using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
@@ -181,8 +182,10 @@ public class ConnectionFactory
     private StopResponse ToDto(DTOs.Halt halt){
         var evaNumber = EvaNumber.Create(halt.ExtId).Value;
         var stationExists = _existingStations.TryGetValue(evaNumber, out var station);
-        if(!stationExists){
-            station = Station.CreateFromRoute(evaNumber, halt.GetStationName(), halt.GetStationInfoId());
+        if(!stationExists)
+        {
+            var snapshot = new StationRouteSnapshot(evaNumber, halt.GetStationName(), halt.GetStationInfoId());
+            station = Station.CreateFromSnapshot(snapshot);
 
             _stationsToCreate.Add(station);
             _existingStations.Add(evaNumber, station);

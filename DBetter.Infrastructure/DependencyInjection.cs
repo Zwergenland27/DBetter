@@ -47,10 +47,9 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
-        services.AddScoped<IStationQueryRepository, StationQueryRepository>();
         services.AddScoped<IConnectionSuggestionService, ConnectionSuggestionService>();
         services.AddScoped<IRouteQueryRepository, RouteQueryRepository>();
-        services.AddScoped<IStationInfoProvider, StationInfoProvider>();
+        services.AddScoped<IStationExternalProvider, ExternalStationProvider>();
         services.AddScoped<IStationRepository, StationRepository>();
         services.AddScoped<IConnectionRequestRepository, ConnectionRequestRepository>();
         return services;

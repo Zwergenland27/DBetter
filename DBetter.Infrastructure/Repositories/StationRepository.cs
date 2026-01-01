@@ -11,4 +11,19 @@ public class StationRepository(DBetterContext db) : IStationRepository
     {
         return db.Stations.FirstOrDefaultAsync(station => station.Id == id);
     }
+
+    public Task<Station?> FindByRil100Async(Ril100Identifier ril100Identifier)
+    {
+        return db.Stations.FirstOrDefaultAsync(station => station.Ril100 == ril100Identifier);
+    }
+
+    public Task<List<Station>> GetManyAsync(IEnumerable<EvaNumber> evaNumbers)
+    {
+        return db.Stations.Where(station => evaNumbers.Contains(station.EvaNumber)).ToListAsync();
+    }
+
+    public void AddRange(IEnumerable<Station> stations)
+    {
+        db.Stations.AddRange(stations);
+    }
 }
