@@ -41,9 +41,11 @@ public class Haltestelle
 
         var location = new Coordinates(Lat, Lon);
 
-        return new StationQuerySnapshot(
-            evaNumber.Value,
-            name.Value,
-            location);
+        return new StationQuerySnapshot
+        {
+            EvaNumber = evaNumber.Value,
+            Name = name.Value,
+            Location = location
+        };
     }
 }
