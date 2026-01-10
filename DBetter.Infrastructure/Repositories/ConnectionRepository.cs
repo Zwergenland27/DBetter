@@ -17,6 +17,11 @@ public class ConnectionRepository(DBetterContext db) : IConnectionRepository
         return db.Connections.Where(connection => contextIds.Contains(connection.ContextId)).ToListAsync();
     }
 
+    public void Remove(Connection connection)
+    {
+        db.Connections.Remove(connection);
+    }
+
     public void AddRange(IEnumerable<Connection> connections)
     {
         db.Connections.AddRange(connections);

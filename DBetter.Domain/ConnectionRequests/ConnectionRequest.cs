@@ -1,6 +1,7 @@
 using CleanDomainValidation.Domain;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests.Entities;
+using DBetter.Domain.ConnectionRequests.Events;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Connections.ValueObjects;
@@ -14,7 +15,7 @@ namespace DBetter.Domain.ConnectionRequests;
 public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
 {
     private List<Passenger> _passengers = [];
-    private List<ConnectionId> SuggestedConnectionIds = [];
+    private List<ConnectionId> _suggestedConnectionIds = [];
     
     public UserId? OwnerId { get; private init; }
     
@@ -31,6 +32,8 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     public PaginationReference? EarlierReference { get; private set; }
     
     public PaginationReference? LaterReference { get; private set; }
+    
+    public IReadOnlyList<ConnectionId> SuggestedConnectionIds => _suggestedConnectionIds.AsReadOnly();
 
     private ConnectionRequest() : base(null!){}
     
@@ -66,7 +69,15 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
 
     public CanFail UpdateReferences(SuggestionMode suggestionMode, PaginationReference? earlierRef, PaginationReference? laterRef)
     {
-        //TODO: Remove all connectionIds when in normal mode (= new request) -> Send DomainEvents for all connectionids
+        if (suggestionMode is SuggestionMode.Normal)
+        {
+            foreach(var connectionId in _suggestedConnectionIds)
+            {
+                RaiseDomainEvent(new ConnectionContextFlushedEvent(connectionId));
+            }
+            _suggestedConnectionIds.Clear();
+        }
+
         if (suggestionMode is SuggestionMode.Normal && earlierRef is not null && laterRef is not null)
         {
             EarlierReference = earlierRef;
@@ -98,7 +109,7 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     
     public void AddSuggestedConnections(IEnumerable<Connection> connections)
     {
-        SuggestedConnectionIds.AddRange(connections.Select(c => c.Id));
-        SuggestedConnectionIds = SuggestedConnectionIds.Distinct().ToList();
+        _suggestedConnectionIds.AddRange(connections.Select(c => c.Id));
+        _suggestedConnectionIds = _suggestedConnectionIds.Distinct().ToList();
     }
 }

@@ -160,5 +160,7 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
             .HasConversion(
                 reference => reference != null ? reference.Token.ToString() : null,
                 value => value != null ? PaginationReference.Create(value) : null);
+
+        builder.OwnsMany(x => x.SuggestedConnectionIds);
     }
 }
