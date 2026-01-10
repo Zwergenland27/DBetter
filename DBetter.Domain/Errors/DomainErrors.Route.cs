@@ -13,5 +13,11 @@ public static partial class DomainErrors
         {
             public static Error Invalid(string value) => Error.Validation("Route.Id.Invalid", $"{value} is no valid guid.");
         }
+
+        public static class ServiceNumber
+        {
+            public static Error Invalid(string value) => Error.Validation("Route.ServiceNumber.Invalid", 
+                $"{value} is not a valid service number.");
+        }
     }
 }

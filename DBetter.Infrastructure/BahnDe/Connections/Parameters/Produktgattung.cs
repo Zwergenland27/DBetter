@@ -48,15 +48,15 @@ public static class Produktgattung
     }
 
 
-    public static List<string> GetUrlIdsFromAlias(string alias)
+    public static List<string> GetUrlIdsFromTransportCategory(TransportCategory transportCategory)
     {
         var transportCategories = TransportCategories
-            .Where(x => x.Alias == alias)
+            .Where(x => x.Category == transportCategory)
             .Select(x => x.UrlId)
             .ToList();
 
         if (!transportCategories.Any())
-            throw new BahnDeException("Mapping.Produktgattung", $"Alias {alias} not found");
+            throw new BahnDeException("Mapping.Produktgattung", $"transport category {transportCategory} not found");
         return transportCategories;
     }
 }

@@ -19,6 +19,6 @@ public class ConnectionRequestRepository(DBetterContext db) : IConnectionRequest
         {
             db.ConnectionRequests.Remove(existing);
         }
-        db.ConnectionRequests.Add(connectionRequest);   
+        db.ConnectionRequests.Add(connectionRequest);
     }
 }

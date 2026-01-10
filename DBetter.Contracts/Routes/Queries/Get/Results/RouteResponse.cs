@@ -1,13 +1,11 @@
-
-using DBetter.Contracts.Routes.Queries.Get.Results;
 using DBetter.Contracts.Shared.DTOs;
 
-namespace DBetter.Contracts.Routes.Queries.Get;
+namespace DBetter.Contracts.Routes.Queries.Get.Results;
 
 /// <summary>
 /// Full trip of a public transport relation from start to destination station
 /// </summary>
-public class RouteDto {
+public class RouteResponse {
 
     /// <summary>
     /// Id of the route
@@ -21,27 +19,27 @@ public class RouteDto {
     public required string? Operator { get; set; } 
 
     /// <summary>
-    /// The transport product
+    /// The transport category
     /// </summary>
-    /// <example>RE</example>
-    public required string ServiceCategory { get; set; }
+    /// <example>HighSpeedTrains</example>
+    public required string TransportCategory { get; set; }
+    
+    /// <summary>
+    /// Line number
+    /// </summary>
+    /// <example>RE 2</example>
+    public required string? Line { get; set; }
     
     /// <summary>
     /// Stops of the route
     /// </summary>
-    public required List<StopDto> Stops { get; set; }
-
-    /// <summary>
-    /// Line number of the route
-    /// </summary>
-    /// <example>2</example>
-    public required string? LineNumber { get; set; }
+    public required List<StopResponse> Stops { get; set; }
 
     /// <summary>
     /// Service number of the route
     /// </summary>
     /// <example>1645</example>
-    public required string? ServiceNumber { get; set; }
+    public required int? ServiceNumber { get; set; }
     
     /// <summary>
     /// Information about bike carriage

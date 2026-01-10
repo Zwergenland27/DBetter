@@ -7,6 +7,7 @@ using DBetter.Application.Requests.UpsertRequest;
 using DBetter.Contracts.Requests.CreateRequest;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Parameters;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 
 namespace DBetter.Api;
 

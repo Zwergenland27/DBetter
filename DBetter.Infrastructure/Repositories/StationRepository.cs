@@ -22,6 +22,11 @@ public class StationRepository(DBetterContext db) : IStationRepository
         return db.Stations.Where(station => evaNumbers.Contains(station.EvaNumber)).ToListAsync();
     }
 
+    public Task<List<Station>> GetManyAsync(IEnumerable<StationId> stationIds)
+    {
+        return db.Stations.Where(station => stationIds.Contains(station.Id)).ToListAsync();
+    }
+
     public void AddRange(IEnumerable<Station> stations)
     {
         db.Stations.AddRange(stations);

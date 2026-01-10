@@ -26,7 +26,7 @@ public class StopResponse
     /// <summary>
     /// Demand information
     /// </summary>
-    public required DemandDto Demand { get; set; }
+    public required DemandResponse Demand { get; set; }
     
     /// <summary>
     /// Name of the station

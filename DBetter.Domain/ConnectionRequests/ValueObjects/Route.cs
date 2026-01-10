@@ -19,6 +19,8 @@ public class Route
     public TransferAmount MaxTransfers { get; private init; }
     
     public TransferTime MinTransferTime { get; private init; }
+    
+    public IReadOnlyList<StationId> RequestedStationIds => GetRequestedStationIds();
 
     private Route(){}
 
@@ -73,5 +75,26 @@ public class Route
             minTransferTime));
         
         return transferOptionsResult;
+    }
+    
+    private List<StationId> GetRequestedStationIds()
+    {
+        var stationIds = new List<StationId>
+        {
+            OriginStationId,
+            DestinationStationId
+        };
+
+        if (FirstStopover is not null)
+        {
+            stationIds.Add(FirstStopover.StationId);
+        }
+
+        if (SecondStopover is not null)
+        {
+            stationIds.Add(SecondStopover.StationId);
+        }
+
+        return stationIds.Distinct().ToList();
     }
 }

@@ -1,41 +1,20 @@
 using System.Web;
+using DBetter.Application;
+using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Errors;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
-public interface IBahnDeUrlFactoryStationSelectionStage
-{
-    BahnDeUrlFactory WithStations(List<Station> stations);
-}
-
-public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
+public class BahnDeUrlFactory(SuggestionRequest suggestionRequest)
 {
     private const string BaseUrl = "https://www.bahn.de/buchung/fahrplan/suche#";
-
-
-    private readonly ReiseAnfrage _request;
-    private List<Station> _stations;
     
     private Dictionary<string, string> _parameters = [];
     public string GenericUrl { get; private set; }
-
-    private BahnDeUrlFactory(ReiseAnfrage request)
-    {
-        _request = request;
-    }
-
-    public static IBahnDeUrlFactoryStationSelectionStage CreateFrom(ReiseAnfrage request)
-    {
-        return new BahnDeUrlFactory(request);
-    }
-    
-    public BahnDeUrlFactory WithStations(List<Station> stations)
-    {
-        _stations = stations;
-        GenericUrl = $"{BaseUrl}/{Build()}";
-        return this;
-    }
 
     public string ForConnection(string ctxRecon)
     {
@@ -49,7 +28,7 @@ public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
         SetOrigin();
         SetDestination();
     
-        if (_request.AnkunftSuche == AnkunftSuche.Departure)
+        if (suggestionRequest.DepartureTime is not null)
         {
             SetDepartureTime();
         }
@@ -73,30 +52,41 @@ public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
 
     private void SetComfortClass()
     {
-        _parameters["kl"] = Klasse.GetUrlAliasFromAlias(_request.Klasse);
+        _parameters["kl"] = Klasse.GetUrlAliasFromComfortClass(suggestionRequest.ComfortClass);
     }
 
     private void SetPassengers()
     {
-        _parameters["r"] = string.Join(',', _request.Reisende.Select(ToReisender));
+        _parameters["r"] = string.Join(',', suggestionRequest.Passengers.Select(ToReisender));
+
+        if (suggestionRequest.AnyBikes)
+        {
+            var numberOfBikes = suggestionRequest.Passengers.Sum(passenger => passenger.Bikes);
+            _parameters["r"] += $",{ReisenderTyp.GetBikeUrlId()}:{ArtErmaessigung.NoneUrlId}:{numberOfBikes}";
+        }
+
+        if (suggestionRequest.AnyDogs)
+        {
+            var numberOfDogs = suggestionRequest.Passengers.Sum(passenger => passenger.Dogs);
+            _parameters["r"] += $",{ReisenderTyp.GetDogUrlId()}:{ArtErmaessigung.NoneUrlId}:{numberOfDogs}";
+        }
     }
     
-    private static string ToReisender(Reisender passenger)
+    private static string ToReisender(SuggestionRequestPassenger passenger)
     {
-        var type = ReisenderTyp.GetUrlIdFromType(passenger.Typ);
-
-        var count = passenger.Anzahl;
-
-        if (passenger.Alter.Any())
-        {
-            return $"{type}:{GenerateUriDiscounts(passenger.Ermaessigungen)}:{count}:{passenger.Alter[0]}";
-        }
+        var type = ReisenderTyp.GetUrlIdFromAge(passenger.Age);
         
-        return $"{type}:{GenerateUriDiscounts(passenger.Ermaessigungen)}:{count}";
+        var count = 1;
+        
+        return $"{type}:{GenerateUriDiscounts(passenger.Discounts)}:{count}:{passenger.Age}";
     }
 
-    private static string GenerateUriDiscounts(List<Ermaessigung> discounts)
+    private static string GenerateUriDiscounts(List<PassengerDiscount> discounts)
     {
+        if (!discounts.Any())
+        {
+            return $"{ArtErmaessigung.None}:{KlasseErmaessigung.GetAliasFromComfortClass(ComfortClass.Unknown)}";
+        }
         var uriDiscounts = discounts
             .Select(GenerateUriDiscount)
             .ToList();
@@ -110,92 +100,98 @@ public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
         return $"{uriDiscounts[0]}[{otherDiscounts}]";
     }
 
-    private static string GenerateUriDiscount(Ermaessigung discount)
+    private static string GenerateUriDiscount(PassengerDiscount discount)
     {
-        var type = ArtErmaessigung.GetUrlIdFromAlias(discount.Art);
-        return $"{type}:{discount.Klasse}";
+        var type = ArtErmaessigung.GetUrlIdFromType(discount.Type);
+        var comfortClass = KlasseErmaessigung.GetAliasFromComfortClass(discount.ComfortClass);
+        return $"{type}:{comfortClass}";
     }
 
     private void SetOrigin()
     {
         _parameters["sot"] = "ST";
-        var name = _stations
-            .First(s => s.EvaNumber.AsFuzzy() == _request.AbfahrtsHalt)
-            .Name.Value;
-        _parameters["so"] = name;
-        _parameters["soid"] = _request.AbfahrtsHalt;
+        _parameters["so"] = suggestionRequest.Route.Origin.Name.Value;
+        _parameters["soid"] = suggestionRequest.Route.Origin.EvaNumber.AsFuzzy();
     }
 
     private void SetDestination()
     {
-        if(_stations is null) throw new InvalidOperationException("Cannot set destination without .WithStations being called");
-        
         _parameters["zot"] = "ST";
-        var name = _stations
-            .First(s => s.EvaNumber.AsFuzzy() == _request.AnkunftsHalt)
-            .Name.Value;
-        _parameters["zo"] = name;
-        _parameters["zoid"] = _request.AnkunftsHalt;
+        _parameters["so"] = suggestionRequest.Route.Destination.Name.Value;
+        _parameters["soid"] = suggestionRequest.Route.Destination.EvaNumber.AsFuzzy();
     }
 
     private void SetDepartureTime()
     {
         _parameters["hza"] = "D";
-        _parameters["hd"] = _request.AnfrageZeitpunkt;
+        _parameters["hd"] = suggestionRequest.DepartureTime!.Value.ToBahnTime();
     }
 
     private void SetArrivalTime()
     {
         _parameters["hza"] = "A";
-        _parameters["hd"] = _request.AnfrageZeitpunkt;
+        _parameters["hd"] = suggestionRequest.ArrivalTime!.Value.ToBahnTime();
     }
 
     private void SetStopovers()
     {
-        _parameters["vm"] = GenerateAllowedMeansOfTransport(_request.Produktgattungen);
-        var uriStopovers = string.Join(',', _request.Zwischenhalte.Select(GenerateUriStopover));
+        _parameters["vm"] = GenerateAllowedMeansOfTransport(suggestionRequest.Route.MeansOfTransportFirstSection);
+
+        var uriStopovers = "";
+        if (suggestionRequest.Route.FirstStopover is not null)
+        {
+            uriStopovers += (GenerateUriStopover(suggestionRequest.Route.FirstStopover));
+        }
+
+        if (suggestionRequest.Route.SecondStopover is not null)
+        {
+            uriStopovers += ",";
+            uriStopovers += GenerateUriStopover(suggestionRequest.Route.SecondStopover);
+        }
+        
         _parameters["hz"] = $"[{uriStopovers}]";
     }
 
-    private string GenerateUriStopover(Zwischenhalt stopover)
+    private string GenerateUriStopover(SuggestionRequestStopover stopover)
     {
-        if(_stations is null) throw new InvalidOperationException("Cannot generate uri stopover without .WithStations being called");
-        
-        var name = _stations
-            .First(s => s.EvaNumber.AsFuzzy() == stopover.Id)
-            .Name.Value;
+        var evaNumber = stopover.Station.EvaNumber.AsFuzzy();
+        var name = stopover.Station.Name.Value;
+        var stayDuration = stopover.StayDuration;
+        var meansOfTransport = GenerateAllowedMeansOfTransport(stopover.MeansOfTransportNextSection);
         return
-            $"[\"{stopover.Id}\",\"{name}\",{stopover.Aufenthaltsdauer ?? 0},\"{GenerateAllowedMeansOfTransport(stopover.VerkehrsmittelOfNextAbschnitt)}\"]";
+            $"[\"{evaNumber}\",\"{name}\",{stayDuration},\"{meansOfTransport}\"]";
     }
 
-    private static string GenerateAllowedMeansOfTransport(List<string> produktgattungen)
+    private static string GenerateAllowedMeansOfTransport(MeansOfTransport meansOfTransport)
     {
-        return string.Join(',', produktgattungen.SelectMany(Produktgattung.GetUrlIdsFromAlias));
+        return string.Join(',', meansOfTransport
+            .AsList()
+            .SelectMany(Produktgattung.GetUrlIdsFromTransportCategory));
     }
 
     private void SetSeatReservationOnly()
     {
-        _parameters["ar"] = _request.SitzplatzOnly ? "true" : "false";
+        _parameters["ar"] = suggestionRequest.SeatReservationOnly ? "true" : "false";
     }
 
     private void SetFastConnectionsOnly()
     {
-        _parameters["s"] = _request.SchnelleVerbindungen ? "true" : "false";
+        _parameters["s"] = suggestionRequest.FastConnectionsOnly ? "true" : "false";
     }
 
     private void SetDirectConnectionsOnly()
     {
-        _parameters["d"] = _request.MaxUmstiege == 0 ? "true" : "false";
+        _parameters["d"] = suggestionRequest.Route.MaxTransfers.Value is 0 ? "true" : "false";
     }
 
     private void SetBikeCarriage()
     {
-        _parameters["fm"] = _request.BikeCarriage ? "true" : "false";
+        _parameters["fm"] = suggestionRequest.AnyBikes ? "true" : "false";
     }
 
     private void SetMinTransferTime()
     {
-        _parameters["mud"] = _request.MinUmstiegszeit.ToString();
+        _parameters["mud"] = suggestionRequest.Route.MinTransferTime.Value.ToString();
     }
 
     private void SetShowBestPrices()
@@ -205,11 +201,11 @@ public class BahnDeUrlFactory : IBahnDeUrlFactoryStationSelectionStage
 
     private void SetDeutschlandTicketOnly()
     {
-        _parameters["dlt"] = _request.NurDeutschlandTicketVerbindungen ? "true" : "false";
+        _parameters["dlt"] = suggestionRequest.DeutschlandTicketConnectionsOnly ? "true" : "false";
     }
     
     private void SetDeutschlandTicketExists()
     {
-        _parameters["dltv"] = _request.DeutschlandTicketVorhanden ? "true" : "false";
+        _parameters["dltv"] = suggestionRequest.AllPassengersOwnDeutschlandTicket ? "true" : "false";
     }
 }

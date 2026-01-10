@@ -1,12 +1,10 @@
 using CleanMessageBus.Abstractions.DependencyInjection;
 using CleanMessageBus.RabbitMQ.DependencyInjection;
 using DBetter.Application.Abstractions.Persistence;
-using DBetter.Application.Requests;
-using DBetter.Application.Routes;
-using DBetter.Application.Stations;
 using DBetter.Application.Users;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests;
+using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.ApiMarketplace;
@@ -47,9 +45,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
-        services.AddScoped<IConnectionSuggestionService, ConnectionSuggestionService>();
-        services.AddScoped<IRouteQueryRepository, RouteQueryRepository>();
         services.AddScoped<IStationExternalProvider, ExternalStationProvider>();
+        services.AddScoped<IRouteRepository, RouteRepository>();
         services.AddScoped<IStationRepository, StationRepository>();
         services.AddScoped<IConnectionRequestRepository, ConnectionRequestRepository>();
         return services;

@@ -1,12 +1,15 @@
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
+using DBetter.Infrastructure.BahnDe.Shared;
 
-namespace DBetter.Infrastructure.BahnDe.Shared;
+namespace DBetter.Infrastructure.BahnDe.Connections;
 
-public class RouteInformationFactory(Verkehrsmittel verkehrsmittel)
+public class TransportSegmentInformationFactory(VerbindungsAbschnitt verbindungsAbschnitt)
 {
     public List<ServiceInformation> ExtractComposition()
     {
+        var verkehrsmittel = verbindungsAbschnitt.Verkehrsmittel!;
+        
         var composition = new List<ServiceInformation>();
         var leadingPartIdentifier = verkehrsmittel.MittelText!;
         var trainParts = verkehrsmittel.LangText!.Split(" / ");
@@ -27,6 +30,21 @@ public class RouteInformationFactory(Verkehrsmittel verkehrsmittel)
         }
 
         return composition;
+    }
+    
+    public CateringInformation ExtractCateringInformation()
+    {
+        return new CateringInformationFactory(verbindungsAbschnitt).ExtractInformation();
+    }
+    
+    public BikeCarriageInformation ExtractBikeCarriageInformation()
+    {
+        return new BikeCarriageInformationFactory(verbindungsAbschnitt).ExtractInformation();
+    }
+
+    public List<PassengerInformation> ExtractPassengerInformationMessages()
+    {
+        return [];
     }
 
     // private static void GetAccessibilityInformation(List<Zugattribut>  zugattribute, IEnumerable<IRouteStop> stopInfos)

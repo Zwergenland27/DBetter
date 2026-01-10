@@ -50,15 +50,6 @@ public static class DTOExtensions
             secondClassDemand.ToDomainDemandStatus());
     }
 
-    public static DemandDto ToDto(this Demand demand)
-    {
-        return new DemandDto
-        {
-            FirstClass = demand.FirstClass.ToString(),
-            SecondClass = demand.SecondClass.ToString(),
-        };
-    }
-
     public static TravelTime? GetDepartureTime(this IRouteStop stop)
     {
         if(stop.AbfahrtsZeitpunkt is null) return null;
@@ -113,15 +104,6 @@ public static class DTOExtensions
         return stop.RisNotizen.Any(r => r.Key is "text.realtime.stop.entry.disabled");
     }
 
-    public static TravelTimeDto? ToDto(this TravelTime? travelTime){
-        if(travelTime is null) return null;
-
-        return new TravelTimeDto{
-            Planned = travelTime.Planned.ToIso8601(),
-            Real = travelTime.Real?.ToIso8601()
-        };
-    }
-
     public static StationInfoId? GetStationInfoId(this IRouteStop stop){
         if(stop.BahnhofsInfoId is null) return null;
 
@@ -151,16 +133,6 @@ public static class DTOExtensions
         return new Platform(stop.Gleis, stop.EzGleis, platformType);
     }
 
-    public static PlatformDto? ToDto(this Platform? platform){
-        if(platform is null) return null;
-
-        return new PlatformDto {
-            Planned = platform.Planned,
-            Real = platform.Real,
-            Type = platform.Type.ToString()
-        };
-    }
-
     public static StopIndex GetStopIndex(this IRouteStop stop){
         return new StopIndex(stop.RouteIdx);
     }
@@ -186,37 +158,6 @@ public static class DTOExtensions
             Waehrung.EUR => Currency.Euro,
             _ => Currency.Unknown
         };
-    }
-
-    public static BikeCarriageInformationDto ToDto(this BikeCarriageInformation bikeCarriage){
-        return new BikeCarriageInformationDto{
-            Status = bikeCarriage.Status.ToString(),
-            FromStopIndex = bikeCarriage.FromStopIndex.Value,
-            ToStopIndex = bikeCarriage.ToStopIndex.Value
-        };
-    }
-
-    public static CateringInformationDto ToDto(this CateringInformation catering){
-        return new CateringInformationDto{
-            Type = catering.Type.ToString(),
-            FromStopIndex = catering.FromStopIndex.Value,
-            ToStopIndex = catering.ToStopIndex.Value
-        };
-    }
-
-    public static List<string> ToDto(this IReadOnlyList<PassengerInformation> messages)
-    {
-        return messages.Select(message => message.ToDto()).ToList();
-    }
-    
-    public static string ToDto(this PassengerInformation message)
-    {
-        if (message.Code is PassengerInformationCode.FreeText)
-        {
-            return message.Text!;
-        }
-        
-        return message.Code.ToString();
     }
 
     private static DemandStatus ToDomainDemandStatus(this AuslastungsStufe stufe)

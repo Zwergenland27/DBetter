@@ -12,4 +12,8 @@
       <PackageReference Include="Zwergenland.CleanMessageBus.Abstractions" Version="1.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ConnectionRequests\Events\" />
+    </ItemGroup>
+
 </Project>

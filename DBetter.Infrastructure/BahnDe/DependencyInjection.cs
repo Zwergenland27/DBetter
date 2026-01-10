@@ -1,4 +1,6 @@
 using System.Net;
+using DBetter.Application.Requests;
+using DBetter.Application.Routes;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Routes;
 using DBetter.Infrastructure.BahnDe.Stations;
@@ -18,7 +20,7 @@ public static class DependencyInjection
             })
             .AddHttpMessageHandler<MetricHttpHandler>();
         
-        services.AddHttpClient<ConnectionService>(
+        services.AddHttpClient<IExternalConnectionProvider, BahnDeConnectionProvider>(
                 client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
@@ -26,14 +28,13 @@ public static class DependencyInjection
             })
             .AddHttpMessageHandler<MetricHttpHandler>();
         
-        services.AddHttpClient<RouteService>(
+        services.AddHttpClient<IExternalRouteProvider, BahnDeRouteProvider>(
                 client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip
             })
             .AddHttpMessageHandler<MetricHttpHandler>();
-        
         return services;
     }
 }

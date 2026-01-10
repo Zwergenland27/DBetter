@@ -6,7 +6,7 @@ namespace DBetter.Contracts.Routes.Queries.Get.Results;
 /// <summary>
 /// A stop on a route
 /// </summary>
-public class StopDto
+public class StopResponse
 {
     /// <summary>
     /// Internal id of the station
@@ -26,13 +26,19 @@ public class StopDto
     /// <summary>
     /// Demand information
     /// </summary>
-    public required DemandDto Demand { get; set; }
+    public required DemandResponse Demand { get; set; }
     
     /// <summary>
     /// Name of the station
     /// </summary>
     /// <example>Dresden Hbf</example>
     public required string Name { get; set; }
+    
+    /// <summary>
+    /// Ril100 identifier of station
+    /// </summary>
+    /// <example>DH</example>
+    public required string? Ril100 { get; set; }
     
     /// <summary>
     /// Platform
@@ -62,6 +68,12 @@ public class StopDto
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public required bool IsEntryOnly { get; set; }
+    
+    /// <summary>
+    /// Indicates that the service only stops, when requested by the passenger
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public required bool IsRequestOnly { get; set; }
     
     /// <summary>
     /// Stop index of the full train run

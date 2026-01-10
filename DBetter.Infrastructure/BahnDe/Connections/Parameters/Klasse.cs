@@ -40,13 +40,13 @@ public static class Klasse
     }
 
 
-    public static string GetUrlAliasFromAlias(string alias)
+    public static string GetUrlAliasFromComfortClass(ComfortClass comfortClass)
     {
-        var result = ComfortClasses.FirstOrDefault(x => x.Alias == alias);
+        var result = ComfortClasses.FirstOrDefault(x => x.ComfortClass == comfortClass);
 
         if (result is null)
         {
-            throw new BahnDeException("Mapping.Klasse", $"Alias {alias} not found");
+            throw new BahnDeException("Mapping.Klasse", $"Comfort class {comfortClass} not found");
         }
         
         return result.UrlAlias;

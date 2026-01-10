@@ -15,7 +15,7 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
 
     public ServiceInformation ExtractData()
     {
-        _category = Produktgattung.GetTransportCategoryFromAlias(produktGattung!);
+        _category = Produktgattung.GetTransportCategoryFromAlias(produktGattung);
 
         var splitLineInformation = fullLineInformation.Split(" ");
 
@@ -49,6 +49,9 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
         {
             _productClass = splitLineInformation[0];
             _lineNumber = new LineNumber(splitLineInformation[1]);
+            
+            //TODO: line number is sometimes the train number, like in ICEs or TGVs and should be extracted for a correct data model
+            //This should not be done using static filters (like only for ices) because sometimes a normal train is also missing its line number
         }
         //Trains with train number and without any additional names
         else if (splitLineInformation.Length == 2 && splitLineInformation[0].Any(char.IsDigit))

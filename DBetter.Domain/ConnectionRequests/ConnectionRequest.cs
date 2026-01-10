@@ -2,15 +2,19 @@ using CleanDomainValidation.Domain;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Connections;
+using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Errors;
 using DBetter.Domain.Shared;
+using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.Users.ValueObjects;
 
 namespace DBetter.Domain.ConnectionRequests;
 
 public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
 {
-    private List<Passenger> _passengers;
+    private List<Passenger> _passengers = [];
+    private List<ConnectionId> SuggestedConnectionIds = [];
     
     public UserId? OwnerId { get; private init; }
     
@@ -19,10 +23,6 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     public DateTime? ArrivalTime { get; private set; }
     
     public IReadOnlyList<Passenger> Passengers => _passengers.AsReadOnly();
-
-    public bool AllPassengersOwnDeutschlandTicket => Passengers.All(p => p.OwnsDeutschlandTicket);
-
-    public bool AnyBikes => Passengers.Any(p => p.Bikes > 0);
     
     public ComfortClass ComfortClass { get; private set; }
     
@@ -64,23 +64,41 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
         return new ConnectionRequest(id, ownerId, departureTime, arrivalTime, passengers, comfortClass, route);
     }
 
-    public void InitializeLaterReference(string earlierRef, string laterRef)
+    public CanFail UpdateReferences(SuggestionMode suggestionMode, PaginationReference? earlierRef, PaginationReference? laterRef)
     {
-        EarlierReference = PaginationReference.Create(earlierRef);
-        LaterReference = PaginationReference.Create(laterRef);
-    }
-
-    public CanFail EarlierUsed(string earlierRef)
-    {
-        if (EarlierReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
-        EarlierReference = PaginationReference.Create(earlierRef);
+        //TODO: Remove all connectionIds when in normal mode (= new request) -> Send DomainEvents for all connectionids
+        if (suggestionMode is SuggestionMode.Normal && earlierRef is not null && laterRef is not null)
+        {
+            EarlierReference = earlierRef;
+            LaterReference = laterRef;
+        }
+        else if (suggestionMode is SuggestionMode.Earlier && earlierRef is not null)
+        {
+            if (EarlierReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
+            EarlierReference = earlierRef;
+        }else if (suggestionMode is SuggestionMode.Later && laterRef is not null)
+        {
+            if (LaterReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
+            LaterReference = laterRef;
+        }
+        
         return CanFail.Success;
     }
     
-    public CanFail LaterUsed(string laterRef)
+    public PaginationReference? GetReferenceForMode(SuggestionMode suggestionMode)
     {
-        if (LaterReference is null) return DomainErrors.ConnectionRequest.ReferencesNotInitialized;
-        LaterReference = PaginationReference.Create(laterRef);
-        return CanFail.Success;
+        return suggestionMode switch
+        {
+            SuggestionMode.Normal => null,
+            SuggestionMode.Earlier => EarlierReference,
+            SuggestionMode.Later => LaterReference,
+            _ => throw new ArgumentOutOfRangeException(nameof(suggestionMode), suggestionMode, null)
+        };
+    }
+    
+    public void AddSuggestedConnections(IEnumerable<Connection> connections)
+    {
+        SuggestedConnectionIds.AddRange(connections.Select(c => c.Id));
+        SuggestedConnectionIds = SuggestedConnectionIds.Distinct().ToList();
     }
 }

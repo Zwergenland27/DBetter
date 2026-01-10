@@ -11,5 +11,7 @@ public interface IStationRepository
     
     Task<List<Station>> GetManyAsync(IEnumerable<EvaNumber> evaNumbers);
     
+    Task<List<Station>> GetManyAsync(IEnumerable<StationId> stationIds);
+    
     void AddRange(IEnumerable<Station> stations);
 }

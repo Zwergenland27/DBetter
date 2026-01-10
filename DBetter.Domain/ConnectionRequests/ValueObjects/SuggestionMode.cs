@@ -1,4 +1,4 @@
-namespace DBetter.Application.Requests;
+namespace DBetter.Domain.ConnectionRequests.ValueObjects;
 
 public enum SuggestionMode
 {

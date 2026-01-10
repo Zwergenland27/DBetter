@@ -3,7 +3,7 @@ namespace DBetter.Contracts.Shared.DTOs;
 /// <summary>
 /// Demand information
 /// </summary>
-public class DemandDto
+public class DemandResponse
 {
     /// <summary>
     /// Demand of first class

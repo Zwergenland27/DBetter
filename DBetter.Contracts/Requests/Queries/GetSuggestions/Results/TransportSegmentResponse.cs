@@ -25,7 +25,7 @@ public class TransportSegmentResponse : SegmentResponse
     /// <summary>
     /// Demand information
     /// </summary>
-    public required DemandDto Demand { get; set; }
+    public required DemandResponse Demand { get; set; }
     
     /// <summary>
     /// Stops of the section of the train run
@@ -61,6 +61,12 @@ public class TransportSegmentResponse : SegmentResponse
     /// </summary>
     /// <example>RE 2</example>
     public required string? Line { get; set; }
+    
+    /// <summary>
+    /// Service number of the route
+    /// </summary>
+    /// <example>1645</example>
+    public required int? ServiceNumber { get; set; }
     
     /// <summary>
     /// Information about bike carriage

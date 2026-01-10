@@ -5,21 +5,24 @@ public record BikeCarriageInformation(
     StopIndex FromStopIndex,
     StopIndex ToStopIndex)
 {
-    public BikeCarriageInformation UpdateStopIndices(StopIndex from, StopIndex to)
+    public BikeCarriageInformation Update(BikeCarriageInformation newInformation)
     {
         var newFromStopIndex = FromStopIndex;
         var newToStopIndex = ToStopIndex;
 
-        if (from.Value < newFromStopIndex.Value)
+        if (newInformation.FromStopIndex.Value < newFromStopIndex.Value)
         {
-            newFromStopIndex = from;
+            newFromStopIndex = newInformation.FromStopIndex;
         }
 
-        if (ToStopIndex.Value > newToStopIndex.Value)
+        if (newInformation.ToStopIndex.Value > newToStopIndex.Value)
         {
-            newToStopIndex = to;
+            newToStopIndex = newInformation.ToStopIndex;
         }
 
-        return this with { FromStopIndex = newFromStopIndex, ToStopIndex = newToStopIndex };
+        return new BikeCarriageInformation(
+            Status: newInformation.Status,
+            FromStopIndex: newFromStopIndex,
+            ToStopIndex: newToStopIndex);
     }
 }

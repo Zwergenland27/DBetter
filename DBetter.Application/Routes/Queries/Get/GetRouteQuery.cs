@@ -2,6 +2,7 @@ using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
 using CleanMediator.Commands;
 using DBetter.Contracts.Routes.Queries.Get;
+using DBetter.Contracts.Routes.Queries.Get.Results;
 using DBetter.Domain.Routes.ValueObjects;
 
 namespace DBetter.Application.Routes.Queries.Get;
@@ -18,4 +19,4 @@ public class GetRouteQueryBuilder : IRequestBuilder<GetRouteParameters, GetRoute
     }
 }
 
-public record GetRouteQuery(RouteId Id) : ICommand<RouteDto>;
+public record GetRouteQuery(RouteId Id) : ICommand<RouteResponse>;

@@ -1,5 +1,7 @@
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.Connections.Snapshots;
 using DBetter.Domain.Routes.Events;
+using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Routes.ValueObjects;
 
 namespace DBetter.Domain.Routes;
@@ -9,7 +11,7 @@ namespace DBetter.Domain.Routes;
 /// </summary>
 public class Route : AggregateRoot<RouteId>
 {
-    private readonly List<PassengerInformation> _messages = [];
+    private List<PassengerInformation> _messages = [];
     
     public BahnJourneyId JourneyId { get; private init; }
     
@@ -37,38 +39,46 @@ public class Route : AggregateRoot<RouteId>
         Catering = cateringInformation;
         BikeCarriage = bikeCarriageInformation;
     }
-
-    public static Route CreateNew(
-        BahnJourneyId journeyId,
-        List<PassengerInformation> messages,
-        ServiceInformation serviceInformation,
-        CateringInformation cateringInformation,
-        BikeCarriageInformation bikeCarriageInformation,
-        bool stationsMissing)
+    
+    public static Route CreateFromSnapshot(TransportSegmentSnapshot snapshot)
     {
-        var route = new Route(RouteId.CreateNew(), journeyId, messages, serviceInformation, cateringInformation,
-            bikeCarriageInformation);
+        var route = new Route(
+            RouteId.CreateNew(),
+            snapshot.JourneyId,
+            snapshot.InformationMessages,
+            snapshot.Composition.First(),
+            snapshot.Catering,
+            snapshot.BikeCarriage);
 
-        if (stationsMissing)
+        if (route.ServiceInformation.TransportCategory is
+            TransportCategory.HighSpeedTrain or
+            TransportCategory.FastTrain or
+            TransportCategory.RegionalTrain or
+            TransportCategory.SuburbanTrain)
         {
-            route.RaiseDomainEvent(new RouteScrapingScheduledEvent(route.Id));   
+            route.RaiseDomainEvent(new RouteScrapingScheduledEvent(route.Id));
         }
-        
         return route;
+    }
+
+    public void Update(TransportSegmentSnapshot snapshot)
+    {
+        Catering = Catering.Update(snapshot.Catering);
+        BikeCarriage = BikeCarriage.Update(snapshot.BikeCarriage);
+        _messages.AddRange(snapshot.InformationMessages);
+        _messages = _messages.Distinct().ToList();
+    }
+
+    public void Update(RouteSnapshot snapshot)
+    {
+        Catering = Catering.Update(snapshot.Catering);
+        BikeCarriage = BikeCarriage.Update(snapshot.BikeCarriage);
+        _messages.AddRange(snapshot.InformationMessages);
+        _messages = _messages.Distinct().ToList();
     }
 
     public void UpdateServiceNumber(ServiceNumber newServiceNumber)
     {
         ServiceInformation = ServiceInformation.UpdateServiceNumber(newServiceNumber);
-    }
-
-    public void TryUpdateCateringInformation(CateringInformation newCateringInformation)
-    {
-        Catering = Catering.UpdateStopIndices(newCateringInformation.FromStopIndex, newCateringInformation.ToStopIndex);
-    }
-    
-    public void TryUpdateBikeCarriageInformation(BikeCarriageInformation newBikeCarriageInformation)
-    {
-        BikeCarriage = BikeCarriage.UpdateStopIndices(newBikeCarriageInformation.FromStopIndex, newBikeCarriageInformation.ToStopIndex);
     }
 }

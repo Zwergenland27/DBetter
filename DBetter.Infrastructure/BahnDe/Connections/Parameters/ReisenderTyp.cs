@@ -32,14 +32,18 @@ public class ReisenderTyp
             .Type;
     }
 
-    public static int GetUrlIdFromType(string type)
+    public static int GetUrlIdFromAge(int age)
     {
         return Types
-            .First(t => t.Type == type)
+            .OfType<PersonGroupWithAlias>()
+            .OrderBy(pg => pg.MinAge)
+            .Last(pg => age > pg.MinAge)
             .UrlId;
     }
     
     public static string GetBikeAlias() => Bike.Type;
+    public static int GetBikeUrlId() => Bike.UrlId;
     
     public static string GetDogAlias() => Dog.Type;
+    public static int GetDogUrlId() => Dog.UrlId;
 }

@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.Connections.Snapshots;
 using DBetter.Domain.Stations.Events;
 using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
@@ -52,6 +53,13 @@ public class Station : AggregateRoot<StationId>
     public static Station CreateFromSnapshot(StationQuerySnapshot snapshot)
     {
         var station = new Station(StationId.CreateNew(), snapshot.EvaNumber, snapshot.Name, snapshot.Location);
+        station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
+        return station;
+    }
+
+    public static Station CreateFromSnapshot(StopSnapshot snapshot)
+    {
+        var station = new Station(StationId.CreateNew(), snapshot.EvaNumber, snapshot.Name, snapshot.InfoId);
         station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
         return station;
     }
