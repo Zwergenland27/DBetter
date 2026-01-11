@@ -8,20 +8,16 @@ namespace DBetter.Domain.Routes.ValueObjects;
 /// <remarks>
 /// DA Flag can be set to any date where the train run is valid -> skip between days is possible
 /// </remarks>
-public record BahnJourneyId
+public record BahnJourneyId(string Value)
 {
-    public string Value { get; private init; }
+    public EvaNumber DestinationEvaNumber => EvaNumber.Create(Parse()["LS"]).Value;
     
-    private readonly Dictionary<string, string> _data = [];
-    
-    public EvaNumber DestinationEvaNumber => EvaNumber.Create(_data["LS"]).Value;
-    
-    public EvaNumber OriginEvaNumber => EvaNumber.Create(_data["1S"]).Value;
-    
-    public BahnJourneyId(string value)
+    public EvaNumber OriginEvaNumber => EvaNumber.Create(Parse()["1S"]).Value;
+
+    private Dictionary<string, string> Parse()
     {
-        Value = value;
-        string[] parts = value.Split('#');
+        var data = new Dictionary<string, string>();
+        string[] parts = Value.Split('#');
 
         //Start at 1 because first part only contains version number without key
         //Increment by two because key and value are seperated by # as well
@@ -29,7 +25,9 @@ public record BahnJourneyId
         {
             var key = parts[i];
             var valueOfKey = parts[i + 1];
-            _data[key] = valueOfKey;
+            data[key] = valueOfKey;
         }
+
+        return data;
     }
 }
