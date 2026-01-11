@@ -4,7 +4,7 @@ namespace DBetter.Domain.ConnectionRequests;
 
 public interface IConnectionRequestRepository
 {
-    Task<ConnectionRequest?> GetById(ConnectionRequestId id);
+    Task<ConnectionRequest?> GetAsync(ConnectionRequestId id);
     
-    Task StoreAsync(ConnectionRequest connectionRequest);
+    void Add(ConnectionRequest connectionRequest);
 }

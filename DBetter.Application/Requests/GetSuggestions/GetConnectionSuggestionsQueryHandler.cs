@@ -28,7 +28,7 @@ public class GetConnectionSuggestionsQueryHandler(
     public override async Task<CanFail<List<ConnectionResponse>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
         await unitOfWork.BeginTransaction(cancellationToken);
-        var connectionRequest = await connectionRequestRepository.GetById(request.Id);
+        var connectionRequest = await connectionRequestRepository.GetAsync(request.Id);
         if (connectionRequest is null) return DomainErrors.ConnectionRequest.NotFound;
 
         if (connectionRequest.OwnerId is not null && request.UserId is null) return DomainErrors.ConnectionRequest.Unauthorized;
@@ -50,6 +50,11 @@ public class GetConnectionSuggestionsQueryHandler(
             ExtractRouteInformation(connection);
             ExtractMissingStations(connection);
             connections.Add(Connection.CreateFromSnapshot(connection));
+        }
+
+        foreach (var r in _existingRoutes)
+        {
+            Console.WriteLine(r.JourneyId.Value);
         }
         
         connectionRepository.AddRange(connections);
@@ -87,6 +92,7 @@ public class GetConnectionSuggestionsQueryHandler(
         var unknownStations = connectionSnapshot.GetUnknownStations(_existingStations);
         foreach (var station in unknownStations)
         {
+            if (_existingStations.Any(existingStation => existingStation.EvaNumber == station.EvaNumber)) continue;
             var newStation = Station.CreateFromSnapshot(station);
             _stationsToCreate.Add(newStation);
             _existingStations.Add(newStation);
@@ -108,7 +114,8 @@ public class GetConnectionSuggestionsQueryHandler(
             jid.OriginEvaNumber,
             jid.DestinationEvaNumber
         }));
-        _existingRoutes = await routeRepository.GetManyAsync(journeyIds);
+        
+        _existingRoutes = await routeRepository.GetManyAsync(journeyIds.Distinct());
         _existingStations = await stationRepository.GetManyAsync(evaNumbers.Distinct());
     }
 }

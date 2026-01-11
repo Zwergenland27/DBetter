@@ -16,51 +16,42 @@ namespace DBetter.Application.Requests.UpsertRequest;
 public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionRequestDto, UpsertConnectionRequestCommand>{
     public ValidatedRequiredProperty<UpsertConnectionRequestCommand> Configure(RequiredPropertyBuilder<ConnectionRequestDto, UpsertConnectionRequestCommand> builder)
     {
-        var request = builder.ClassProperty(r => r.Request)
+        var requestId = builder.ClassProperty(r => r.Id)
             .Required()
-            .MapComplex(p => p, requestBuilder =>
-            {
-                var requestId = requestBuilder.ClassProperty(r => r.Id)
-                    .Required()
-                    .Map(p => p.RequestId, ConnectionRequestId.Create);
+            .Map(p => p.RequestId, ConnectionRequestId.Create);
         
-                var ownerId = requestBuilder.ClassProperty(r => r.OwnerId)
-                    .Optional()
-                    .Map(p => p.OwnerId, UserId.Create);
+        var ownerId = builder.ClassProperty(r => r.OwnerId)
+            .Optional()
+            .Map(p => p.OwnerId, UserId.Create);
         
-                var departureTime = requestBuilder.StructProperty(r => r.DepartureTime)
-                    .Optional()
-                    .Map(p => p.DepartureTime, DateTimeFactory.CreateFromIso8601);
+        var departureTime = builder.StructProperty(r => r.DepartureTime)
+            .Optional()
+            .Map(p => p.DepartureTime, DateTimeFactory.CreateFromIso8601);
         
-                var arrivalTime = requestBuilder.StructProperty(r => r.ArrivalTime)
-                    .Optional()
-                    .Map(p => p.ArrivalTime, DateTimeFactory.CreateFromIso8601);
+        var arrivalTime = builder.StructProperty(r => r.ArrivalTime)
+            .Optional()
+            .Map(p => p.ArrivalTime, DateTimeFactory.CreateFromIso8601);
 
-                var passengers = requestBuilder.ListProperty(r => r.Passengers)
-                    .Required()
-                    .MapEachComplex(r => r.Passengers, MapPassenger);
+        var passengers = builder.ListProperty(r => r.Passengers)
+            .Required()
+            .MapEachComplex(r => r.Passengers, MapPassenger);
 
-                var options = requestBuilder.EnumProperty(r => r.ComfortClass)
-                    .Required()
-                    .Map(p => p.ComfortClass, DomainErrors.Shared.ComfortClass.Invalid);
+        var comfortClass = builder.EnumProperty(r => r.ComfortClass)
+            .Required()
+            .Map(p => p.ComfortClass, DomainErrors.Shared.ComfortClass.Invalid);
         
-                var route = requestBuilder.ClassProperty(r => r.Route)
-                    .Required()
-                    .MapComplex(p => p.Route, MapRoute);
-
-                return requestBuilder.Build(() => ConnectionRequest.Create(
-                    requestId,
-                    ownerId,
-                    departureTime,
-                    arrivalTime,
-                    passengers.ToList(),
-                    options,
-                    route));
-            });
+        var route = builder.ClassProperty(r => r.Route)
+            .Required()
+            .MapComplex(p => p.Route, MapRoute);
         
-        
-        
-        return builder.Build(() => new UpsertConnectionRequestCommand(request));
+        return builder.Build(() => new UpsertConnectionRequestCommand(
+            requestId,
+            ownerId,
+            departureTime,
+            arrivalTime,
+            passengers.ToList(),
+            comfortClass,
+            route));
     }
     
     private ValidatedRequiredProperty<Passenger> MapPassenger(RequiredPropertyBuilder<PassengerDto, Passenger> builder)
@@ -217,4 +208,11 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
     }
 }
 
-public record UpsertConnectionRequestCommand(ConnectionRequest Request) : ICommand<List<ConnectionResponse>>;
+public record UpsertConnectionRequestCommand(
+    ConnectionRequestId Id,
+    UserId? OwnerId,
+    DateTime? DepartureTime,
+    DateTime? ArrivalTime,
+    List<Passenger> Passengers,
+    ComfortClass ComfortClass,
+    Route Route) : ICommand<List<ConnectionResponse>>;

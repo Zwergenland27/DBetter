@@ -18,9 +18,32 @@ public class UpsertConnectionRequestCommandHandler(
     public override async Task<CanFail<List<ConnectionResponse>>> Handle(UpsertConnectionRequestCommand request, CancellationToken cancellationToken)
     {
         await unitOfWork.BeginTransaction(cancellationToken);
-        await connectionRequestRepository.StoreAsync(request.Request);
+        var existingRequest = await connectionRequestRepository.GetAsync(request.Id);
+        if (existingRequest is null)
+        {
+            var newRequestResult = ConnectionRequest.Create(
+                request.Id,
+                request.OwnerId,
+                request.DepartureTime,
+                request.ArrivalTime,
+                request.Passengers,
+                request.ComfortClass,
+                request.Route);
+            if (newRequestResult.HasFailed) return newRequestResult.Errors;
+            
+            connectionRequestRepository.Add(newRequestResult.Value);
+        }
+        else
+        {
+            existingRequest.Update(
+                request.DepartureTime,
+                request.ArrivalTime,
+                request.Passengers,
+                request.ComfortClass,
+                request.Route);
+        }
         await unitOfWork.CommitAsync(cancellationToken);
         
-        return await mediator.RunAsync(new GetConnectionSuggestionsQuery(request.Request.Id, request.Request.OwnerId, SuggestionMode.Normal), cancellationToken: cancellationToken);
+        return await mediator.RunAsync(new GetConnectionSuggestionsQuery(request.Id, request.OwnerId, SuggestionMode.Normal), cancellationToken: cancellationToken);
     }
 }

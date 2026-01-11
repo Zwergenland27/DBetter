@@ -1,3 +1,4 @@
+using CleanDomainValidation.Application.Lists;
 using CleanDomainValidation.Domain;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests.Entities;
@@ -111,5 +112,25 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     {
         _suggestedConnectionIds.AddRange(connections.Select(c => c.Id));
         _suggestedConnectionIds = _suggestedConnectionIds.Distinct().ToList();
+    }
+
+    public void Update(
+        DateTime? departureTime,
+        DateTime? arrivalTime,
+        List<Passenger> passengers,
+        ComfortClass comfortClass,
+        Route route)
+    {
+        DepartureTime = departureTime;
+        ArrivalTime = arrivalTime;
+        _passengers = passengers;
+        ComfortClass = comfortClass;
+        Route = route;
+        
+        foreach(var connectionId in _suggestedConnectionIds)
+        {
+            RaiseDomainEvent(new ConnectionContextFlushedEvent(connectionId));
+        }
+        _suggestedConnectionIds.Clear();
     }
 }
