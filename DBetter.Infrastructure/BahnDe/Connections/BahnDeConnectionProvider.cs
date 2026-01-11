@@ -14,7 +14,7 @@ public class BahnDeConnectionProvider(HttpClient http) : IExternalConnectionProv
         var anfrage = ConnectionRequestFactory.FromRequest(request)
             .Build();
         
-        var response = await http.PostAsJsonAsync("angebote/fahrplan", request, new JsonSerializerOptions
+        var response = await http.PostAsJsonAsync("angebote/fahrplan", anfrage, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
