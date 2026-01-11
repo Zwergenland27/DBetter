@@ -62,6 +62,19 @@ namespace DBetter.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Connections",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ConnectionDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    ContextId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Connections", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OutboxMessages",
                 columns: table => new
                 {
@@ -160,6 +173,26 @@ namespace DBetter.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ConnectionRequestSuggestedConnectionIds",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ConnectionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ConnectionRequestId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConnectionRequestSuggestedConnectionIds", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ConnectionRequestSuggestedConnectionIds_ConnectionRequests_~",
+                        column: x => x.ConnectionRequestId,
+                        principalTable: "ConnectionRequests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
                 {
@@ -234,6 +267,11 @@ namespace DBetter.Infrastructure.Migrations
                 column: "ConnectionRequestId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ConnectionRequestSuggestedConnectionIds_ConnectionRequestId",
+                table: "ConnectionRequestSuggestedConnectionIds",
+                column: "ConnectionRequestId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Discounts_UserId",
                 table: "Discounts",
                 column: "UserId");
@@ -256,6 +294,12 @@ namespace DBetter.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ConnectionRequestPassengerDiscounts");
+
+            migrationBuilder.DropTable(
+                name: "ConnectionRequestSuggestedConnectionIds");
+
+            migrationBuilder.DropTable(
+                name: "Connections");
 
             migrationBuilder.DropTable(
                 name: "Discounts");

@@ -29,4 +29,8 @@
       <PackageReference Include="Zwergenland.CleanMessageBus.RabbitMQ" Version="1.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>

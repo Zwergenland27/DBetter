@@ -35,7 +35,7 @@ public class GetConnectionSuggestionsQueryHandler(
         
         if(connectionRequest.OwnerId != request.UserId) return DomainErrors.ConnectionRequest.Unauthorized;
 
-        var requestedStations = await stationRepository.GetManyAsync(connectionRequest.Route.RequestedStationIds);
+        var requestedStations = await stationRepository.GetManyAsync(connectionRequest.Route.GetRequestedStationIds());
         
         var suggestionRequestFactory = new SuggestionRequestFactory(connectionRequest, requestedStations);
         

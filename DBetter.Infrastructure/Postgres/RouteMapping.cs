@@ -35,7 +35,7 @@ public class RouteMapping : IEntityTypeConfiguration<Route>
             mb.Property(x => x.Code);
 
             mb.Property(x => x.Text);
-        });
+        }).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.OwnsOne(x => x.Catering, cib =>
         {

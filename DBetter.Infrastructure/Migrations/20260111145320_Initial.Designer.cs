@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBetter.Infrastructure.Migrations
 {
     [DbContext(typeof(DBetterContext))]
-    [Migration("20251229163859_Initial")]
+    [Migration("20260111145320_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -51,6 +51,23 @@ namespace DBetter.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ConnectionRequests", (string)null);
+                });
+
+            modelBuilder.Entity("DBetter.Domain.Connections.Connection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("ConnectionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ContextId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Connections", (string)null);
                 });
 
             modelBuilder.Entity("DBetter.Domain.Routes.Route", b =>
@@ -413,10 +430,37 @@ namespace DBetter.Infrastructure.Migrations
                             b1.Navigation("SecondStopover");
                         });
 
+                    b.OwnsMany("DBetter.Domain.Connections.ValueObjects.ConnectionId", "SuggestedConnectionIds", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<Guid>("ConnectionRequestId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Value")
+                                .HasColumnType("uuid")
+                                .HasColumnName("ConnectionId");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ConnectionRequestId");
+
+                            b1.ToTable("ConnectionRequestSuggestedConnectionIds", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ConnectionRequestId");
+                        });
+
                     b.Navigation("Passengers");
 
                     b.Navigation("Route")
                         .IsRequired();
+
+                    b.Navigation("SuggestedConnectionIds");
                 });
 
             modelBuilder.Entity("DBetter.Domain.Routes.Route", b =>
@@ -465,7 +509,7 @@ namespace DBetter.Infrastructure.Migrations
                                 .HasForeignKey("RouteId");
                         });
 
-                    b.OwnsMany("DBetter.Domain.Routes.ValueObjects.RoutePassengerInformation", "Messages", b1 =>
+                    b.OwnsMany("DBetter.Domain.Routes.ValueObjects.PassengerInformation", "Messages", b1 =>
                         {
                             b1.Property<Guid>("RouteId")
                                 .HasColumnType("uuid");

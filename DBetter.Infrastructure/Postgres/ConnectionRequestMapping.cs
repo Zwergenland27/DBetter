@@ -161,6 +161,17 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
                 reference => reference != null ? reference.Token.ToString() : null,
                 value => value != null ? PaginationReference.Create(value) : null);
 
-        builder.OwnsMany(x => x.SuggestedConnectionIds);
+        builder.OwnsMany(x => x.SuggestedConnectionIds, crb =>
+        {
+            crb.ToTable("ConnectionRequestSuggestedConnectionIds");
+            
+            crb.WithOwner().HasForeignKey("ConnectionRequestId");
+            
+            crb.HasKey("Id");
+            
+            crb.Property(x => x.Value)
+                .HasColumnName("ConnectionId")
+                .ValueGeneratedNever();
+        }).UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
