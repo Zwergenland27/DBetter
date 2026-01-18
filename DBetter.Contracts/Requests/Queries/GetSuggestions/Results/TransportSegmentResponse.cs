@@ -57,6 +57,12 @@ public class TransportSegmentResponse : SegmentResponse
     public required string TransportCategory { get; set; }
     
     /// <summary>
+    /// Detailed Class of the transportation product
+    /// </summary>
+    /// <example>RB</example>
+    public required string ProductClass { get; set; }
+    
+    /// <summary>
     /// Line number
     /// </summary>
     /// <example>RE 2</example>

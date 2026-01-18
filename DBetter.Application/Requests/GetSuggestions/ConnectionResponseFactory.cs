@@ -71,10 +71,10 @@ public class ConnectionResponseFactory(List<Connection> connections, List<Route>
         var originStationName = stations.FirstOrDefault(station => station.EvaNumber == originStationEva)?.Name;
         var destinationStationEva = snapshot.JourneyId.DestinationEvaNumber;
         var destinationStationName =  stations.FirstOrDefault(station => station.EvaNumber == destinationStationEva)?.Name;
-
-        var serviceInformation = snapshot.Composition.First();
+        
         var route = routes.First(route => route.JourneyId == snapshot.JourneyId);
-
+        var serviceInformation = route.ServiceInformation;
+        
         return new TransportSegmentResponse
         {
             RouteId = route.Id.Value.ToString(),
@@ -83,8 +83,9 @@ public class ConnectionResponseFactory(List<Connection> connections, List<Route>
             BikeCarriage = route.BikeCarriage.ToResponse(),
             Catering = route.Catering.ToResponse(),
             Demand = snapshot.Demand.ToResponse(),
-            Origin = originStationName?.Value,
-            Destination = destinationStationName?.Value ?? snapshot.Destination?.Value,
+            Origin = originStationName?.NormalizedValue,
+            Destination = destinationStationName?.NormalizedValue ?? snapshot.Destination?.NormalizedValue,
+            ProductClass = serviceInformation.ProductClass,
             Line = serviceInformation.LineNumber?.Value,
             ServiceNumber = serviceInformation.ServiceNumber?.Value,
             Operator = null,
@@ -110,7 +111,7 @@ public class ConnectionResponseFactory(List<Connection> connections, List<Route>
             IsCancelled = attributes.IsCancelled,
             IsEntryOnly = attributes.IsEntryOnly,
             IsExitOnly = attributes.IsExitOnly,
-            Name = station.Name.Value,
+            Name = station.Name.NormalizedValue,
             Platform = snapshot.Platform?.ToResponse(),
             StopIndex = snapshot.RouteIndex.Value,
         };
