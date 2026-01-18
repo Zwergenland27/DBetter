@@ -10,7 +10,7 @@ public class RouteResponse {
     /// <summary>
     /// Id of the route
     /// </summary>
-    public required string RouteId { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// Operator of the service
@@ -23,6 +23,12 @@ public class RouteResponse {
     /// </summary>
     /// <example>HighSpeedTrains</example>
     public required string TransportCategory { get; set; }
+    
+    /// <summary>
+    /// Detailed Class of the transportation product
+    /// </summary>
+    /// <example>RB</example>
+    public required string ProductClass { get; set; }
     
     /// <summary>
     /// Line number

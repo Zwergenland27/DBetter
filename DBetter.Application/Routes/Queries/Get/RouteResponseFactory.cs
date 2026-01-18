@@ -13,11 +13,12 @@ public class RouteResponseFactory(Route route, List<Station> stations)
     {
         return new RouteResponse
         {
-            RouteId = route.Id.Value.ToString(),
+            Id = route.Id.Value.ToString(),
             Operator = null,
             BikeCarriage = route.BikeCarriage.ToResponse(),
             Catering = route.Catering.ToResponse(),
             TransportCategory = route.ServiceInformation.ProductClass,
+            ProductClass = route.ServiceInformation.ProductClass,
             Line = route.ServiceInformation.LineNumber?.Value,
             ServiceNumber = route.ServiceInformation.ServiceNumber?.Value,
             Stops = snapshot.Stops.Select(MapToResponse).ToList()

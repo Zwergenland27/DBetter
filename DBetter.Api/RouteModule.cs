@@ -11,9 +11,9 @@ public static class RouteModule
 {
     public static void AddRouteEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("trainRuns", async (
+        app.MapGet("routes/{id}", async (
                 IMediator mediator,
-                [FromQuery(Name = "id")] string? id) =>
+                string id) =>
             {
                 var query = Builder<GetRouteQuery>
                     .WithName("TrainRun.Get")
@@ -26,7 +26,8 @@ public static class RouteModule
                     return Results.Ok(result);
                 });
             })
-        .WithName("GetTrainRuns")
+        .WithName("GetRoute")
+        .Produces<RouteResponse>()
         .WithOpenApi();
     }
 }
