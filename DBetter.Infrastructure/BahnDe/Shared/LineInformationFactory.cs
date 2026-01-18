@@ -32,6 +32,18 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
             _productClass = fullLineInformation;
             _lineNumber = new LineNumber(fullLineInformation);
         }
+        //Remove "STR" Prefix for trams
+        else if (_category is TransportCategory.Tram)
+        {
+            _productClass = "";
+            _lineNumber = new LineNumber(splitLineInformation[1]);
+        }
+        //Remove "Bus" Prefix for buses
+        else if(_category is TransportCategory.Bus)
+        {
+            _productClass = "";
+            _lineNumber = new LineNumber(splitLineInformation[1]);
+        }
         //InterCity lines that can also be used with regional ticket
         else if (splitLineInformation.Length > 2 && splitLineInformation[0] is "RE" && splitLineInformation[1].StartsWith("IC"))
         {
