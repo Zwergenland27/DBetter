@@ -1,6 +1,6 @@
-using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Application.Requests.Dtos;
 
@@ -22,5 +22,5 @@ public record StopDto
     
     public required StopAttributes Attributes { get; init; }
     
-    public required StopIndex RouteIndex { get; init; }
+    public required StopIndex TrainRunIndex { get; init; }
 }

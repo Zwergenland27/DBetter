@@ -1,4 +1,4 @@
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
@@ -9,7 +9,7 @@ public class PartialStopIndexFactory
     
     public StopIndex To { get; private init; }
     
-    public PartialStopIndexFactory(List<IRouteStop> stops, string? partialInformation)
+    public PartialStopIndexFactory(List<ITrainRunStop> stops, string? partialInformation)
     {
         var firstStationIndex = stops[0].RouteIdx;
         var lastStationIndex = stops[^1].RouteIdx;

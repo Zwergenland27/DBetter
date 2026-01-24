@@ -1,4 +1,4 @@
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;

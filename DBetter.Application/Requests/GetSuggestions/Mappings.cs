@@ -3,8 +3,8 @@ using DBetter.Contracts.Shared.DTOs;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.PassengerInformationManagement.ValueObjects;
-using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
+using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Application.Requests.GetSuggestions;
 

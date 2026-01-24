@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
-using DBetter.Infrastructure.BahnDe.Routes.DTOs;
+using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
@@ -13,20 +13,20 @@ public class CateringInformationFactory
         "Zug verkehrt ohne gastronomische Bewirtschaftung."
     ];
     
-    private readonly List<IRouteStop> _stops;
+    private readonly List<ITrainRunStop> _stops;
     private readonly List<Zugattribut> _zugattribute;
     private readonly List<PriorisierteMeldung> _prioritizedMessages;
     
     public CateringInformationFactory(VerbindungsAbschnitt abschnitt)
     {
-        _stops = abschnitt.Halte.Select(halt => halt as IRouteStop).ToList();
+        _stops = abschnitt.Halte.Select(halt => halt as ITrainRunStop).ToList();
         _zugattribute = abschnitt.Verkehrsmittel.Zugattribute;
         _prioritizedMessages = abschnitt.PriorisierteMeldungen;
     }
 
     public CateringInformationFactory(Fahrt fahrt)
     {
-        _stops = fahrt.Halte.Select(halt => halt as IRouteStop).ToList();
+        _stops = fahrt.Halte.Select(halt => halt as ITrainRunStop).ToList();
         _zugattribute = fahrt.Zugattribute;
         _prioritizedMessages = fahrt.PriorisierteMeldungen;
     }

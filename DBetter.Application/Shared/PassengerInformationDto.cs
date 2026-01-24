@@ -1,5 +1,5 @@
 using DBetter.Domain.PassengerInformationManagement.ValueObjects;
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Application.Shared;
 

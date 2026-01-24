@@ -1,9 +1,9 @@
 using DBetter.Application.Shared;
 using DBetter.Contracts.Requests.CreateRequest;
 using DBetter.Domain.PassengerInformationManagement.ValueObjects;
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
-using DBetter.Infrastructure.BahnDe.Routes.DTOs;
+using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
@@ -13,14 +13,14 @@ public class PassengerInformationTextFactory
     private List<HimMeldung> _himMeldung;
     private List<PriorisierteMeldung> _priorisierteMeldung;
     
-    private List<IRouteStop> _routeStops;
+    private List<ITrainRunStop> _routeStops;
 
     public PassengerInformationTextFactory(Fahrt fahrt)
     {
         _risNotizen = fahrt.RisNotizen;
         _himMeldung = fahrt.HimMeldungen ?? [];
         _priorisierteMeldung = fahrt.PriorisierteMeldungen;
-        _routeStops = fahrt.Halte.Cast<IRouteStop>().ToList();
+        _routeStops = fahrt.Halte.Cast<ITrainRunStop>().ToList();
     }
 
     public PassengerInformationTextFactory(VerbindungsAbschnitt verbindungsAbschnitt)
@@ -28,7 +28,7 @@ public class PassengerInformationTextFactory
         _risNotizen = verbindungsAbschnitt.RisNotizen;
         _himMeldung = verbindungsAbschnitt.HimMeldungen ?? [];
         _priorisierteMeldung = verbindungsAbschnitt.PriorisierteMeldungen;
-        _routeStops = verbindungsAbschnitt.Halte.Cast<IRouteStop>().ToList();
+        _routeStops = verbindungsAbschnitt.Halte.Cast<ITrainRunStop>().ToList();
     }
     
     public List<PassengerInformationDto> ExtractInformation()

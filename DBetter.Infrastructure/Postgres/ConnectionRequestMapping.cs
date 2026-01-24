@@ -91,8 +91,6 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
         
         builder.Property(o => o.ComfortClass);
 
-        builder.Ignore(cr => cr.Route);
-
         builder.OwnsOne(cr => cr.Route, rb =>
         {
             rb.Property(r => r.OriginStationId)

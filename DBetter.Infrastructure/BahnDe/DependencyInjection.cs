@@ -1,9 +1,9 @@
 using System.Net;
 using DBetter.Application.Requests;
-using DBetter.Application.Routes;
+using DBetter.Application.TrainRuns;
 using DBetter.Infrastructure.BahnDe.Connections;
-using DBetter.Infrastructure.BahnDe.Routes;
 using DBetter.Infrastructure.BahnDe.Stations;
+using DBetter.Infrastructure.BahnDe.TrainRuns;
 using DBetter.Infrastructure.Monitoring;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,7 +28,7 @@ public static class DependencyInjection
             })
             .AddHttpMessageHandler<MetricHttpHandler>();
         
-        services.AddHttpClient<IExternalRouteProvider, BahnDeRouteProvider>(
+        services.AddHttpClient<IExternalTrainRunProvider, BahnDeTrainRunProvider>(
                 client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {

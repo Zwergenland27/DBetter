@@ -1,9 +1,9 @@
 using DBetter.Application;
 using DBetter.Contracts.Shared.DTOs;
 using DBetter.Domain.Connections.ValueObjects;
-using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
@@ -45,7 +45,7 @@ public static class DTOExtensions
             secondClassDemand.ToDomainDemandStatus());
     }
 
-    public static TravelTime? GetDepartureTime(this IRouteStop stop)
+    public static TravelTime? GetDepartureTime(this ITrainRunStop stop)
     {
         if(stop.AbfahrtsZeitpunkt is null) return null;
 
@@ -62,7 +62,7 @@ public static class DTOExtensions
             verbindungsabschnitt.EzAbfahrtsZeitpunkt.ConvertToDateTime());
     }
 
-    public static TravelTime? GetArrivalTime(this IRouteStop stop)
+    public static TravelTime? GetArrivalTime(this ITrainRunStop stop)
     {
         if(stop.AnkunftsZeitpunkt is null) return null;
 
@@ -99,7 +99,7 @@ public static class DTOExtensions
         return stop.RisNotizen.Any(r => r.Key is "text.realtime.stop.entry.disabled");
     }
 
-    public static StationInfoId? GetStationInfoId(this IRouteStop stop){
+    public static StationInfoId? GetStationInfoId(this ITrainRunStop stop){
         if(stop.BahnhofsInfoId is null) return null;
 
         var stationInfoResult = StationInfoId.Create(stop.BahnhofsInfoId);
@@ -107,11 +107,11 @@ public static class DTOExtensions
         return stationInfoResult.Value;
     }
 
-    public static StationName GetStationName(this IRouteStop stop){
+    public static StationName GetStationName(this ITrainRunStop stop){
         return StationName.Create(stop.Name).Value;
     }
 
-    public static Platform? GetPlatform(this IRouteStop stop){
+    public static Platform? GetPlatform(this ITrainRunStop stop){
         if(stop.Gleis is null && stop.EzGleis is null) return null;
 
         var platformType = stop.HaltTyp switch {
@@ -128,7 +128,7 @@ public static class DTOExtensions
         return new Platform(stop.Gleis, stop.EzGleis, platformType);
     }
 
-    public static StopIndex GetStopIndex(this IRouteStop stop){
+    public static StopIndex GetStopIndex(this ITrainRunStop stop){
         return new StopIndex(stop.RouteIdx);
     }
 

@@ -1,8 +1,8 @@
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
-using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
+using DBetter.Domain.TrainRuns;
 using DBetter.Domain.Users;
 using DBetter.Infrastructure.OutboxPattern;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     
     public DbSet<Station> Stations { get; set; }
     
-    public DbSet<Route> Routes { get; set; }
+    public DbSet<TrainRun> TrainRuns { get; set; }
     
     public DbSet<PassengerInformation> PassengerInformation { get; set; }
     

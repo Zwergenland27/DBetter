@@ -1,26 +1,26 @@
 using System.Diagnostics.CodeAnalysis;
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
-using DBetter.Infrastructure.BahnDe.Routes.DTOs;
+using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 using Halt = DBetter.Infrastructure.BahnDe.Connections.DTOs.Halt;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;
 
 public class BikeCarriageInformationFactory
 {
-    private readonly List<IRouteStop> _stops;
+    private readonly List<ITrainRunStop> _stops;
     private readonly List<Zugattribut> _zugattribute;
     private readonly List<HimMeldung> _himMeldungen;
     public BikeCarriageInformationFactory(VerbindungsAbschnitt abschnitt)
     {
-        _stops = abschnitt.Halte.Select(halt => halt as IRouteStop).ToList();
+        _stops = abschnitt.Halte.Select(halt => halt as ITrainRunStop).ToList();
         _zugattribute = abschnitt.Verkehrsmittel.Zugattribute;
         _himMeldungen = abschnitt.HimMeldungen ?? [];
     }
 
     public BikeCarriageInformationFactory(Fahrt fahrt)
     {
-        _stops = fahrt.Halte.Select(halt => halt as IRouteStop).ToList();
+        _stops = fahrt.Halte.Select(halt => halt as ITrainRunStop).ToList();
         _zugattribute = fahrt.Zugattribute;
         _himMeldungen = fahrt.HimMeldungen ?? [];
     }

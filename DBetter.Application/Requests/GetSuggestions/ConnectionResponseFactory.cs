@@ -3,14 +3,14 @@ using DBetter.Application.Requests.Dtos;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
-using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
+using DBetter.Domain.TrainRuns;
 
 namespace DBetter.Application.Requests.GetSuggestions;
 
 public class ConnectionResponseFactory(
     List<Connection> connections, 
-    List<Route> routes,
+    List<TrainRun> routes,
     List<Station> stations,
     List<PassengerInformation> passengerInformation)
 {
@@ -120,7 +120,7 @@ public class ConnectionResponseFactory(
             IsExitOnly = attributes.IsExitOnly,
             Name = station.Name.NormalizedValue,
             Platform = dto.Platform?.ToResponse(),
-            StopIndex = dto.RouteIndex.Value,
+            StopIndex = dto.TrainRunIndex.Value,
         };
     }
 }

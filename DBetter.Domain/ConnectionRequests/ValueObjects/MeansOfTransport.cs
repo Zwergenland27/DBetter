@@ -1,4 +1,4 @@
-using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Domain.ConnectionRequests.ValueObjects;
 

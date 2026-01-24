@@ -1,6 +1,6 @@
 using DBetter.Application.Requests.Dtos;
-using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
 
@@ -60,7 +60,7 @@ public class TransportSegmentFactory(VerbindungsAbschnitt abschnitt)
             InfoId = halt.GetStationInfoId(),
             Name = halt.GetStationName(),
             Platform = halt.GetPlatform(),
-            RouteIndex = halt.GetStopIndex()
+            TrainRunIndex = halt.GetStopIndex()
         };
     }
 }
