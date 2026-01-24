@@ -1,12 +1,12 @@
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Stations.Snapshots;
+namespace DBetter.Application.Stations.Dtos;
 
-public record StationRouteSnapshot
+public record StationQueryDto
 {
     public required EvaNumber EvaNumber { get; init; }
     
     public required StationName Name { get; init; }
     
-    public required StationInfoId? InfoId { get; init; }
+    public required Coordinates Location { get; init; }
 }

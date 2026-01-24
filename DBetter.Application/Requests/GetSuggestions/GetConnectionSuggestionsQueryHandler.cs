@@ -1,7 +1,7 @@
 using CleanDomainValidation.Domain;
 using CleanMediator.Queries;
 using DBetter.Application.Abstractions.Persistence;
-using DBetter.Application.Requests.Snapshots;
+using DBetter.Application.Requests.Dtos;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
@@ -56,8 +56,8 @@ public class GetConnectionSuggestionsQueryHandler(
             ExtractRouteInformation(connection);
             ExtractMissingStations(connection);
 
-            var firstStop = connection.Segments.OfType<TransportSegmentSnapshot>().First().Stops.First();
-            connections.Add(Connection.CreateFromSnapshot(connection.ContextId, DateOnly.FromDateTime(firstStop.DepartureTime!.Planned)));
+            var firstStop = connection.Segments.OfType<TransportSegmentDto>().First().Stops.First();
+            connections.Add(Connection.Create(connection.ContextId, DateOnly.FromDateTime(firstStop.DepartureTime!.Planned)));
         }
 
         foreach (var r in _existingRoutes)
@@ -79,10 +79,10 @@ public class GetConnectionSuggestionsQueryHandler(
         return suggestionsDto.Connections.Select(connection => responseFactory.MapToResponse(connection)).ToList();
     }
     
-    private void ExtractPassengerInformation(ConnectionSnapshot connectionSnapshot)
+    private void ExtractPassengerInformation(ConnectionDto connectionDto)
     {
-        var passengerInformation = connectionSnapshot.Segments
-            .OfType<TransportSegmentSnapshot>()
+        var passengerInformation = connectionDto.Segments
+            .OfType<TransportSegmentDto>()
             .SelectMany(ts => ts.PassengerInformation)
             .Distinct();
 
@@ -97,9 +97,9 @@ public class GetConnectionSuggestionsQueryHandler(
             _existingPassengerInformation.Add(newPassengerInformation);
         }
     }
-    private void ExtractRouteInformation(ConnectionSnapshot connectionSnapshot)
+    private void ExtractRouteInformation(ConnectionDto connectionDto)
     {
-        var routes = connectionSnapshot.Segments.OfType<TransportSegmentSnapshot>();
+        var routes = connectionDto.Segments.OfType<TransportSegmentDto>();
         foreach (var route in routes)
         {
             var passengerInformationSnapshots = route.PassengerInformation
@@ -130,19 +130,19 @@ public class GetConnectionSuggestionsQueryHandler(
         }
     }
 
-    private void ExtractMissingStations(ConnectionSnapshot connectionSnapshot)
+    private void ExtractMissingStations(ConnectionDto connectionDto)
     {
-        var unknownStations = connectionSnapshot.GetUnknownStations(_existingStations);
+        var unknownStations = connectionDto.GetUnknownStations(_existingStations);
         foreach (var station in unknownStations)
         {
             if (_existingStations.Any(existingStation => existingStation.EvaNumber == station.EvaNumber)) continue;
-            var newStation = Station.CreateFromSnapshot(station.EvaNumber, station.Name, station.InfoId);
+            var newStation = Station.Create(station.EvaNumber, station.Name, station.InfoId);
             _stationsToCreate.Add(newStation);
             _existingStations.Add(newStation);
         }
     }
 
-    private async Task ExtractConnectionsAndRoutesAndStations(List<ConnectionSnapshot> connectionSnapshots)
+    private async Task ExtractConnectionsAndRoutesAndStations(List<ConnectionDto> connectionSnapshots)
     {
         var journeyIds = connectionSnapshots
             .SelectMany(cs => cs.JourneyIds)

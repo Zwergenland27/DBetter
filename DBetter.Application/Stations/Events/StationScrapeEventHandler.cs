@@ -11,7 +11,7 @@ namespace DBetter.Application.Stations.Events;
 public class StationScrapeEventHandler(
     IUnitOfWork unitOfWork,
     IStationRepository stationRepository,
-    IStationExternalProvider externalStationProvider) : DomainEventHandlerBase<UnknownStationCreatedEvent>
+    IExternalStationProvider externalStationProvider) : DomainEventHandlerBase<UnknownStationCreatedEvent>
 {
     public override async Task<CanFail> Handle(UnknownStationCreatedEvent @event, CancellationToken cancellationToken)
     {
@@ -19,8 +19,22 @@ public class StationScrapeEventHandler(
         var station = await stationRepository.GetAsync(@event.StationId);
         if(station is null) return CanFail.Success;
         var stationInfos = await externalStationProvider.GetStationInfoAsync(station.EvaNumber);
+
+        if (stationInfos.InfoId is not null)
+        {
+            station.Update(stationInfos.InfoId);
+        }
+
+        if (stationInfos.Position is not null)
+        {
+            station.Update(stationInfos.Position);
+        }
+
+        if (stationInfos.Ril100 is not null)
+        { 
+            station.Update(stationInfos.Ril100);   
+        }
         
-        station.UpdateInformation(stationInfos);
         await unitOfWork.CommitAsync(cancellationToken);
         return CanFail.Success;
     }

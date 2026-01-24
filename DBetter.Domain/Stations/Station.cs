@@ -1,6 +1,5 @@
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.Stations.Events;
-using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 
 namespace DBetter.Domain.Stations;
@@ -40,43 +39,33 @@ public class Station : AggregateRoot<StationId>
     }
 
     private Station() : base(null!){}
-
-    public static Station CreateFromSnapshot(StationRouteSnapshot snapshot)
-    {
-        var station = new Station(StationId.CreateNew(), snapshot.EvaNumber, snapshot.Name, snapshot.InfoId);
-        station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
-        return station;
-    }
     
-    public static Station CreateFromSnapshot(StationQuerySnapshot snapshot)
+    public static Station Create(EvaNumber evaNumber, StationName name, Coordinates location)
     {
-        var station = new Station(StationId.CreateNew(), snapshot.EvaNumber, snapshot.Name, snapshot.Location);
+        var station = new Station(StationId.CreateNew(), evaNumber, name, location);
         station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
         return station;
     }
 
-    public static Station CreateFromSnapshot(EvaNumber evaNumber, StationName name, StationInfoId? infoId)
+    public static Station Create(EvaNumber evaNumber, StationName name, StationInfoId? infoId)
     {
         var station = new Station(StationId.CreateNew(), evaNumber, name, infoId);
         station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
         return station;
     }
 
-    public void UpdateInformation(StationInformation stationInformation)
+    public void Update(Coordinates location)
     {
-        if (stationInformation.Position is not null)
-        {
-            Location = stationInformation.Position;
-        }
+        Location = location;
+    }
 
-        if (stationInformation.InfoId is not null)
-        {
-            InfoId = stationInformation.InfoId;
-        }
+    public void Update(StationInfoId infoId)
+    {
+        InfoId = infoId;
+    }
 
-        if (stationInformation.Ril100 is not null)
-        {
-            Ril100 = stationInformation.Ril100;
-        }
+    public void Update(Ril100Identifier ri100Identifier)
+    {
+        Ril100 = ri100Identifier;
     }
 }

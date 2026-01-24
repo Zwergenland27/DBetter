@@ -5,5 +5,5 @@ namespace DBetter.Application.Routes;
 
 public interface IExternalRouteProvider
 {
-    Task<RouteSnapshot> GetRouteAsync(BahnJourneyId journeyId);
+    Task<RouteDto> GetRouteAsync(BahnJourneyId journeyId);
 }

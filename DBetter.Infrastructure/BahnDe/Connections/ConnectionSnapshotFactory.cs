@@ -1,5 +1,5 @@
+using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
-using DBetter.Application.Requests.Snapshots;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
@@ -25,15 +25,15 @@ public class ConnectionSnapshotFactory(SuggestionRequest request, Fahrplan fahrp
         };
     }
 
-    private ConnectionSnapshot ExtractConnectionSnapshot(Verbindung verbindung)
+    private ConnectionDto ExtractConnectionSnapshot(Verbindung verbindung)
     {
-        List<SegmentSnapshot> segments = [];
+        List<SegmentDto> segments = [];
 
         foreach (var abschnitt in verbindung.VerbindungsAbschnitte)
         {
             if (abschnitt.Verkehrsmittel.Typ is VerkehrsmittelTyp.WALK or VerkehrsmittelTyp.TRANSFER)
             {
-                segments.Add(new WalkingSegmentSnapshot
+                segments.Add(new WalkingSegmentDto
                 {
                     Distance = abschnitt.Distanz!.Value,
                     WalkDuration = abschnitt.AbschnittsDauer
@@ -42,9 +42,9 @@ public class ConnectionSnapshotFactory(SuggestionRequest request, Fahrplan fahrp
                 continue;
             }
             
-            if (segments.LastOrDefault() is TransportSegmentSnapshot)
+            if (segments.LastOrDefault() is TransportSegmentDto)
             {
-                segments.Add(new TransferSegmentSnapshot());
+                segments.Add(new TransferSegmentDto());
             }
             
             segments.Add(new TransportSegmentFactory(abschnitt).GetTransportSegment());
@@ -61,7 +61,7 @@ public class ConnectionSnapshotFactory(SuggestionRequest request, Fahrplan fahrp
             offer = new Offer(comfortClass, price, currency, partial);
         }
 
-        return new ConnectionSnapshot
+        return new ConnectionDto
         {
             ContextId = new ConnectionContextId(verbindung.CtxRecon),
             Demand = verbindung.GetDemand(),

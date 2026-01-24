@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices.ComTypes;
-using DBetter.Application.Requests.Snapshots;
+using DBetter.Application.Requests.Dtos;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
@@ -14,9 +14,9 @@ public class ConnectionResponseFactory(
     List<Station> stations,
     List<PassengerInformation> passengerInformation)
 {
-    public ConnectionResponse MapToResponse(ConnectionSnapshot snapshot)
+    public ConnectionResponse MapToResponse(ConnectionDto dto)
     {
-        var segments = snapshot.Segments.Select(MapToResponse).ToList();
+        var segments = dto.Segments.Select(MapToResponse).ToList();
         var differentOrigin = false;
         var differentDestination = false;
         
@@ -35,61 +35,61 @@ public class ConnectionResponseFactory(
         
         return new ConnectionResponse
         {
-            Id = connections.First(c => c.ContextId == snapshot.ContextId).Id.Value.ToString(),
+            Id = connections.First(c => c.ContextId == dto.ContextId).Id.Value.ToString(),
             DifferentOrigin = differentOrigin,
             DifferentDestination = differentDestination,
-            Demand = snapshot.Demand.ToResponse(),
-            BahnDeUrl = snapshot.BookingLink.Value,
-            Offer = snapshot.Offer?.ToResponse(),
+            Demand = dto.Demand.ToResponse(),
+            BahnDeUrl = dto.BookingLink.Value,
+            Offer = dto.Offer?.ToResponse(),
             Segments = segments
         };
     }
 
-    private SegmentResponse MapToResponse(SegmentSnapshot snapshot)
+    private SegmentResponse MapToResponse(SegmentDto dto)
     {
-        return snapshot switch
+        return dto switch
         {
-            TransferSegmentSnapshot transferSegmentSnapshot => MapToTransferSegmentResponse(transferSegmentSnapshot),
-            TransportSegmentSnapshot transportSegmentSnapshot => MapToTransferSegmentResponse(transportSegmentSnapshot),
-            WalkingSegmentSnapshot walkingSegmentSnapshot => MapToWalkingSegmentResponse(walkingSegmentSnapshot),
-            _ => throw new ArgumentOutOfRangeException(nameof(snapshot))
+            TransferSegmentDto transferSegmentSnapshot => MapToTransferSegmentResponse(transferSegmentSnapshot),
+            TransportSegmentDto transportSegmentSnapshot => MapToTransferSegmentResponse(transportSegmentSnapshot),
+            WalkingSegmentDto walkingSegmentSnapshot => MapToWalkingSegmentResponse(walkingSegmentSnapshot),
+            _ => throw new ArgumentOutOfRangeException(nameof(dto))
         };
     }
 
-    private WalkingSegmentResponse MapToWalkingSegmentResponse(WalkingSegmentSnapshot snapshot)
+    private WalkingSegmentResponse MapToWalkingSegmentResponse(WalkingSegmentDto dto)
     {
         return new WalkingSegmentResponse
         {
-            Distance = snapshot.Distance,
-            WalkDuration = snapshot.WalkDuration
+            Distance = dto.Distance,
+            WalkDuration = dto.WalkDuration
         };
     }
 
-    private TransferSegmentResponse MapToTransferSegmentResponse(TransferSegmentSnapshot snapshot)
+    private TransferSegmentResponse MapToTransferSegmentResponse(TransferSegmentDto dto)
     {
         return new TransferSegmentResponse();
     }
 
-    private TransportSegmentResponse MapToTransferSegmentResponse(TransportSegmentSnapshot snapshot)
+    private TransportSegmentResponse MapToTransferSegmentResponse(TransportSegmentDto dto)
     {
-        var originStationEva = snapshot.JourneyId.OriginEvaNumber;
+        var originStationEva = dto.JourneyId.OriginEvaNumber;
         var originStationName = stations.FirstOrDefault(station => station.EvaNumber == originStationEva)?.Name;
-        var destinationStationEva = snapshot.JourneyId.DestinationEvaNumber;
+        var destinationStationEva = dto.JourneyId.DestinationEvaNumber;
         var destinationStationName =  stations.FirstOrDefault(station => station.EvaNumber == destinationStationEva)?.Name;
         
-        var route = routes.First(route => route.JourneyId == snapshot.JourneyId);
+        var route = routes.First(route => route.JourneyId == dto.JourneyId);
         var serviceInformation = route.ServiceInformation;
         
         return new TransportSegmentResponse
         {
             RouteId = route.Id.Value.ToString(),
-            DepartureTime = snapshot.Stops.First().DepartureTime!.ToResponse(),
-            ArrivalTime = snapshot.Stops.Last().ArrivalTime!.ToResponse(),
+            DepartureTime = dto.Stops.First().DepartureTime!.ToResponse(),
+            ArrivalTime = dto.Stops.Last().ArrivalTime!.ToResponse(),
             BikeCarriage = route.BikeCarriage.ToResponse(),
             Catering = route.Catering.ToResponse(),
-            Demand = snapshot.Demand.ToResponse(),
+            Demand = dto.Demand.ToResponse(),
             Origin = originStationName?.NormalizedValue,
-            Destination = destinationStationName?.NormalizedValue ?? snapshot.Destination?.NormalizedValue,
+            Destination = destinationStationName?.NormalizedValue ?? dto.Destination?.NormalizedValue,
             ProductClass = serviceInformation.ProductClass,
             Line = serviceInformation.LineNumber?.Value,
             ServiceNumber = serviceInformation.ServiceNumber?.Value,
@@ -98,29 +98,29 @@ public class ConnectionResponseFactory(
             Messages = route.PassengerInformation
                 .Select(pim => passengerInformation.First(pi => pi.Id == pim.InformationId).ToResponse())
                 .ToList(),
-            Stops = snapshot.Stops.Select(MapToResponse).ToList()
+            Stops = dto.Stops.Select(MapToResponse).ToList()
         };
     }
 
-    private StopResponse MapToResponse(StopSnapshot snapshot)
+    private StopResponse MapToResponse(StopDto dto)
     {
-        var station = stations.First(station => station.EvaNumber == snapshot.EvaNumber);
-        var attributes = snapshot.Attributes;
+        var station = stations.First(station => station.EvaNumber == dto.EvaNumber);
+        var attributes = dto.Attributes;
 
         return new StopResponse
         {
             Id = station.Id.Value.ToString(),
             Ril100 = station.Ril100?.Value,
-            ArrivalTime = snapshot.ArrivalTime?.ToResponse(),
-            DepartureTime = snapshot.DepartureTime?.ToResponse(),
-            Demand = snapshot.Demand.ToResponse(),
+            ArrivalTime = dto.ArrivalTime?.ToResponse(),
+            DepartureTime = dto.DepartureTime?.ToResponse(),
+            Demand = dto.Demand.ToResponse(),
             IsAdditional = attributes.IsAdditional,
             IsCancelled = attributes.IsCancelled,
             IsEntryOnly = attributes.IsEntryOnly,
             IsExitOnly = attributes.IsExitOnly,
             Name = station.Name.NormalizedValue,
-            Platform = snapshot.Platform?.ToResponse(),
-            StopIndex = snapshot.RouteIndex.Value,
+            Platform = dto.Platform?.ToResponse(),
+            StopIndex = dto.RouteIndex.Value,
         };
     }
 }

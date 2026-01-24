@@ -1,4 +1,4 @@
-using DBetter.Application.Requests.Snapshots;
+using DBetter.Application.Requests.Dtos;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
@@ -8,7 +8,7 @@ namespace DBetter.Infrastructure.BahnDe.Connections;
 
 public class TransportSegmentFactory(VerbindungsAbschnitt abschnitt)
 {
-    public TransportSegmentSnapshot GetTransportSegment()
+    public TransportSegmentDto GetTransportSegment()
     {
         var journeyId = new BahnJourneyId(abschnitt.JourneyId!);
 
@@ -26,7 +26,7 @@ public class TransportSegmentFactory(VerbindungsAbschnitt abschnitt)
         
         var routeInformationFactory = new TransportSegmentInformationFactory(abschnitt);
         
-        return new TransportSegmentSnapshot
+        return new TransportSegmentDto
         {
             JourneyId = journeyId,
             BikeCarriage = routeInformationFactory.ExtractBikeCarriageInformation(),
@@ -39,7 +39,7 @@ public class TransportSegmentFactory(VerbindungsAbschnitt abschnitt)
         };
     }
     
-    private StopSnapshot GetStop(Halt halt)
+    private StopDto GetStop(Halt halt)
     { 
         var attributes = new StopAttributes
         {
@@ -50,7 +50,7 @@ public class TransportSegmentFactory(VerbindungsAbschnitt abschnitt)
             IsRequestStop = false
         };
         
-        return new StopSnapshot
+        return new StopDto
         {
             EvaNumber = EvaNumber.Create(halt.ExtId).Value,
             DepartureTime = halt.GetDepartureTime(),

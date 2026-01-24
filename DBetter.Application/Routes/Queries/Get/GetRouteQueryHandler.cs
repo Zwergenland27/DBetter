@@ -65,26 +65,26 @@ public class GetRouteQueryHandler(
         return responseFactory.MapToResponse(routeSnapshot);
     }
 
-    private async Task ExtractStations(RouteSnapshot routeSnapshot)
+    private async Task ExtractStations(RouteDto routeDto)
     {
-        var evaNumbers = routeSnapshot.Stops.Select(stop => stop.EvaNumber);
+        var evaNumbers = routeDto.Stops.Select(stop => stop.EvaNumber);
         _existingStations = await stationRepository.GetManyAsync(evaNumbers);
     }
     
-    private void ExtractMissingStations(RouteSnapshot routeSnapshot)
+    private void ExtractMissingStations(RouteDto routeDto)
     {
-        var unknownStations = routeSnapshot.GetUnknownStations(_existingStations);
+        var unknownStations = routeDto.GetUnknownStations(_existingStations);
         foreach (var station in unknownStations)
         {
-            var newStation = Station.CreateFromSnapshot(station.EvaNumber, station.Name, station.InfoId);
+            var newStation = Station.Create(station.EvaNumber, station.Name, station.InfoId);
             _stationsToCreate.Add(newStation);
             _existingStations.Add(newStation);
         }
     }
     
-    private void ExtractMissingPassengerInformation(RouteSnapshot routeSnapshot)
+    private void ExtractMissingPassengerInformation(RouteDto routeDto)
     {
-        var unknownPassengerInformation = routeSnapshot.GetUnknownPassengerInformation(_existingPassengerInformation);
+        var unknownPassengerInformation = routeDto.GetUnknownPassengerInformation(_existingPassengerInformation);
         
         foreach (var passengerInformation in unknownPassengerInformation)
         {

@@ -1,5 +1,6 @@
+using DBetter.Application.Stations;
+using DBetter.Application.Stations.Dtos;
 using DBetter.Domain.Stations;
-using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.ApiMarketplace.StaDa;
 using DBetter.Infrastructure.ApiMarketplace.Timetables;
@@ -10,9 +11,9 @@ namespace DBetter.Infrastructure.Repositories;
 public class ExternalStationProvider(
     StaDaService stada,
     TimetablesService timetables,
-    StationService stationService) : IStationExternalProvider
+    StationService stationService) : IExternalStationProvider
 {
-    public async Task<StationInformation> GetStationInfoAsync(EvaNumber evaNumber)
+    public async Task<StationProviderDto> GetStationInfoAsync(EvaNumber evaNumber)
     {
         Coordinates? location = null;
         StationInfoId? stationInfoId = null;
@@ -30,18 +31,18 @@ public class ExternalStationProvider(
         location ??= await TryGetLocation(evaNumber);
         ril100 ??= await TryGetRil100(evaNumber);
 
-        return new StationInformation(
+        return new StationProviderDto(
             location,
             stationInfoId,
             ril100);
     }
 
-    public async Task<List<StationQuerySnapshot>> FindAsync(string query)
+    public async Task<List<StationQueryDto>> FindAsync(string query)
     {
         var haltestellen = await stationService.FindAsync(query, 5);
         return haltestellen
             .Select(halt => halt.ToSnapshot())
-            .OfType<StationQuerySnapshot>()
+            .OfType<StationQueryDto>()
             .ToList();
     }
 

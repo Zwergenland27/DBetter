@@ -1,5 +1,5 @@
+using DBetter.Application.Stations.Dtos;
 using DBetter.Domain.Stations;
-using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 
 namespace DBetter.Infrastructure.BahnDe.Stations;
@@ -31,7 +31,7 @@ public class Haltestelle
     /// <example>13.731409</example>
     public required float Lon { get; set; }
     
-    public StationQuerySnapshot? ToSnapshot()
+    public StationQueryDto? ToSnapshot()
     {
         var evaNumber = EvaNumber.Create(ExtId);
         if (evaNumber.HasFailed) return null;
@@ -41,7 +41,7 @@ public class Haltestelle
 
         var location = new Coordinates(Lat, Lon);
 
-        return new StationQuerySnapshot
+        return new StationQueryDto
         {
             EvaNumber = evaNumber.Value,
             Name = name.Value,

@@ -9,7 +9,7 @@ namespace DBetter.Infrastructure.BahnDe.Routes;
 
 public class BahnDeRouteProvider(HttpClient http) : IExternalRouteProvider
 {
-    public async Task<RouteSnapshot> GetRouteAsync(BahnJourneyId journeyId)
+    public async Task<RouteDto> GetRouteAsync(BahnJourneyId journeyId)
     {
         var escapedJourneyId = Uri.EscapeDataString(journeyId.Value);
         var response = await http.GetAsync($"reiseloesung/fahrt?journeyId={escapedJourneyId}");

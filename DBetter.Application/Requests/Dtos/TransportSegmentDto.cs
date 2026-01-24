@@ -1,18 +1,17 @@
 using DBetter.Application.Shared;
-using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Application.Requests.Snapshots;
+namespace DBetter.Application.Requests.Dtos;
 
-public record TransportSegmentSnapshot : SegmentSnapshot
+public record TransportSegmentDto : SegmentDto
 {
     public required BahnJourneyId JourneyId { get; init; }
     
     public required Demand Demand { get; init; }
     
-    public required List<StopSnapshot> Stops { get; init; }
+    public required List<StopDto> Stops { get; init; }
     
     public required StationName? Destination { get; init; }
     

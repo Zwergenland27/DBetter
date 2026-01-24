@@ -19,7 +19,7 @@ public class Connection : AggregateRoot<ConnectionId>
     
     private Connection() : base(null!){}
 
-    public static Connection CreateFromSnapshot(ConnectionContextId contextId, DateOnly connectionDate)
+    public static Connection Create(ConnectionContextId contextId, DateOnly connectionDate)
     {
         return new Connection(ConnectionId.CreateNew(), contextId, connectionDate);
     }

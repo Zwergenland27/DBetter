@@ -1,4 +1,4 @@
-using DBetter.Application.Requests.Snapshots;
+using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Routes.Dtos;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
@@ -10,11 +10,11 @@ namespace DBetter.Infrastructure.BahnDe.Routes;
 
 public class RouteSnapshotFactory(Fahrt fahrt)
 {
-    public RouteSnapshot ExtractSnapshot()
+    public RouteDto ExtractSnapshot()
     {
         var routeInformationFactory = new RouteInformationFactory(fahrt);
         
-        return new RouteSnapshot
+        return new RouteDto
         {
             BikeCarriage = routeInformationFactory.ExtractBikeCarriageInformation(),
             Catering = routeInformationFactory.ExtractCateringInformation(),
@@ -24,7 +24,7 @@ public class RouteSnapshotFactory(Fahrt fahrt)
         };
     }
     
-    private StopSnapshot GetStop(Halt halt)
+    private StopDto GetStop(Halt halt)
     {
         var isRequestStop = false;
         var attributes = new StopAttributes
@@ -36,7 +36,7 @@ public class RouteSnapshotFactory(Fahrt fahrt)
             IsRequestStop = isRequestStop
         };
         
-        return new StopSnapshot
+        return new StopDto
         {
             EvaNumber = EvaNumber.Create(halt.ExtId).Value,
             DepartureTime = halt.GetDepartureTime(),

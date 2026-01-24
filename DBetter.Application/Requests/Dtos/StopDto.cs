@@ -2,9 +2,9 @@ using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Application.Requests.Snapshots;
+namespace DBetter.Application.Requests.Dtos;
 
-public record StopSnapshot
+public record StopDto
 {
     public required TravelTime? DepartureTime { get; init; }
     

@@ -1,6 +1,6 @@
-namespace DBetter.Application.Requests.Snapshots;
+namespace DBetter.Application.Requests.Dtos;
 
-public record WalkingSegmentSnapshot : SegmentSnapshot
+public record WalkingSegmentDto : SegmentDto
 {
     public required int Distance { get; init; }
     

@@ -10,7 +10,7 @@ namespace DBetter.Application.Stations.Queries.Find;
 public class FindStationsQueryHandler(
     IUnitOfWork unitOfWork,
     IStationRepository stationRepository,
-    IStationExternalProvider externalStationProvider) : QueryHandlerBase<FindStationsQuery, List<StationDto>>
+    IExternalStationProvider externalStationProvider) : QueryHandlerBase<FindStationsQuery, List<StationDto>>
 {
     public override async Task<CanFail<List<StationDto>>> Handle(FindStationsQuery request, CancellationToken cancellationToken)
     {
@@ -40,7 +40,7 @@ public class FindStationsQueryHandler(
         foreach (var result in fuzzyResults)
         {
             if (existingStations.Any(station => station.EvaNumber == result.EvaNumber)) continue;
-            yetUnknownStations.Add(Station.CreateFromSnapshot(result));
+            yetUnknownStations.Add(Station.Create(result.EvaNumber, result.Name, result.Location));
         }
         
         stationRepository.AddRange(yetUnknownStations);

@@ -1,8 +1,8 @@
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Stations;
+namespace DBetter.Application.Stations.Dtos;
 
-public record StationInformation(
+public record StationProviderDto(
     Coordinates? Position,
     StationInfoId? InfoId,
     Ril100Identifier?  Ril100);
