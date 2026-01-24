@@ -1,5 +1,5 @@
-using DBetter.Domain.Connections.Snapshots;
-using DBetter.Domain.Routes.Snapshots;
+using DBetter.Application.Requests.Snapshots;
+using DBetter.Application.Routes.Dtos;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections;
@@ -18,7 +18,7 @@ public class RouteSnapshotFactory(Fahrt fahrt)
         {
             BikeCarriage = routeInformationFactory.ExtractBikeCarriageInformation(),
             Catering = routeInformationFactory.ExtractCateringInformation(),
-            InformationMessages = routeInformationFactory.ExtractPassengerInformationMessages(),
+            PassengerInformation = routeInformationFactory.ExtractPassengerInformation(),
             ServiceNumbers = routeInformationFactory.ExtractServiceNumbers(),
             Stops = fahrt.Halte.Select(GetStop).ToList()
         };

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DBetter.Application.Routes;
-using DBetter.Domain.Routes.Snapshots;
+using DBetter.Application.Routes.Dtos;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 

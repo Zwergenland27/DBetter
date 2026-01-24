@@ -1,12 +1,12 @@
+using DBetter.Application.Shared;
 using DBetter.Domain.Connections.ValueObjects;
-using DBetter.Domain.Routes;
+using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
-using DBetter.Domain.Stations.Snapshots;
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Connections.Snapshots;
+namespace DBetter.Application.Requests.Snapshots;
 
 public record ConnectionSnapshot
 {
@@ -40,4 +40,10 @@ public record ConnectionSnapshot
             .Where(s => existingStations.All(es => es.EvaNumber != s.EvaNumber))
             .ToList();
     }
+    
+    public List<PassengerInformationDto> PassengerInformation => Segments
+        .OfType<TransportSegmentSnapshot>()
+        .SelectMany(s => s.PassengerInformation)
+        .Distinct()
+        .ToList();
 }

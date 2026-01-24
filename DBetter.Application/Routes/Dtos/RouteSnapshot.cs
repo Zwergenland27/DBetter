@@ -1,10 +1,10 @@
-using DBetter.Domain.Connections.Snapshots;
+using DBetter.Application.Requests.Snapshots;
+using DBetter.Application.Shared;
+using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Routes.ValueObjects;
-using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
-using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Routes.Snapshots;
+namespace DBetter.Application.Routes.Dtos;
 
 public class RouteSnapshot
 {
@@ -16,12 +16,18 @@ public class RouteSnapshot
     
     public required CateringInformation Catering { get; init; }
     
-    public required List<PassengerInformation> InformationMessages { get; init; }
-
+    public required List<PassengerInformationDto> PassengerInformation { get; init; }
     public List<StopSnapshot> GetUnknownStations(List<Station> existingStations)
     {
         return Stops
             .Where(s => existingStations.All(es => es.EvaNumber != s.EvaNumber))
+            .ToList();
+    }
+    
+    public List<PassengerInformationDto> GetUnknownPassengerInformation(List<PassengerInformation> existingPassengerInformation)
+    {
+        return PassengerInformation
+            .Where(dto => existingPassengerInformation.All(im => im.Text != dto.OriginalText))
             .ToList();
     }
 }

@@ -3,6 +3,7 @@ using System;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBetter.Infrastructure.Migrations
 {
     [DbContext(typeof(DBetterContext))]
-    partial class DBetterContextModelSnapshot : ModelSnapshot
+    [Migration("20260123195846_PassengerInformation")]
+    partial class PassengerInformation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -489,26 +492,26 @@ namespace DBetter.Infrastructure.Migrations
 
             modelBuilder.Entity("DBetter.Domain.Routes.Route", b =>
                 {
-                    b.OwnsMany("DBetter.Domain.Routes.Entities.RoutePassengerInformation", "PassengerInformation", b1 =>
+                    b.OwnsMany("DBetter.Domain.PassengerInformationManagement.ValueObjects.PassengerInformationId", "InformationMessageIds", b1 =>
                         {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
                             b1.Property<Guid>("RouteId")
                                 .HasColumnType("uuid");
 
-                            b1.Property<Guid>("Id")
-                                .HasColumnType("uuid");
+                            b1.Property<Guid>("Value")
+                                .HasColumnType("uuid")
+                                .HasColumnName("PassengerInformationId");
 
-                            b1.Property<int>("FromStopIndex")
-                                .HasColumnType("integer");
+                            b1.HasKey("Id");
 
-                            b1.Property<Guid>("InformationId")
-                                .HasColumnType("uuid");
+                            b1.HasIndex("RouteId");
 
-                            b1.Property<int>("ToStopIndex")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("RouteId", "Id");
-
-                            b1.ToTable("RoutePassengerInformation", (string)null);
+                            b1.ToTable("Messages", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("RouteId");
@@ -590,7 +593,7 @@ namespace DBetter.Infrastructure.Migrations
                     b.Navigation("Catering")
                         .IsRequired();
 
-                    b.Navigation("PassengerInformation");
+                    b.Navigation("InformationMessageIds");
 
                     b.Navigation("ServiceInformation")
                         .IsRequired();

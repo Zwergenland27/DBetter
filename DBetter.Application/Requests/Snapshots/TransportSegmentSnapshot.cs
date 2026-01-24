@@ -1,8 +1,10 @@
+using DBetter.Application.Shared;
+using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Connections.Snapshots;
+namespace DBetter.Application.Requests.Snapshots;
 
 public record TransportSegmentSnapshot : SegmentSnapshot
 {
@@ -20,5 +22,5 @@ public record TransportSegmentSnapshot : SegmentSnapshot
     
     public required CateringInformation Catering { get; init; }
     
-    public required List<PassengerInformation> InformationMessages { get; init; }
+    public required List<PassengerInformationDto> PassengerInformation { get; init; }
 }

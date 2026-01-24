@@ -1,6 +1,8 @@
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Contracts.Shared.DTOs;
 using DBetter.Domain.Connections.ValueObjects;
+using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 
@@ -53,12 +55,12 @@ public static class Mappings
     
     public static string ToResponse(this PassengerInformation message)
     {
-        if (message.Code is PassengerInformationCode.FreeText)
+        if (message.Type is PassengerInformationType.FreeText)
         {
-            return message.Text!;
+            return message.Text.Value;
         }
         
-        return message.Code.ToString();
+        return message.Code.Value;
     }
     
     public static PlatformDto ToResponse(this Platform platform){

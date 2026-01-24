@@ -1,3 +1,5 @@
+using DBetter.Application.Shared;
+using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
@@ -42,9 +44,9 @@ public class TransportSegmentInformationFactory(VerbindungsAbschnitt verbindungs
         return new BikeCarriageInformationFactory(verbindungsAbschnitt).ExtractInformation();
     }
 
-    public List<PassengerInformation> ExtractPassengerInformationMessages()
+    public List<PassengerInformationDto> ExtractPassengerInformation()
     {
-        return [];
+        return new PassengerInformationTextFactory(verbindungsAbschnitt).ExtractInformation();
     }
 
     // private static void GetAccessibilityInformation(List<Zugattribut>  zugattribute, IEnumerable<IRouteStop> stopInfos)

@@ -1,4 +1,6 @@
+using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.Entities;
 using DBetter.Domain.Routes.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -26,15 +28,34 @@ public class RouteMapping : IEntityTypeConfiguration<Route>
                 id => id.Value,
                 value => new BahnJourneyId(value));
 
-        builder.OwnsMany(x => x.Messages, mb =>
+        builder.OwnsMany(x => x.PassengerInformation, mb =>
         {
-            mb.ToTable("Messages");
+            mb.ToTable("RoutePassengerInformation");
             
             mb.WithOwner().HasForeignKey("RouteId");
 
-            mb.Property(x => x.Code);
+            mb.HasKey("RouteId", nameof(RoutePassengerInformation.Id));
 
-            mb.Property(x => x.Text);
+            mb.Property(x => x.Id)
+                .HasConversion(
+                    id => id.Value,
+                    value => new RoutePassengerInformationId(value));
+            
+            mb.Property(x => x.InformationId)
+                .HasConversion(
+                    id => id.Value,
+                    value => new PassengerInformationId(value));
+            
+            mb.Property(x => x.FromStopIndex)
+                .HasConversion(
+                    stopIndex => stopIndex.Value,
+                    value => new StopIndex(value));
+            
+            mb.Property(x => x.ToStopIndex)
+                .HasConversion(
+                    stopIndex => stopIndex.Value,
+                    value => new StopIndex(value));
+
         }).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.OwnsOne(x => x.Catering, cib =>

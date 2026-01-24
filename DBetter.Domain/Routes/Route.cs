@@ -1,5 +1,6 @@
 using DBetter.Domain.Abstractions;
-using DBetter.Domain.Connections.Snapshots;
+using DBetter.Domain.PassengerInformationManagement.ValueObjects;
+using DBetter.Domain.Routes.Entities;
 using DBetter.Domain.Routes.Events;
 using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Routes.ValueObjects;
@@ -11,11 +12,11 @@ namespace DBetter.Domain.Routes;
 /// </summary>
 public class Route : AggregateRoot<RouteId>
 {
-    private List<PassengerInformation> _messages = [];
+    private List<RoutePassengerInformation> _passengerInformation = [];
     
     public BahnJourneyId JourneyId { get; private init; }
     
-    public IReadOnlyList<PassengerInformation> Messages => _messages.AsReadOnly();
+    public IReadOnlyList<RoutePassengerInformation> PassengerInformation => _passengerInformation.AsReadOnly();
     
     public CateringInformation Catering  { get; private set; }
     
@@ -28,28 +29,35 @@ public class Route : AggregateRoot<RouteId>
     private Route(
         RouteId id,
         BahnJourneyId journeyId,
-        List<PassengerInformation> messages,
+        List<RoutePassengerInformation> passengerInformation,
         ServiceInformation serviceInformation,
         CateringInformation cateringInformation,
         BikeCarriageInformation bikeCarriageInformation) : base(id)
     {
         JourneyId = journeyId;
-        _messages = messages;
+        _passengerInformation = passengerInformation;
         ServiceInformation = serviceInformation;
         Catering = cateringInformation;
         BikeCarriage = bikeCarriageInformation;
     }
     
-    public static Route CreateFromSnapshot(TransportSegmentSnapshot snapshot)
+    public static Route Create(
+        BahnJourneyId journeyId,
+        List<RoutePassengerInformationSnapshot> passengerInformation,
+        ServiceInformation serviceInformation,
+        CateringInformation cateringInformation,
+        BikeCarriageInformation bikeCarriageInformation)
     {
         var route = new Route(
             RouteId.CreateNew(),
-            snapshot.JourneyId,
-            snapshot.InformationMessages,
-            snapshot.Composition.First(),
-            snapshot.Catering,
-            snapshot.BikeCarriage);
+            journeyId,
+            [],
+            serviceInformation,
+            cateringInformation,
+            bikeCarriageInformation);
 
+        route.ReconcilePassengerInformation(passengerInformation);
+        
         if (route.ServiceInformation.TransportCategory is
             TransportCategory.HighSpeedTrain or
             TransportCategory.FastTrain or
@@ -61,23 +69,43 @@ public class Route : AggregateRoot<RouteId>
         return route;
     }
 
-    public void Update(TransportSegmentSnapshot snapshot)
+    public void Update(CateringInformation cateringInformation)
     {
-        Catering = Catering.Update(snapshot.Catering);
-        BikeCarriage = BikeCarriage.Update(snapshot.BikeCarriage);
-        _messages.AddRange(snapshot.InformationMessages);
-        _messages = _messages.Distinct().ToList();
+        Catering = Catering.Update(cateringInformation);
+    }
+    
+    public void Update(BikeCarriageInformation bikeCarriageInformation)
+    {
+        BikeCarriage = BikeCarriage.Update(bikeCarriageInformation);
     }
 
-    public void Update(RouteSnapshot snapshot)
+    public void ReconcilePassengerInformation(List<RoutePassengerInformationSnapshot> incomingPassengerInformation)
     {
-        Catering = Catering.Update(snapshot.Catering);
-        BikeCarriage = BikeCarriage.Update(snapshot.BikeCarriage);
-        _messages.AddRange(snapshot.InformationMessages);
-        _messages = _messages.Distinct().ToList();
+        var remainingPassengerInformation = incomingPassengerInformation;
+        foreach (var existingPassengerInformation in _passengerInformation)
+        {
+            var incoming = remainingPassengerInformation
+                .FirstOrDefault(im => im.Id == existingPassengerInformation.InformationId);
+            if (incoming is not null)
+            {
+                remainingPassengerInformation.Remove(incoming);
+            }
+        }
+
+        foreach (var passengerInformation in remainingPassengerInformation)
+        {
+            var routePassengerInformation = RoutePassengerInformation.Create(passengerInformation.Id, passengerInformation.FromStopIndex, passengerInformation.ToStopIndex);
+            _passengerInformation.Add(routePassengerInformation);
+        }
+    }
+    
+    public void Update(List<RoutePassengerInformation> passengerInformationIds)
+    {
+        _passengerInformation.AddRange(passengerInformationIds);
+        _passengerInformation = _passengerInformation.Distinct().ToList();
     }
 
-    public void UpdateServiceNumber(ServiceNumber newServiceNumber)
+    public void Update(ServiceNumber newServiceNumber)
     {
         ServiceInformation = ServiceInformation.UpdateServiceNumber(newServiceNumber);
     }

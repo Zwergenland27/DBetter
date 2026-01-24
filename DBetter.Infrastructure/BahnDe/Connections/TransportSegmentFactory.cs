@@ -1,4 +1,4 @@
-using DBetter.Domain.Connections.Snapshots;
+using DBetter.Application.Requests.Snapshots;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
@@ -33,7 +33,7 @@ public class TransportSegmentFactory(VerbindungsAbschnitt abschnitt)
             Catering = routeInformationFactory.ExtractCateringInformation(),
             Demand = abschnitt.GetDemand(),
             Destination = destination,
-            InformationMessages = routeInformationFactory.ExtractPassengerInformationMessages(),
+            PassengerInformation = routeInformationFactory.ExtractPassengerInformation(),
             Composition = routeInformationFactory.ExtractComposition(),
             Stops = abschnitt.Halte.Select(GetStop).ToList()
         };

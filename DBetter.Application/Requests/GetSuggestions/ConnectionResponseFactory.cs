@@ -1,13 +1,18 @@
 using System.Runtime.InteropServices.ComTypes;
+using DBetter.Application.Requests.Snapshots;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.Connections;
-using DBetter.Domain.Connections.Snapshots;
+using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 
 namespace DBetter.Application.Requests.GetSuggestions;
 
-public class ConnectionResponseFactory(List<Connection> connections, List<Route> routes, List<Station> stations)
+public class ConnectionResponseFactory(
+    List<Connection> connections, 
+    List<Route> routes,
+    List<Station> stations,
+    List<PassengerInformation> passengerInformation)
 {
     public ConnectionResponse MapToResponse(ConnectionSnapshot snapshot)
     {
@@ -90,7 +95,9 @@ public class ConnectionResponseFactory(List<Connection> connections, List<Route>
             ServiceNumber = serviceInformation.ServiceNumber?.Value,
             Operator = null,
             TransportCategory = serviceInformation.TransportCategory.ToString(),
-            Messages = snapshot.InformationMessages.Select(m => m.ToResponse()).ToList(),
+            Messages = route.PassengerInformation
+                .Select(pim => passengerInformation.First(pi => pi.Id == pim.InformationId).ToResponse())
+                .ToList(),
             Stops = snapshot.Stops.Select(MapToResponse).ToList()
         };
     }

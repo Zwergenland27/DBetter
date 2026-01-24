@@ -18,11 +18,6 @@ public static class DTOExtensions
         "Fähre"
     ];
     
-    public static List<PassengerInformation> GetDomainSectionMessages(this IHasMessage obj)
-    {
-        return [];
-    }
-    
     
     public static DateTime? ConvertToDateTime(this string? bahnDateString)
     {

@@ -1,3 +1,5 @@
+using DBetter.Application.Shared;
+using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Routes.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
@@ -30,8 +32,8 @@ public class RouteInformationFactory(Fahrt fahrt)
         return new BikeCarriageInformationFactory(fahrt).ExtractInformation();
     }
 
-    public List<PassengerInformation> ExtractPassengerInformationMessages()
+    public List<PassengerInformationDto> ExtractPassengerInformation()
     {
-        return [];
+        return new PassengerInformationTextFactory(fahrt).ExtractInformation();
     }
 }

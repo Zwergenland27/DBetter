@@ -1,5 +1,5 @@
+using DBetter.Application.Requests.Snapshots;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
-using DBetter.Domain.Connections.Snapshots;
 
 namespace DBetter.Application.Requests.GetSuggestions;
 

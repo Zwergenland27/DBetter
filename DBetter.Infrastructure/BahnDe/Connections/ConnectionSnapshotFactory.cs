@@ -1,6 +1,6 @@
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.Requests.Snapshots;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
-using DBetter.Domain.Connections.Snapshots;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;

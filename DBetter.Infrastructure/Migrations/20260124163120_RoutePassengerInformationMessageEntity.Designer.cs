@@ -3,6 +3,7 @@ using System;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBetter.Infrastructure.Migrations
 {
     [DbContext(typeof(DBetterContext))]
-    partial class DBetterContextModelSnapshot : ModelSnapshot
+    [Migration("20260124163120_RoutePassengerInformationMessageEntity")]
+    partial class RoutePassengerInformationMessageEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -503,12 +506,15 @@ namespace DBetter.Infrastructure.Migrations
                             b1.Property<Guid>("InformationId")
                                 .HasColumnType("uuid");
 
+                            b1.Property<bool>("IsCleared")
+                                .HasColumnType("boolean");
+
                             b1.Property<int>("ToStopIndex")
                                 .HasColumnType("integer");
 
                             b1.HasKey("RouteId", "Id");
 
-                            b1.ToTable("RoutePassengerInformation", (string)null);
+                            b1.ToTable("RouteMessages", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("RouteId");

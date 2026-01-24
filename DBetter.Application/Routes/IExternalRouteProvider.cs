@@ -1,4 +1,4 @@
-using DBetter.Domain.Routes.Snapshots;
+using DBetter.Application.Routes.Dtos;
 using DBetter.Domain.Routes.ValueObjects;
 
 namespace DBetter.Application.Routes;

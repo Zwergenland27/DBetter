@@ -5,6 +5,7 @@ using DBetter.Application.Users;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
+using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Users;
@@ -46,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserQueryRepository, UserQueryRepository>();
+        services.AddScoped<IPassengerInformationRepository, PassengerInformationRepository>();
         services.AddScoped<IStationExternalProvider, ExternalStationProvider>();
         services.AddScoped<IRouteRepository, RouteRepository>();
         services.AddScoped<IStationRepository, StationRepository>();

@@ -2,7 +2,7 @@ using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 
-namespace DBetter.Domain.Connections.Snapshots;
+namespace DBetter.Application.Requests.Snapshots;
 
 public record StopSnapshot
 {

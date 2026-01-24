@@ -1,8 +1,8 @@
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.Requests.Snapshots;
+using DBetter.Application.Routes.Dtos;
 using DBetter.Contracts.Routes.Queries.Get.Results;
-using DBetter.Domain.Connections.Snapshots;
 using DBetter.Domain.Routes;
-using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Stations;
 
 namespace DBetter.Application.Routes.Queries.Get;

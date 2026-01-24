@@ -1,4 +1,4 @@
-namespace DBetter.Domain.Connections.Snapshots;
+namespace DBetter.Application.Requests.Snapshots;
 
 public record WalkingSegmentSnapshot : SegmentSnapshot
 {

@@ -1,12 +1,14 @@
 using CleanDomainValidation.Domain;
 using CleanMediator.Queries;
 using DBetter.Application.Abstractions.Persistence;
+using DBetter.Application.Requests.Snapshots;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
-using DBetter.Domain.Connections.Snapshots;
 using DBetter.Domain.Errors;
+using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Stations;
 using Route = DBetter.Domain.Routes.Route;
 
@@ -18,12 +20,15 @@ public class GetConnectionSuggestionsQueryHandler(
     IConnectionRequestRepository connectionRequestRepository,
     IConnectionRepository connectionRepository,
     IStationRepository stationRepository,
-    IRouteRepository routeRepository) : QueryHandlerBase<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
+    IRouteRepository routeRepository,
+    IPassengerInformationRepository passengerInformationRepository) : QueryHandlerBase<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
 {
     private List<Route> _existingRoutes = [];
     private List<Route> _routesToCreate = [];
     private List<Station> _existingStations = [];
     private List<Station> _stationsToCreate = [];
+    private List<PassengerInformation> _existingPassengerInformation = [];
+    private List<PassengerInformation> _passengerInformationToCreate = [];
     
     public override async Task<CanFail<List<ConnectionResponse>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
@@ -47,9 +52,12 @@ public class GetConnectionSuggestionsQueryHandler(
 
         foreach (var connection in suggestionsDto.Connections)
         {
+            ExtractPassengerInformation(connection);
             ExtractRouteInformation(connection);
             ExtractMissingStations(connection);
-            connections.Add(Connection.CreateFromSnapshot(connection));
+
+            var firstStop = connection.Segments.OfType<TransportSegmentSnapshot>().First().Stops.First();
+            connections.Add(Connection.CreateFromSnapshot(connection.ContextId, DateOnly.FromDateTime(firstStop.DepartureTime!.Planned)));
         }
 
         foreach (var r in _existingRoutes)
@@ -60,28 +68,63 @@ public class GetConnectionSuggestionsQueryHandler(
         connectionRepository.AddRange(connections);
         routeRepository.AddRange(_routesToCreate);
         stationRepository.AddRange(_stationsToCreate);
+        passengerInformationRepository.AddRange(_passengerInformationToCreate);
         
         connectionRequest.AddSuggestedConnections(connections);
         
         await unitOfWork.CommitAsync(cancellationToken);
 
-        var responseFactory = new ConnectionResponseFactory(connections, _existingRoutes, _existingStations);
+        var responseFactory = new ConnectionResponseFactory(connections, _existingRoutes, _existingStations, _existingPassengerInformation);
             
         return suggestionsDto.Connections.Select(connection => responseFactory.MapToResponse(connection)).ToList();
+    }
+    
+    private void ExtractPassengerInformation(ConnectionSnapshot connectionSnapshot)
+    {
+        var passengerInformation = connectionSnapshot.Segments
+            .OfType<TransportSegmentSnapshot>()
+            .SelectMany(ts => ts.PassengerInformation)
+            .Distinct();
+
+        foreach (var pim in passengerInformation)
+        {
+            var existingMessage = _existingPassengerInformation.FirstOrDefault(im => im.Text == pim.OriginalText);
+            if (existingMessage is not null) continue;
+            
+            var newPassengerInformation = PassengerInformation.FoundNew(pim.OriginalText, pim.Priority);
+            
+            _passengerInformationToCreate.Add(newPassengerInformation);
+            _existingPassengerInformation.Add(newPassengerInformation);
+        }
     }
     private void ExtractRouteInformation(ConnectionSnapshot connectionSnapshot)
     {
         var routes = connectionSnapshot.Segments.OfType<TransportSegmentSnapshot>();
         foreach (var route in routes)
         {
+            var passengerInformationSnapshots = route.PassengerInformation
+                .Select(pimDto =>
+                {
+                    var pim = _existingPassengerInformation.First(im => im.Text == pimDto.OriginalText);
+                    return new RoutePassengerInformationSnapshot(pim.Id, pimDto.FromStopIndex, pimDto.ToStopIndex);
+                }).ToList();
+            
             var existingRoute = _existingRoutes.FirstOrDefault(r => r.JourneyId == route.JourneyId);
             if (existingRoute is not null)
             {
-                existingRoute.Update(route);
+                existingRoute.Update(route.BikeCarriage);
+                existingRoute.Update(route.Catering);
+                existingRoute.ReconcilePassengerInformation(passengerInformationSnapshots);
                 continue;
             }
             
-            var newRoute = Route.CreateFromSnapshot(route);
+            var newRoute = Route.Create(
+                route.JourneyId,
+                passengerInformationSnapshots,
+                route.Composition.First(),
+                route.Catering,
+                route.BikeCarriage);
+            
             _routesToCreate.Add(newRoute);
             _existingRoutes.Add(newRoute);
         }
@@ -93,7 +136,7 @@ public class GetConnectionSuggestionsQueryHandler(
         foreach (var station in unknownStations)
         {
             if (_existingStations.Any(existingStation => existingStation.EvaNumber == station.EvaNumber)) continue;
-            var newStation = Station.CreateFromSnapshot(station);
+            var newStation = Station.CreateFromSnapshot(station.EvaNumber, station.Name, station.InfoId);
             _stationsToCreate.Add(newStation);
             _existingStations.Add(newStation);
         }
@@ -109,6 +152,11 @@ public class GetConnectionSuggestionsQueryHandler(
             .SelectMany(cs => cs.StationEvaNumbers)
             .ToList();
         
+        var passengerInformationTexts = connectionSnapshots
+            .SelectMany(cs => cs.PassengerInformation)
+            .Select(cs => cs.OriginalText)
+            .ToList();
+        
         evaNumbers.AddRange(journeyIds.SelectMany(jid => new []
         {
             jid.OriginEvaNumber,
@@ -117,5 +165,11 @@ public class GetConnectionSuggestionsQueryHandler(
         
         _existingRoutes = await routeRepository.GetManyAsync(journeyIds.Distinct());
         _existingStations = await stationRepository.GetManyAsync(evaNumbers.Distinct());
+        
+        _existingPassengerInformation = await passengerInformationRepository.FindManyAsync(passengerInformationTexts);
+        _existingPassengerInformation.AddRange(await passengerInformationRepository.GetManyAsync(_existingRoutes
+            .SelectMany(r => r.PassengerInformation)
+            .Select(pim => pim.InformationId)));
+        _existingPassengerInformation = _existingPassengerInformation.Distinct().ToList();
     }
 }

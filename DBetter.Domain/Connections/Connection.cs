@@ -1,5 +1,4 @@
 using DBetter.Domain.Abstractions;
-using DBetter.Domain.Connections.Snapshots;
 using DBetter.Domain.Connections.ValueObjects;
 
 namespace DBetter.Domain.Connections;
@@ -20,14 +19,8 @@ public class Connection : AggregateRoot<ConnectionId>
     
     private Connection() : base(null!){}
 
-    public static Connection CreateFromSnapshot(ConnectionSnapshot snapshot)
+    public static Connection CreateFromSnapshot(ConnectionContextId contextId, DateOnly connectionDate)
     {
-        var firstStation = snapshot.Segments
-            .OfType<TransportSegmentSnapshot>()
-            .First()
-            .Stops
-            .First();
-        
-        return new Connection(ConnectionId.CreateNew(), snapshot.ContextId, DateOnly.FromDateTime(firstStation.DepartureTime!.Planned));
+        return new Connection(ConnectionId.CreateNew(), contextId, connectionDate);
     }
 }
