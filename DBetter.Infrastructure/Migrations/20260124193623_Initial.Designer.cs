@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBetter.Infrastructure.Migrations
 {
     [DbContext(typeof(DBetterContext))]
-    [Migration("20260111145320_Initial")]
+    [Migration("20260124193623_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -70,21 +70,31 @@ namespace DBetter.Infrastructure.Migrations
                     b.ToTable("Connections", (string)null);
                 });
 
-            modelBuilder.Entity("DBetter.Domain.Routes.Route", b =>
+            modelBuilder.Entity("DBetter.Domain.PassengerInformationManagement.PassengerInformation", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("JourneyId")
+                    b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("JourneyId")
+                    b.HasIndex("Text")
                         .IsUnique();
 
-                    b.ToTable("Routes", (string)null);
+                    b.ToTable("PassengerInformation", (string)null);
                 });
 
             modelBuilder.Entity("DBetter.Domain.Stations.Station", b =>
@@ -112,6 +122,23 @@ namespace DBetter.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Stations", (string)null);
+                });
+
+            modelBuilder.Entity("DBetter.Domain.TrainRuns.TrainRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("JourneyId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JourneyId")
+                        .IsUnique();
+
+                    b.ToTable("TrainRuns", (string)null);
                 });
 
             modelBuilder.Entity("DBetter.Domain.Users.User", b =>
@@ -463,115 +490,6 @@ namespace DBetter.Infrastructure.Migrations
                     b.Navigation("SuggestedConnectionIds");
                 });
 
-            modelBuilder.Entity("DBetter.Domain.Routes.Route", b =>
-                {
-                    b.OwnsOne("DBetter.Domain.Routes.ValueObjects.BikeCarriageInformation", "BikeCarriage", b1 =>
-                        {
-                            b1.Property<Guid>("RouteId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int?>("FromStopIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Status")
-                                .HasColumnType("integer");
-
-                            b1.Property<int?>("ToStopIndex")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("RouteId");
-
-                            b1.ToTable("Routes");
-
-                            b1.WithOwner()
-                                .HasForeignKey("RouteId");
-                        });
-
-                    b.OwnsOne("DBetter.Domain.Routes.ValueObjects.CateringInformation", "Catering", b1 =>
-                        {
-                            b1.Property<Guid>("RouteId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int?>("FromStopIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int?>("ToStopIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Type")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("RouteId");
-
-                            b1.ToTable("Routes");
-
-                            b1.WithOwner()
-                                .HasForeignKey("RouteId");
-                        });
-
-                    b.OwnsMany("DBetter.Domain.Routes.ValueObjects.PassengerInformation", "Messages", b1 =>
-                        {
-                            b1.Property<Guid>("RouteId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
-
-                            b1.Property<int>("Code")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Text")
-                                .HasColumnType("text");
-
-                            b1.HasKey("RouteId", "Id");
-
-                            b1.ToTable("Messages", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("RouteId");
-                        });
-
-                    b.OwnsOne("DBetter.Domain.Routes.ValueObjects.ServiceInformation", "ServiceInformation", b1 =>
-                        {
-                            b1.Property<Guid>("RouteId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("LineNumber")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("ProductClass")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<int?>("ServiceNumber")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("TransportCategory")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("RouteId");
-
-                            b1.ToTable("Routes");
-
-                            b1.WithOwner()
-                                .HasForeignKey("RouteId");
-                        });
-
-                    b.Navigation("BikeCarriage")
-                        .IsRequired();
-
-                    b.Navigation("Catering")
-                        .IsRequired();
-
-                    b.Navigation("Messages");
-
-                    b.Navigation("ServiceInformation")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DBetter.Domain.Stations.Station", b =>
                 {
                     b.OwnsOne("DBetter.Domain.Stations.ValueObjects.Coordinates", "Location", b1 =>
@@ -594,6 +512,115 @@ namespace DBetter.Infrastructure.Migrations
                         });
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("DBetter.Domain.TrainRuns.TrainRun", b =>
+                {
+                    b.OwnsMany("DBetter.Domain.TrainRuns.Entities.TrainRunPassengerInformation", "PassengerInformation", b1 =>
+                        {
+                            b1.Property<Guid>("TrainRunId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("FromStopIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<Guid>("InformationId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("ToStopIndex")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("TrainRunId", "Id");
+
+                            b1.ToTable("TrainRunPassengerInformation", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainRunId");
+                        });
+
+                    b.OwnsOne("DBetter.Domain.TrainRuns.ValueObjects.BikeCarriageInformation", "BikeCarriage", b1 =>
+                        {
+                            b1.Property<Guid>("TrainRunId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int?>("FromStopIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Status")
+                                .HasColumnType("integer");
+
+                            b1.Property<int?>("ToStopIndex")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("TrainRunId");
+
+                            b1.ToTable("TrainRuns");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainRunId");
+                        });
+
+                    b.OwnsOne("DBetter.Domain.TrainRuns.ValueObjects.CateringInformation", "Catering", b1 =>
+                        {
+                            b1.Property<Guid>("TrainRunId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int?>("FromStopIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int?>("ToStopIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("TrainRunId");
+
+                            b1.ToTable("TrainRuns");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainRunId");
+                        });
+
+                    b.OwnsOne("DBetter.Domain.TrainRuns.ValueObjects.ServiceInformation", "ServiceInformation", b1 =>
+                        {
+                            b1.Property<Guid>("TrainRunId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("LineNumber")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("ProductClass")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<int?>("ServiceNumber")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("TransportCategory")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("TrainRunId");
+
+                            b1.ToTable("TrainRuns");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainRunId");
+                        });
+
+                    b.Navigation("BikeCarriage")
+                        .IsRequired();
+
+                    b.Navigation("Catering")
+                        .IsRequired();
+
+                    b.Navigation("PassengerInformation");
+
+                    b.Navigation("ServiceInformation")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DBetter.Domain.Users.User", b =>

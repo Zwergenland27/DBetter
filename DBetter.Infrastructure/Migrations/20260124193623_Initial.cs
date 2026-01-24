@@ -90,25 +90,18 @@ namespace DBetter.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Routes",
+                name: "PassengerInformation",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    JourneyId = table.Column<string>(type: "text", nullable: false),
-                    Catering_Type = table.Column<int>(type: "integer", nullable: false),
-                    Catering_FromStopIndex = table.Column<int>(type: "integer", nullable: true),
-                    Catering_ToStopIndex = table.Column<int>(type: "integer", nullable: true),
-                    BikeCarriage_Status = table.Column<int>(type: "integer", nullable: false),
-                    BikeCarriage_FromStopIndex = table.Column<int>(type: "integer", nullable: true),
-                    BikeCarriage_ToStopIndex = table.Column<int>(type: "integer", nullable: true),
-                    ServiceInformation_TransportCategory = table.Column<int>(type: "integer", nullable: false),
-                    ServiceInformation_ProductClass = table.Column<string>(type: "text", nullable: false),
-                    ServiceInformation_LineNumber = table.Column<string>(type: "text", nullable: true),
-                    ServiceInformation_ServiceNumber = table.Column<int>(type: "integer", nullable: true)
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Priority = table.Column<int>(type: "integer", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Routes", x => x.Id);
+                    table.PrimaryKey("PK_PassengerInformation", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -126,6 +119,28 @@ namespace DBetter.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Stations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrainRuns",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    JourneyId = table.Column<string>(type: "text", nullable: false),
+                    Catering_Type = table.Column<int>(type: "integer", nullable: false),
+                    Catering_FromStopIndex = table.Column<int>(type: "integer", nullable: true),
+                    Catering_ToStopIndex = table.Column<int>(type: "integer", nullable: true),
+                    BikeCarriage_Status = table.Column<int>(type: "integer", nullable: false),
+                    BikeCarriage_FromStopIndex = table.Column<int>(type: "integer", nullable: true),
+                    BikeCarriage_ToStopIndex = table.Column<int>(type: "integer", nullable: true),
+                    ServiceInformation_TransportCategory = table.Column<int>(type: "integer", nullable: false),
+                    ServiceInformation_ProductClass = table.Column<string>(type: "text", nullable: false),
+                    ServiceInformation_LineNumber = table.Column<string>(type: "text", nullable: true),
+                    ServiceInformation_ServiceNumber = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainRuns", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,22 +208,22 @@ namespace DBetter.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Messages",
+                name: "TrainRunPassengerInformation",
                 columns: table => new
                 {
-                    RouteId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Code = table.Column<int>(type: "integer", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TrainRunId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InformationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FromStopIndex = table.Column<int>(type: "integer", nullable: false),
+                    ToStopIndex = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Messages", x => new { x.RouteId, x.Id });
+                    table.PrimaryKey("PK_TrainRunPassengerInformation", x => new { x.TrainRunId, x.Id });
                     table.ForeignKey(
-                        name: "FK_Messages_Routes_RouteId",
-                        column: x => x.RouteId,
-                        principalTable: "Routes",
+                        name: "FK_TrainRunPassengerInformation_TrainRuns_TrainRunId",
+                        column: x => x.TrainRunId,
+                        principalTable: "TrainRuns",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -277,15 +292,21 @@ namespace DBetter.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Routes_JourneyId",
-                table: "Routes",
-                column: "JourneyId",
+                name: "IX_PassengerInformation_Text",
+                table: "PassengerInformation",
+                column: "Text",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Stations_EvaNumber",
                 table: "Stations",
                 column: "EvaNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrainRuns_JourneyId",
+                table: "TrainRuns",
+                column: "JourneyId",
                 unique: true);
         }
 
@@ -305,13 +326,16 @@ namespace DBetter.Infrastructure.Migrations
                 name: "Discounts");
 
             migrationBuilder.DropTable(
-                name: "Messages");
-
-            migrationBuilder.DropTable(
                 name: "OutboxMessages");
 
             migrationBuilder.DropTable(
+                name: "PassengerInformation");
+
+            migrationBuilder.DropTable(
                 name: "Stations");
+
+            migrationBuilder.DropTable(
+                name: "TrainRunPassengerInformation");
 
             migrationBuilder.DropTable(
                 name: "ConnectionRequestPassengers");
@@ -320,7 +344,7 @@ namespace DBetter.Infrastructure.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Routes");
+                name: "TrainRuns");
 
             migrationBuilder.DropTable(
                 name: "ConnectionRequests");
