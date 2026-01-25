@@ -4,13 +4,15 @@ using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Stations;
+using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
 
 namespace DBetter.Application.Requests.GetSuggestions;
 
 public class ConnectionResponseFactory(
     List<Connection> connections, 
-    List<TrainRun> routes,
+    List<TrainCirculation> trainCirculations,
+    List<TrainRun> trainRuns,
     List<Station> stations,
     List<PassengerInformation> passengerInformation)
 {
@@ -76,17 +78,18 @@ public class ConnectionResponseFactory(
         var originStationName = stations.FirstOrDefault(station => station.EvaNumber == originStationEva)?.Name;
         var destinationStationEva = dto.JourneyId.DestinationEvaNumber;
         var destinationStationName =  stations.FirstOrDefault(station => station.EvaNumber == destinationStationEva)?.Name;
-        
-        var route = routes.First(route => route.JourneyId == dto.JourneyId);
-        var serviceInformation = route.ServiceInformation;
+
+        var trainCirculation = trainCirculations.First(tc => tc.NormalizedJourneyId == dto.JourneyId.Normalize());
+        var trainRun = trainRuns.First(tr => tr.CirculationId == trainCirculation.Id && tr.OperatingDay == dto.JourneyId.OperatingDay);
+        var serviceInformation = trainCirculation.ServiceInformation;
         
         return new TransportSegmentResponse
         {
-            RouteId = route.Id.Value.ToString(),
+            RouteId = trainRun.Id.Value.ToString(),
             DepartureTime = dto.Stops.First().DepartureTime!.ToResponse(),
             ArrivalTime = dto.Stops.Last().ArrivalTime!.ToResponse(),
-            BikeCarriage = route.BikeCarriage.ToResponse(),
-            Catering = route.Catering.ToResponse(),
+            BikeCarriage = trainRun.BikeCarriage.ToResponse(),
+            Catering = trainRun.Catering.ToResponse(),
             Demand = dto.Demand.ToResponse(),
             Origin = originStationName?.NormalizedValue,
             Destination = destinationStationName?.NormalizedValue ?? dto.Destination?.NormalizedValue,
@@ -95,7 +98,7 @@ public class ConnectionResponseFactory(
             ServiceNumber = serviceInformation.ServiceNumber?.Value,
             Operator = null,
             TransportCategory = serviceInformation.TransportCategory.ToString(),
-            Messages = route.PassengerInformation
+            Messages = trainRun.PassengerInformation
                 .Select(pim => passengerInformation.First(pi => pi.Id == pim.InformationId).ToResponse())
                 .ToList(),
             Stops = dto.Stops.Select(MapToResponse).ToList()

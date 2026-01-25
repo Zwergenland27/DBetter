@@ -1,7 +1,7 @@
 using CleanDomainValidation.Domain;
 using DBetter.Domain.Errors;
 
-namespace DBetter.Domain.TrainRuns.ValueObjects;
+namespace DBetter.Domain.TrainCirculations.ValueObjects;
 
 public record ServiceNumber(int Value)
 {

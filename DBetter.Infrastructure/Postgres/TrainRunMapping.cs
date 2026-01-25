@@ -1,4 +1,5 @@
 using DBetter.Domain.PassengerInformationManagement.ValueObjects;
+using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.TrainRuns.Entities;
 using DBetter.Domain.TrainRuns.ValueObjects;
@@ -15,6 +16,9 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRun>
         
         builder.HasKey(x => x.Id);
         
+        builder.HasIndex(x => new {x.CirculationId, x.OperatingDay})
+            .IsUnique();
+        
         builder.HasIndex(x => x.JourneyId)
             .IsUnique();
         
@@ -22,11 +26,21 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRun>
             .HasConversion(
                 id => id.Value,
                 value => new TrainRunId(value));
+        
+        builder.Property(x => x.OperatingDay)
+            .HasConversion(
+                day => day.Date,
+                value => new OperatingDay(value));
 
         builder.Property(x => x.JourneyId)
             .HasConversion(
-                id => id.Value,
+                jid => jid.Value,
                 value => new BahnJourneyId(value));
+
+        builder.Property(x => x.CirculationId)
+            .HasConversion(
+                id => id.Value,
+                value => new TrainCirculationId(value));
 
         builder.OwnsMany(x => x.PassengerInformation, mb =>
         {
@@ -89,26 +103,6 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRun>
                 .HasConversion(
                     stopIndex => stopIndex.Value,
                     value => new StopIndex(value))
-                .IsRequired(false);
-        });
-        
-        
-        builder.OwnsOne(x => x.ServiceInformation, tib =>
-        {
-            tib.Property(x => x.ProductClass);
-
-            tib.Property(x => x.TransportCategory);
-
-            tib.Property(x => x.LineNumber)
-                .HasConversion(
-                    line => line != null ? line.Value : null,
-                    value => value != null ? new LineNumber(value) : null)
-                .IsRequired(false);
-            
-            tib.Property(x => x.ServiceNumber)
-                .HasConversion(
-                    number => number != null ? number.Value : (int?) null,
-                    value => value.HasValue ? new ServiceNumber(value.Value) : null)
                 .IsRequired(false);
         });
     }

@@ -1,4 +1,4 @@
-namespace DBetter.Domain.TrainRuns.ValueObjects;
+namespace DBetter.Domain.TrainCirculations.ValueObjects;
 
 public enum TransportCategory
 {

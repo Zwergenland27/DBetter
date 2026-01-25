@@ -6,6 +6,7 @@ using DBetter.Contracts.TrainRuns.Queries.Get.Results;
 using DBetter.Domain.Errors;
 using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Stations;
+using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.TrainRuns.Snapshots;
 
@@ -15,6 +16,7 @@ public class GetTrainRunQueryHandler(
     IUnitOfWork unitOfWork,
     IStationRepository stationRepository,
     ITrainRunRepository trainRunRepository,
+    ITrainCirculationRepository trainCirculationRepository,
     IExternalTrainRunProvider trainRunProvider,
     IPassengerInformationRepository passengerInformationRepository) : CommandHandlerBase<GetTrainRunQuery, TrainRunResponse>
 {
@@ -28,8 +30,11 @@ public class GetTrainRunQueryHandler(
         var trainRun = await trainRunRepository.GetAsync(request.Id);
 
         if (trainRun is null) return DomainErrors.TrainRun.NotFound(request.Id);
+
+        var trainCirculation = await trainCirculationRepository.GetAsync(trainRun.CirculationId);
+        if (trainCirculation is null) throw new InvalidDataException("No train circulation exists for the train run");
         
-        var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainRun.JourneyId);
+        var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainCirculation.NormalizedJourneyId.GenerateBahnJourneyId(trainRun.OperatingDay));
         _existingPassengerInformation = await passengerInformationRepository.GetManyAsync(trainRun.PassengerInformation.Select(im => im.InformationId));
         _existingPassengerInformation.AddRange(await passengerInformationRepository.FindManyAsync(trainRunDto.PassengerInformation.Select(pim => pim.OriginalText)));
         _existingPassengerInformation = _existingPassengerInformation.Distinct().ToList();
@@ -54,12 +59,12 @@ public class GetTrainRunQueryHandler(
         
         if (trainRunDto.ServiceNumbers.Any())
         {
-            trainRun.Update(trainRunDto.ServiceNumbers.First());   
+            trainCirculation.Update(trainRunDto.ServiceNumbers.First());   
         }
         
         await unitOfWork.CommitAsync(cancellationToken);
 
-        var responseFactory = new TrainRunResponseFactory(trainRun, _existingStations);
+        var responseFactory = new TrainRunResponseFactory(trainCirculation, trainRun, _existingStations);
         return responseFactory.MapToResponse(trainRunDto);
     }
 

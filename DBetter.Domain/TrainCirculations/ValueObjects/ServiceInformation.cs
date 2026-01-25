@@ -1,4 +1,6 @@
-namespace DBetter.Domain.TrainRuns.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
+
+namespace DBetter.Domain.TrainCirculations.ValueObjects;
 
 public record ServiceInformation(TransportCategory TransportCategory, string ProductClass, LineNumber? LineNumber, ServiceNumber? ServiceNumber)
 {

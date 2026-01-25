@@ -1,4 +1,6 @@
+using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns;
+using DBetter.Domain.TrainRuns.Snapshots;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +14,13 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
         return db.TrainRuns.FirstOrDefaultAsync(r => r.Id == id);
     }
 
-    public Task<List<TrainRun>> GetManyAsync(IEnumerable<BahnJourneyId> journeyIds)
+    public Task<List<TrainRun>> GetManyAsync(IEnumerable<BahnJourneyId> jouneyIds)
     {
-        return db.TrainRuns.Where(r => journeyIds.Contains(r.JourneyId)).ToListAsync();
+        return db.TrainRuns.Where(tr => jouneyIds.Contains(tr.JourneyId)) .ToListAsync();   
     }
 
-    public void AddRange(IEnumerable<TrainRun> routes)
+    public void AddRange(IEnumerable<TrainRun> trainRuns)
     {
-        db.TrainRuns.AddRange(routes);
+        db.TrainRuns.AddRange(trainRuns);
     }
 }

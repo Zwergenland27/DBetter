@@ -1,4 +1,5 @@
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.Entities;
 using DBetter.Domain.TrainRuns.Events;
 using DBetter.Domain.TrainRuns.Snapshots;
@@ -13,6 +14,10 @@ public class TrainRun : AggregateRoot<TrainRunId>
 {
     private List<TrainRunPassengerInformation> _passengerInformation = [];
     
+    public TrainCirculationId CirculationId { get; private init; }
+    
+    public OperatingDay OperatingDay { get; private init; }
+    
     public BahnJourneyId JourneyId { get; private init; }
     
     public IReadOnlyList<TrainRunPassengerInformation> PassengerInformation => _passengerInformation.AsReadOnly();
@@ -21,50 +26,47 @@ public class TrainRun : AggregateRoot<TrainRunId>
     
     public BikeCarriageInformation BikeCarriage { get; private set; }
     
-    public ServiceInformation ServiceInformation { get; private set; }
-    
     private TrainRun() : base(null!){}
 
     private TrainRun(
         TrainRunId id,
+        TrainCirculationId circulationId,
+        OperatingDay operatingDay,
         BahnJourneyId journeyId,
         List<TrainRunPassengerInformation> passengerInformation,
-        ServiceInformation serviceInformation,
         CateringInformation cateringInformation,
         BikeCarriageInformation bikeCarriageInformation) : base(id)
     {
+        CirculationId = circulationId;
         JourneyId = journeyId;
+        OperatingDay = operatingDay;
         _passengerInformation = passengerInformation;
-        ServiceInformation = serviceInformation;
         Catering = cateringInformation;
         BikeCarriage = bikeCarriageInformation;
     }
     
-    public static TrainRun Create(
+    internal static TrainRun Create(
+        TrainCirculationId circulationId,
         BahnJourneyId journeyId,
-        List<TrainRunPassengerInformationSnapshot> passengerInformation,
-        ServiceInformation serviceInformation,
+        OperatingDay operatingDay,
         CateringInformation cateringInformation,
-        BikeCarriageInformation bikeCarriageInformation)
+        BikeCarriageInformation bikeCarriageInformation,
+        bool isRailway)
     {
         var trainRun = new TrainRun(
             TrainRunId.CreateNew(),
+            circulationId,
+            operatingDay,
             journeyId,
             [],
-            serviceInformation,
             cateringInformation,
             bikeCarriageInformation);
 
-        trainRun.ReconcilePassengerInformation(passengerInformation);
-        
-        if (trainRun.ServiceInformation.TransportCategory is
-            TransportCategory.HighSpeedTrain or
-            TransportCategory.FastTrain or
-            TransportCategory.RegionalTrain or
-            TransportCategory.SuburbanTrain)
+        if (isRailway)
         {
             trainRun.RaiseDomainEvent(new TrainRunScrapingScheduledEvent(trainRun.Id));
         }
+        
         return trainRun;
     }
 
@@ -96,10 +98,5 @@ public class TrainRun : AggregateRoot<TrainRunId>
             var trainRunPassengerInformation = TrainRunPassengerInformation.Create(passengerInformation.Id, passengerInformation.FromStopIndex, passengerInformation.ToStopIndex);
             _passengerInformation.Add(trainRunPassengerInformation);
         }
-    }
-
-    public void Update(ServiceNumber newServiceNumber)
-    {
-        ServiceInformation = ServiceInformation.UpdateServiceNumber(newServiceNumber);
     }
 }

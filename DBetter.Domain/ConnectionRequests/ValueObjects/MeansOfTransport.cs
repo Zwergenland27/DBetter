@@ -1,3 +1,4 @@
+using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Domain.ConnectionRequests.ValueObjects;

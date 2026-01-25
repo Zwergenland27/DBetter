@@ -122,21 +122,35 @@ namespace DBetter.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TrainCirculations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    NormalizedJourneyId = table.Column<string>(type: "text", nullable: false),
+                    ServiceInformation_TransportCategory = table.Column<int>(type: "integer", nullable: false),
+                    ServiceInformation_ProductClass = table.Column<string>(type: "text", nullable: false),
+                    ServiceInformation_LineNumber = table.Column<string>(type: "text", nullable: true),
+                    ServiceInformation_ServiceNumber = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainCirculations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TrainRuns",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CirculationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OperatingDay = table.Column<DateOnly>(type: "date", nullable: false),
                     JourneyId = table.Column<string>(type: "text", nullable: false),
                     Catering_Type = table.Column<int>(type: "integer", nullable: false),
                     Catering_FromStopIndex = table.Column<int>(type: "integer", nullable: true),
                     Catering_ToStopIndex = table.Column<int>(type: "integer", nullable: true),
                     BikeCarriage_Status = table.Column<int>(type: "integer", nullable: false),
                     BikeCarriage_FromStopIndex = table.Column<int>(type: "integer", nullable: true),
-                    BikeCarriage_ToStopIndex = table.Column<int>(type: "integer", nullable: true),
-                    ServiceInformation_TransportCategory = table.Column<int>(type: "integer", nullable: false),
-                    ServiceInformation_ProductClass = table.Column<string>(type: "text", nullable: false),
-                    ServiceInformation_LineNumber = table.Column<string>(type: "text", nullable: true),
-                    ServiceInformation_ServiceNumber = table.Column<int>(type: "integer", nullable: true)
+                    BikeCarriage_ToStopIndex = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -304,6 +318,18 @@ namespace DBetter.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_TrainCirculations_NormalizedJourneyId",
+                table: "TrainCirculations",
+                column: "NormalizedJourneyId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrainRuns_CirculationId_OperatingDay",
+                table: "TrainRuns",
+                columns: new[] { "CirculationId", "OperatingDay" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TrainRuns_JourneyId",
                 table: "TrainRuns",
                 column: "JourneyId",
@@ -333,6 +359,9 @@ namespace DBetter.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Stations");
+
+            migrationBuilder.DropTable(
+                name: "TrainCirculations");
 
             migrationBuilder.DropTable(
                 name: "TrainRunPassengerInformation");

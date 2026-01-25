@@ -2,6 +2,7 @@ using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Shared;
 using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Stations;
+using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Application.TrainRuns.Dtos;

@@ -1,5 +1,6 @@
 using DBetter.Application.Requests.Dtos;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Shared;
