@@ -8,11 +8,9 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
 {
     private TransportCategory _category;
 
-    private string _productClass;
-
     private LineNumber? _lineNumber;
 
-    private ServiceNumber? _trainNumber;
+    private ServiceNumber? _serviceNumber;
 
     public ServiceInformation ExtractData()
     {
@@ -24,85 +22,77 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
         if (_category is TransportCategory.SuburbanTrain && splitLineInformation[0].StartsWith("S"))
         {
             _category = TransportCategory.SuburbanTrain;
-            _productClass = "S";
-            _lineNumber = new LineNumber(splitLineInformation[0].Replace("S", ""));
+            _lineNumber = new LineNumber(splitLineInformation[0].Replace("S", "S "));
         }
         //Boats etc.
         else if (_category is TransportCategory.Boat)
         {
-            _productClass = fullLineInformation;
             _lineNumber = new LineNumber(fullLineInformation);
         }
         //Remove "STR" Prefix for trams
         else if (_category is TransportCategory.Tram)
         {
-            _productClass = "";
             _lineNumber = new LineNumber(splitLineInformation[1]);
         }
         //Remove "Bus" Prefix for buses
         else if(_category is TransportCategory.Bus)
         {
-            _productClass = "";
             _lineNumber = new LineNumber(splitLineInformation[1]);
         }
         //InterCity lines that can also be used with regional ticket
         else if (splitLineInformation.Length > 2 && splitLineInformation[0] is "RE" && splitLineInformation[1].StartsWith("IC"))
         {
             _category = TransportCategory.FastTrain;
-            _productClass = "RE";
-            _lineNumber = new LineNumber(new string(splitLineInformation[1].Where(char.IsDigit).ToArray()));
+            _lineNumber = new LineNumber($"RE {new string(splitLineInformation[1].Where(char.IsDigit).ToArray())}");
             if (splitLineInformation.Length == 3 && splitLineInformation[2].Any(char.IsDigit))
             {
                 var serviceNumberContent = new string(splitLineInformation[2].Where(char.IsDigit).ToArray());
-                _trainNumber = new ServiceNumber(int.Parse(serviceNumberContent));
+                _serviceNumber = new ServiceNumber(int.Parse(serviceNumberContent));
             }
         }
         //Trains without dedicated train number
         else if (splitLineInformation.Length == 2 && splitLineInformation[0].All(char.IsLetter))
         {
-            _productClass = splitLineInformation[0];
-            _lineNumber = new LineNumber(splitLineInformation[1]);
+            _lineNumber = new LineNumber($"{splitLineInformation[0]} {splitLineInformation[1]}");
             
             //TODO: line number is sometimes the train number, like in ICEs or TGVs and should be extracted for a correct data model
             //This should not be done using static filters (like only for ices) because sometimes a normal train is also missing its line number
         }
-        //Trains with train number and without any additional names
+        //Trains with service number and without any additional names
         else if (splitLineInformation.Length == 2 && splitLineInformation[0].Any(char.IsDigit))
         {
+            var productClassContent = new string(splitLineInformation[0].Where(char.IsLetter).ToArray());
             var lineNumberContent = new string(splitLineInformation[0].Where(char.IsDigit).ToArray());
             var serviceNumberContent = new string(splitLineInformation[1].Where(char.IsDigit).ToArray());
             
-            _productClass = new string(splitLineInformation[0].Where(char.IsLetter).ToArray());
-            _lineNumber = new LineNumber(lineNumberContent);
+            _lineNumber = new LineNumber($"{productClassContent} {lineNumberContent}");
             if (int.TryParse(serviceNumberContent, out var serviceNumber))
             {
-                _trainNumber = new ServiceNumber(serviceNumber);
+                _serviceNumber = new ServiceNumber(serviceNumber);
             }
         }
         //Trains with train number that contain an additional name (for example TL for trilex)
         else if (splitLineInformation.Length == 3 && splitLineInformation[1].All(char.IsDigit))
         {
+            var productClassContent = new string(splitLineInformation[1].Where(char.IsLetter).ToArray());
             var lineNumberContent = new string(splitLineInformation[1].Where(char.IsDigit).ToArray());
             var serviceNumberContent = new string(splitLineInformation[2].Where(char.IsDigit).ToArray());
             
-            _productClass = new string(splitLineInformation[1].Where(char.IsLetter).ToArray());
-            _lineNumber = new LineNumber(lineNumberContent);
+            _lineNumber = new LineNumber($"{productClassContent} {lineNumberContent}");
             if (int.TryParse(serviceNumberContent, out var serviceNumber))
             {
-                _trainNumber = new ServiceNumber(serviceNumber);
+                _serviceNumber = new ServiceNumber(serviceNumber);
             }
         }
         //Catch all other cases
         else
         {
-            _productClass = fullLineInformation;
             _lineNumber = new LineNumber(fullLineInformation);
         }
         
         return new ServiceInformation(
             _category,
-            _productClass,
             _lineNumber,
-            _trainNumber);
+            _serviceNumber);
     }
 }

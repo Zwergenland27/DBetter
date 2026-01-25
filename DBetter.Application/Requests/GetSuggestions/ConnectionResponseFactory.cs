@@ -85,7 +85,7 @@ public class ConnectionResponseFactory(
         
         return new TransportSegmentResponse
         {
-            RouteId = trainRun.Id.Value.ToString(),
+            TrainRunId = trainRun.Id.Value.ToString(),
             DepartureTime = dto.Stops.First().DepartureTime!.ToResponse(),
             ArrivalTime = dto.Stops.Last().ArrivalTime!.ToResponse(),
             BikeCarriage = trainRun.BikeCarriage.ToResponse(),
@@ -93,12 +93,11 @@ public class ConnectionResponseFactory(
             Demand = dto.Demand.ToResponse(),
             Origin = originStationName?.NormalizedValue,
             Destination = destinationStationName?.NormalizedValue ?? dto.Destination?.NormalizedValue,
-            ProductClass = serviceInformation.ProductClass,
             Line = serviceInformation.LineNumber?.Value,
             ServiceNumber = serviceInformation.ServiceNumber?.Value,
             Operator = null,
             TransportCategory = serviceInformation.TransportCategory.ToString(),
-            Messages = trainRun.PassengerInformation
+            PassengerInformation = trainRun.PassengerInformation
                 .Select(pim => passengerInformation.First(pi => pi.Id == pim.InformationId).ToResponse())
                 .ToList(),
             Stops = dto.Stops.Select(MapToResponse).ToList()

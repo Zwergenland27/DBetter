@@ -64,7 +64,7 @@ public class GetTrainRunQueryHandler(
         
         await unitOfWork.CommitAsync(cancellationToken);
 
-        var responseFactory = new TrainRunResponseFactory(trainCirculation, trainRun, _existingStations);
+        var responseFactory = new TrainRunResponseFactory(trainCirculation, trainRun, _existingPassengerInformation, _existingStations);
         return responseFactory.MapToResponse(trainRunDto);
     }
 

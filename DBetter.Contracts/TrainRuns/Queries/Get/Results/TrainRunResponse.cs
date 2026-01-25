@@ -1,3 +1,4 @@
+using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Contracts.Shared.DTOs;
 
 namespace DBetter.Contracts.TrainRuns.Queries.Get.Results;
@@ -11,6 +12,11 @@ public class TrainRunResponse {
     /// Id of the train run
     /// </summary>
     public required string Id { get; set; }
+    
+    /// <summary>
+    /// Id of the corresponding train circulation
+    /// </summary>
+    public required string CirculationId { get; set; }
 
     /// <summary>
     /// Operator of the service
@@ -23,12 +29,6 @@ public class TrainRunResponse {
     /// </summary>
     /// <example>HighSpeedTrains</example>
     public required string TransportCategory { get; set; }
-    
-    /// <summary>
-    /// Detailed Class of the transportation product
-    /// </summary>
-    /// <example>RB</example>
-    public required string ProductClass { get; set; }
     
     /// <summary>
     /// Line number
@@ -56,4 +56,9 @@ public class TrainRunResponse {
     /// Information about catering in the vehicle
     /// </summary>
     public required CateringInformationDto Catering { get; set; }
+    
+    /// <summary>
+    /// Messages for passengers
+    /// </summary>
+    public required List<PassengerInformationResponse> PassengerInformation { get; set; }
 }

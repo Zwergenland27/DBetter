@@ -1,5 +1,6 @@
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Contracts.Shared.DTOs;
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.PassengerInformationManagement.ValueObjects;
@@ -53,21 +54,23 @@ public static class Mappings
         };
     }
     
-    public static string ToResponse(this PassengerInformation message)
-    {
-        if (message.Type is PassengerInformationType.FreeText)
-        {
-            return message.Text.Value;
-        }
-        
-        return message.Code.Value;
-    }
-    
     public static PlatformDto ToResponse(this Platform platform){
         return new PlatformDto {
             Planned = platform.Planned,
             Real = platform.Real,
             Type = platform.Type.ToString()
+        };
+    }
+
+    public static PassengerInformationResponse ToResponse(this PassengerInformation passengerInformation)
+    {
+        return new PassengerInformationResponse
+        {
+            Priority = passengerInformation.Priority.ToString(),
+            Type = passengerInformation.Type.ToString(),
+            Message = passengerInformation.Code == PassengerInformationCode.Unmapped
+                ? passengerInformation.Text.Value
+                : passengerInformation.Code.Value
         };
     }
 }

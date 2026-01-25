@@ -28,8 +28,6 @@ public class TrainCirculationMapping : IEntityTypeConfiguration<TrainCirculation
         
         builder.OwnsOne(x => x.ServiceInformation, tib =>
         {
-            tib.Property(x => x.ProductClass);
-
             tib.Property(x => x.TransportCategory);
 
             tib.Property(x => x.LineNumber)

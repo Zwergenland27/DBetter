@@ -133,20 +133,6 @@ public static class DTOExtensions
         return new StopIndex(stop.RouteIdx);
     }
 
-    public static string? GetLine(this ServiceInformation information)
-    {
-        if (information.LineNumber is null && information.ServiceNumber is null) return null;
-        
-        var line = information.LineNumber is not null ? information.LineNumber.Value : information.ServiceNumber!.Value.ToString();
-
-        if (!_ignoredProductClasses.Contains(information.ProductClass))
-        {
-            line = $"{information.ProductClass} {line}";
-        }
-
-        return line;
-    }
-
     public static Currency ToCurrency(this Waehrung currency)
     {
         return currency switch

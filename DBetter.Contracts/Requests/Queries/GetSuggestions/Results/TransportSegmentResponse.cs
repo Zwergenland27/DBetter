@@ -20,7 +20,7 @@ public class TransportSegmentResponse : SegmentResponse
     /// <summary>
     /// Id of the complete train run
     /// </summary>
-    public required string RouteId {get;set;}
+    public required string TrainRunId {get;set;}
     
     /// <summary>
     /// Demand information
@@ -57,12 +57,6 @@ public class TransportSegmentResponse : SegmentResponse
     public required string TransportCategory { get; set; }
     
     /// <summary>
-    /// Detailed Class of the transportation product
-    /// </summary>
-    /// <example>RB</example>
-    public required string ProductClass { get; set; }
-    
-    /// <summary>
     /// Line number
     /// </summary>
     /// <example>RE 2</example>
@@ -87,5 +81,5 @@ public class TransportSegmentResponse : SegmentResponse
     /// <summary>
     /// Messages for passengers
     /// </summary>
-    public required List<string> Messages { get; set; }
+    public required List<PassengerInformationResponse> PassengerInformation { get; set; }
 }

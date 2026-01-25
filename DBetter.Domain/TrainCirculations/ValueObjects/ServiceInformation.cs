@@ -2,7 +2,7 @@ using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Domain.TrainCirculations.ValueObjects;
 
-public record ServiceInformation(TransportCategory TransportCategory, string ProductClass, LineNumber? LineNumber, ServiceNumber? ServiceNumber)
+public record ServiceInformation(TransportCategory TransportCategory, LineNumber? LineNumber, ServiceNumber? ServiceNumber)
 {
     public ServiceInformation UpdateServiceNumber(ServiceNumber number)
     {
