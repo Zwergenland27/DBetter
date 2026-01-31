@@ -9,7 +9,7 @@ public class TrainRunFactory
 {
     public static TrainRun Create(
         TrainCirculation trainCirculation,
-        OperatingDay operatingDay,
+        BahnJourneyId journeyId,
         List<TrainRunPassengerInformationSnapshot> passengerInformation,
         BikeCarriageInformation bikeCarriage,
         CateringInformation catering)
@@ -22,8 +22,8 @@ public class TrainRunFactory
         
         var trainRun = TrainRun.Create(
             trainCirculation.Id,
-            trainCirculation.NormalizedJourneyId.GenerateBahnJourneyId(operatingDay),
-            operatingDay,
+            journeyId,
+            journeyId.OperatingDay,
             catering,
             bikeCarriage,
             isRailway);

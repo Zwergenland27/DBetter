@@ -12,9 +12,19 @@ public class TrainCirculationRepository(DBetterContext db) : ITrainCirculationRe
         return db.TrainCirculations.FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public Task<List<TrainCirculation>> GetManyAsync(IEnumerable<NormalizedBahnJourneyId> journeyIds)
+    public Task<List<TrainCirculation>> GetManyAsync(IEnumerable<TimeTableCompositeIdentifier> timeTableIdentifier)
     {
-        return db.TrainCirculations.Where(tc => journeyIds.Contains(tc.NormalizedJourneyId)).ToListAsync();
+        var sql = $"""
+                   SELECT *
+                   FROM "TrainCirculations"
+                   WHERE ("TrainId", "TimeTablePeriod") IN (
+                       {string.Join(",", timeTableIdentifier.Select(id => $"({id.TrainId.Value}, {id.TimeTablePeriod.Year})"))}
+                   )
+                   """;
+        
+        return db.TrainCirculations
+            .FromSqlRaw(sql)
+            .ToListAsync();
     }
 
     public void AddRange(IEnumerable<TrainCirculation> trainCirculations)

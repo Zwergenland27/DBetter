@@ -34,7 +34,7 @@ public class GetTrainRunQueryHandler(
         var trainCirculation = await trainCirculationRepository.GetAsync(trainRun.CirculationId);
         if (trainCirculation is null) throw new InvalidDataException("No train circulation exists for the train run");
         
-        var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainCirculation.NormalizedJourneyId.GenerateBahnJourneyId(trainRun.OperatingDay));
+        var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainRun.JourneyId);
         _existingPassengerInformation = await passengerInformationRepository.GetManyAsync(trainRun.PassengerInformation.Select(im => im.InformationId));
         _existingPassengerInformation.AddRange(await passengerInformationRepository.FindManyAsync(trainRunDto.PassengerInformation.Select(pim => pim.OriginalText)));
         _existingPassengerInformation = _existingPassengerInformation.Distinct().ToList();

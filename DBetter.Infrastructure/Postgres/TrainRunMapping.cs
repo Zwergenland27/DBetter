@@ -2,6 +2,7 @@ using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.TrainRuns.Entities;
+using DBetter.Domain.TrainRuns.Snapshots;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

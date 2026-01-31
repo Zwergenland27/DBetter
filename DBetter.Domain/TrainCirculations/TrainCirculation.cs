@@ -1,30 +1,33 @@
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.TrainCirculations.ValueObjects;
-using DBetter.Domain.TrainRuns.ValueObjects;
+using DBetter.Domain.TrainRuns.Snapshots;
 
 namespace DBetter.Domain.TrainCirculations;
 
 public class TrainCirculation : AggregateRoot<TrainCirculationId>
 {
-    public NormalizedBahnJourneyId NormalizedJourneyId { get; private init; }
+    public TimeTablePeriod TimeTablePeriod { get; private set; }
+    public TrainId TrainId { get; private init; }
     
     public ServiceInformation ServiceInformation { get; private set; }
 
     private TrainCirculation(
         TrainCirculationId id,
-        NormalizedBahnJourneyId journeyId,
+        TimeTablePeriod timeTablePeriod,
+        TrainId trainId,
         ServiceInformation serviceInformation) : base(id)
     {
-        NormalizedJourneyId =  journeyId;
+        TrainId =  trainId;
+        TimeTablePeriod = timeTablePeriod;
         ServiceInformation = serviceInformation;
     }
     
     private TrainCirculation() : base(null!){}
 
 
-    public static TrainCirculation Create(NormalizedBahnJourneyId journeyId, ServiceInformation serviceInformation)
+    public static TrainCirculation Create(BahnJourneyId journeyId, ServiceInformation serviceInformation)
     {
-        return new TrainCirculation(TrainCirculationId.CreateNew(), journeyId, serviceInformation);
+        return new TrainCirculation(TrainCirculationId.CreateNew(), TimeTablePeriod.FromOperatingDay(journeyId.OperatingDay),  journeyId.TrainId, serviceInformation);
     }
     public void Update(ServiceNumber newServiceNumber)
     {

@@ -126,13 +126,15 @@ namespace DBetter.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("NormalizedJourneyId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("TimeTablePeriod")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TrainId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedJourneyId")
+                    b.HasIndex("TrainId", "TimeTablePeriod")
                         .IsUnique();
 
                     b.ToTable("TrainCirculations", (string)null);

@@ -1,20 +1,20 @@
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 
-namespace DBetter.Domain.TrainCirculations.ValueObjects;
+namespace DBetter.Domain.TrainRuns.Snapshots;
 
 public record BahnJourneyId(string Value)
 {
+    public TrainId TrainId => TrainId.Create(Parse(Value)["ZI"]).Value;
     public EvaNumber DestinationEvaNumber => EvaNumber.Create(Parse(Value)["LS"]).Value;
     
     public EvaNumber OriginEvaNumber => EvaNumber.Create(Parse(Value)["1S"]).Value;
     
     public OperatingDay OperatingDay => OperatingDay.Parse(Parse(Value)["DA"]);
 
-    public NormalizedBahnJourneyId Normalize()
-    {
-        return NormalizedBahnJourneyId.CreateNormalized(Value);
-    }
+    public TimeTableCompositeIdentifier CompositeKey =>
+        TimeTableCompositeIdentifier.Create(TrainId, TimeTablePeriod.FromOperatingDay(OperatingDay));
     
     private static Dictionary<string, string> Parse(string value)
     {

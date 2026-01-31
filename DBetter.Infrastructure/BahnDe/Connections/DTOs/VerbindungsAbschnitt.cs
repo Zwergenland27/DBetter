@@ -1,5 +1,6 @@
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainCirculations.ValueObjects;
+using DBetter.Domain.TrainRuns.Snapshots;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Shared;
 
@@ -147,6 +148,11 @@ public class VerbindungsAbschnitt : IHasMessage, IHasDemandInformation
     /// </summary>
     /// <example>116</example>
     public int? Distanz { get; set; }
+    
+    /// <summary>
+    /// Indicator on how likely the next transport method is reached
+    /// </summary> 5 = Anschluss wartet nicht; 1 - Anschluss wartet; 2 - Anschluss voraussichtlich erreichbar, 3 - Anschluss voraussichtlich nicht erreichbar? 4 - Anschluss nicht erreichbar
+    public int? AnschlussBewertungCode { get; set; }
 
     public BahnJourneyId GetJourneyId(){
         if(JourneyId is null) throw new BahnDeException("Verbindungsabschnitt", "A walking section does not have a journeyId");

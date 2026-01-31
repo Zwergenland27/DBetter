@@ -79,7 +79,7 @@ public class ConnectionResponseFactory(
         var destinationStationEva = dto.JourneyId.DestinationEvaNumber;
         var destinationStationName =  stations.FirstOrDefault(station => station.EvaNumber == destinationStationEva)?.Name;
 
-        var trainCirculation = trainCirculations.First(tc => tc.NormalizedJourneyId == dto.JourneyId.Normalize());
+        var trainCirculation = trainCirculations.First(tc => tc.TrainId == dto.JourneyId.TrainId);
         var trainRun = trainRuns.First(tr => tr.CirculationId == trainCirculation.Id && tr.OperatingDay == dto.JourneyId.OperatingDay);
         var serviceInformation = trainCirculation.ServiceInformation;
         

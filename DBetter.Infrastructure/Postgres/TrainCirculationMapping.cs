@@ -13,7 +13,7 @@ public class TrainCirculationMapping : IEntityTypeConfiguration<TrainCirculation
         
         builder.HasKey(x => x.Id);
 
-        builder.HasIndex(x => x.NormalizedJourneyId)
+        builder.HasIndex(x => new {x.TrainId, x.TimeTablePeriod})
             .IsUnique();
 
         builder.Property(x => x.Id)
@@ -21,10 +21,15 @@ public class TrainCirculationMapping : IEntityTypeConfiguration<TrainCirculation
                 id => id.Value,
                 value => new TrainCirculationId(value));
 
-        builder.Property(x => x.NormalizedJourneyId)
+        builder.Property(x => x.TrainId)
             .HasConversion(
                 id => id.Value,
-                value => NormalizedBahnJourneyId.CreateNormalized(value));
+                value => new TrainId(value));
+        
+        builder.Property(x => x.TimeTablePeriod)
+            .HasConversion(
+                id => id.Year,
+                value => new TimeTablePeriod(value));
         
         builder.OwnsOne(x => x.ServiceInformation, tib =>
         {

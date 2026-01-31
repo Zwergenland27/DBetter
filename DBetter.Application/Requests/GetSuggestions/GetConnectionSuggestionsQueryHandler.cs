@@ -103,17 +103,16 @@ public class GetConnectionSuggestionsQueryHandler(
         var transportSegments = connectionDto.Segments.OfType<TransportSegmentDto>();
         foreach (var transportSegment in transportSegments)
         {
-            var normalizedJourneyId = transportSegment.JourneyId.Normalize();
             var existingTrainCirculation =
                 _existingTrainCirculations.FirstOrDefault(tc =>
-                    tc.NormalizedJourneyId == normalizedJourneyId);
+                    tc.TrainId == transportSegment.JourneyId.TrainId);
             if (existingTrainCirculation is not null)
             {
                 continue;
             }
 
             var newTrainCirculation =
-                TrainCirculation.Create(normalizedJourneyId, transportSegment.Composition.First());
+                TrainCirculation.Create(transportSegment.JourneyId, transportSegment.Composition.First());
             _existingTrainCirculations.Add(newTrainCirculation);
             _trainCirculationsToCreate.Add(newTrainCirculation);
         }
@@ -123,6 +122,11 @@ public class GetConnectionSuggestionsQueryHandler(
         var transportSegments = connectionDto.Segments.OfType<TransportSegmentDto>();
         foreach (var transportSegment in transportSegments)
         {
+            var journeyId = transportSegment.JourneyId;
+            var trainId = journeyId.TrainId;
+            var operatingDay = journeyId.OperatingDay;
+            var timeTablePeriod = TimeTablePeriod.FromOperatingDay(operatingDay);
+            
             var passengerInformationSnapshots = transportSegment.PassengerInformation
                 .Select(pimDto =>
                 {
@@ -130,9 +134,7 @@ public class GetConnectionSuggestionsQueryHandler(
                     return new TrainRunPassengerInformationSnapshot(pim.Id, pimDto.FromStopIndex, pimDto.ToStopIndex);
                 }).ToList();
             
-            var operatingDay = transportSegment.JourneyId.OperatingDay;
-            
-            var trainCirculation = _existingTrainCirculations.First(tc => tc.NormalizedJourneyId == transportSegment.JourneyId.Normalize());
+            var trainCirculation = _existingTrainCirculations.First(tc => tc.TrainId == trainId && tc.TimeTablePeriod == timeTablePeriod);
             
             var existingTrainRun = _existingTrainRuns.FirstOrDefault(r => r.CirculationId == trainCirculation.Id && r.OperatingDay == operatingDay);
             if (existingTrainRun is not null)
@@ -145,7 +147,7 @@ public class GetConnectionSuggestionsQueryHandler(
 
             var newTrainRun = TrainRunFactory.Create(
                 trainCirculation,
-                operatingDay,
+                journeyId,
                 passengerInformationSnapshots,
                 transportSegment.BikeCarriage,
                 transportSegment.Catering);
@@ -188,7 +190,7 @@ public class GetConnectionSuggestionsQueryHandler(
             jid.DestinationEvaNumber
         }));
 
-        _existingTrainCirculations = await trainCirculationRepository.GetManyAsync(journeyIds.Select(jid => jid.Normalize()).Distinct());
+        _existingTrainCirculations = await trainCirculationRepository.GetManyAsync(journeyIds.Select(jid => jid.CompositeKey).Distinct());
         
         _existingTrainRuns = await trainRunRepository.GetManyAsync(journeyIds);
         _existingStations = await stationRepository.GetManyAsync(evaNumbers.Distinct());

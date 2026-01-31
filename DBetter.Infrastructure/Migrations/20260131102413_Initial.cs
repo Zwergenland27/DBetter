@@ -126,9 +126,9 @@ namespace DBetter.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    NormalizedJourneyId = table.Column<string>(type: "text", nullable: false),
+                    TimeTablePeriod = table.Column<int>(type: "integer", nullable: false),
+                    TrainId = table.Column<int>(type: "integer", nullable: false),
                     ServiceInformation_TransportCategory = table.Column<int>(type: "integer", nullable: false),
-                    ServiceInformation_ProductClass = table.Column<string>(type: "text", nullable: false),
                     ServiceInformation_LineNumber = table.Column<string>(type: "text", nullable: true),
                     ServiceInformation_ServiceNumber = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -318,9 +318,9 @@ namespace DBetter.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TrainCirculations_NormalizedJourneyId",
+                name: "IX_TrainCirculations_TrainId_TimeTablePeriod",
                 table: "TrainCirculations",
-                column: "NormalizedJourneyId",
+                columns: new[] { "TrainId", "TimeTablePeriod" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
