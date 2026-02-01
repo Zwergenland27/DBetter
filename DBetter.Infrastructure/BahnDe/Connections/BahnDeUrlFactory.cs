@@ -14,11 +14,11 @@ public class BahnDeUrlFactory(SuggestionRequest suggestionRequest)
     private const string BaseUrl = "https://www.bahn.de/buchung/fahrplan/suche#";
     
     private Dictionary<string, string> _parameters = [];
-    public string GenericUrl { get; private set; }
 
     public string ForConnection(string ctxRecon)
     {
-        return $"{GenericUrl}&gh={ctxRecon}&cbs=true";
+        var parameters = Build();
+        return $"{BaseUrl}{parameters}&gh={ctxRecon}&cbs=true";
     }
 
     private string Build()
@@ -117,8 +117,8 @@ public class BahnDeUrlFactory(SuggestionRequest suggestionRequest)
     private void SetDestination()
     {
         _parameters["zot"] = "ST";
-        _parameters["so"] = suggestionRequest.Route.Destination.Name.Value;
-        _parameters["soid"] = suggestionRequest.Route.Destination.EvaNumber.AsFuzzy();
+        _parameters["zo"] = suggestionRequest.Route.Destination.Name.Value;
+        _parameters["zoid"] = suggestionRequest.Route.Destination.EvaNumber.AsFuzzy();
     }
 
     private void SetDepartureTime()
