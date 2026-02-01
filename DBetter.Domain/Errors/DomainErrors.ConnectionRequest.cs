@@ -86,5 +86,14 @@ public static partial class DomainErrors
                     "The transfer time cannot be more than 43 minutes");
             }
         }
+
+        public static class ConnectionResults
+        {
+            public static Error NotSuggested => Error.NotFound("ConnectionRequests.ConnectionResults.NotSuggested",
+                "The connection request has not suggested the connection");
+
+            public static Error NothingFound => Error.NotFound("ConnectionRequests.ConnectionResults.NothingFound",
+                "No connection could be found for the request");
+        }
     }
 }

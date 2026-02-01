@@ -1,13 +1,12 @@
+using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Shared;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
-using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.Snapshots;
-using DBetter.Domain.TrainRuns.ValueObjects;
 
-namespace DBetter.Application.Requests.Dtos;
+namespace DBetter.Application.Connections.Dtos;
 
 public record ConnectionDto
 {

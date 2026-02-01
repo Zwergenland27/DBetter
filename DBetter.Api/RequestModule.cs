@@ -2,11 +2,14 @@ using System.Security.Claims;
 using CleanDomainValidation.Application;
 using CleanMediator;
 using DBetter.Application.Requests;
+using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.Requests.IncreaseTransferTime;
 using DBetter.Application.Requests.UpsertRequest;
 using DBetter.Contracts.Requests.CreateRequest;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Parameters;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
+using DBetter.Contracts.Requests.Queries.GetWithIncreasedTransferTime;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 
 namespace DBetter.Api;
@@ -62,7 +65,7 @@ public static class RequestModule
                 return Results.Ok(result);
             });
 
-        }).WithName("GetEarlierSuggestions")
+        }).WithName("GetSuggestions")
         .Produces<List<ConnectionResponse>>()
         .WithOpenApi();
         
@@ -76,7 +79,7 @@ public static class RequestModule
                 var userId = userIdClaim?.Value;
             
                 var query = Builder<GetConnectionSuggestionsQuery>
-                    .WithName("Request.GetSuggestions")
+                    .WithName("Request.GetEarlierSuggestions")
                     .BindParameters(new GetSuggestionsDto())
                     .MapParameter(r => r.Id, id)
                     .MapParameter(r => r.UserId, userId)
@@ -88,7 +91,7 @@ public static class RequestModule
                     return Results.Ok(result);
                 });
 
-            }).WithName("GetLaterSuggestions")
+            }).WithName("GetEarlierSuggestions")
             .Produces<List<ConnectionResponse>>()
             .WithOpenApi();
         app.MapGet("requests/{id}/suggestions/later", async (
@@ -101,7 +104,7 @@ public static class RequestModule
                 var userId = userIdClaim?.Value;
             
                 var query = Builder<GetConnectionSuggestionsQuery>
-                    .WithName("Request.GetSuggestions")
+                    .WithName("Request.GetLaterSuggestions")
                     .BindParameters(new GetSuggestionsDto())
                     .MapParameter(r => r.Id, id)
                     .MapParameter(r => r.UserId, userId)
@@ -113,8 +116,68 @@ public static class RequestModule
                     return Results.Ok(result);
                 });
 
-            }).WithName("GetSuggestions")
+            }).WithName("GetLaterSuggestions")
             .Produces<List<ConnectionResponse>>()
             .WithOpenApi();
+        
+        app.MapGet("requests/{requestId}/suggestions/{connectionId}/transfers/{transferId}/arriveEarlier", async (
+                string requestId,
+                string connectionId,
+                byte transferId,
+                ClaimsPrincipal user,
+                IMediator mediator) =>
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+
+            var userId = userIdClaim?.Value;
+            
+            var query = Builder<IncreaseTransferTimeQuery>
+                .WithName("Request.IncreaseTransferTime")
+                .BindParameters(new GetWithIncreasedTransferTimeDto())
+                .MapParameter(r => r.UserId, userId)
+                .MapParameter(r => r.ConnectionRequestId, requestId)
+                .MapParameter(r => r.ConnectionId, connectionId)
+                .MapParameter(r => r.TransferId, transferId)
+                .MapParameter(r => r.Mode, nameof(IncreaseTransferTimeMode.ArriveEarlier))
+                .BuildUsing<IncreaseTransferTimeQueryBuilder>();
+
+            return await mediator.HandleQueryAsync(query, (ConnectionResponse result) =>
+            {
+                return Results.Ok(result);
+            });
+        }).WithName("IncreaseTransferTime.ArriveEarlier")
+        .Produces<ConnectionResponse>()
+        .WithOpenApi();
+        
+        app.MapGet("requests/{requestId}/suggestions/{connectionId}/transfers/{transferId}/departLater", async (
+                string requestId,
+                string connectionId,
+                byte transferId,
+                ClaimsPrincipal user,
+                IMediator mediator) =>
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+
+                var userId = userIdClaim?.Value;
+            
+                var query = Builder<IncreaseTransferTimeQuery>
+                    .WithName("Request.IncreaseTransferTime")
+                    .BindParameters(new GetWithIncreasedTransferTimeDto())
+                    .MapParameter(r => r.UserId, userId)
+                    .MapParameter(r => r.ConnectionRequestId, requestId)
+                    .MapParameter(r => r.ConnectionId, connectionId)
+                    .MapParameter(r => r.TransferId, transferId)
+                    .MapParameter(r => r.Mode, nameof(IncreaseTransferTimeMode.DepartLater))
+                    .BuildUsing<IncreaseTransferTimeQueryBuilder>();
+
+                return await mediator.HandleQueryAsync(query, (ConnectionResponse result) =>
+                {
+                    return Results.Ok(result);
+                });
+            }).WithName("IncreaseTransferTime.DepartLater")
+            .Produces<ConnectionResponse>()
+            .WithOpenApi();
+        
+        
     }
 }

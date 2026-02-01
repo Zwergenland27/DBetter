@@ -1,3 +1,5 @@
+using DBetter.Application.Requests.Dtos;
+using DBetter.Application.Requests.IncreaseTransferTime;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;

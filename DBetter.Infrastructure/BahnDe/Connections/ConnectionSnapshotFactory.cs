@@ -1,5 +1,7 @@
+using DBetter.Application.Connections.Dtos;
 using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.Requests.IncreaseTransferTime;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
@@ -8,24 +10,21 @@ using DBetter.Infrastructure.BahnDe.Shared;
 
 namespace DBetter.Infrastructure.BahnDe.Connections;
 
-public class ConnectionSnapshotFactory(SuggestionRequest request, Fahrplan fahrplan)
+public class ConnectionSnapshotFactory
 {
-    private BahnDeUrlFactory _urlFactory = new(request);
+    private readonly BahnDeUrlFactory _urlFactory;
 
-    public SuggestionResponse ExtractSnapshot()
+    public ConnectionSnapshotFactory(SuggestionRequest request)
     {
-        var earlierToken = fahrplan.VerbindungReference.Earlier;
-        var laterToken = fahrplan.VerbindungReference.Later;
-        
-        return new SuggestionResponse
-        {
-            Connections = fahrplan.Verbindungen.Select(ExtractConnectionSnapshot).ToList(),
-            EarlierRef = earlierToken is null ? null : PaginationReference.Create(earlierToken),
-            LaterRef = laterToken is null ? null : PaginationReference.Create(laterToken)
-        };
+        _urlFactory = new(request);
     }
 
-    private ConnectionDto ExtractConnectionSnapshot(Verbindung verbindung)
+    public ConnectionSnapshotFactory(IncreaseTransferTimeRequest request)
+    {
+        _urlFactory = new(request.OriginalRequest);
+    }
+
+    public ConnectionDto ExtractConnectionSnapshot(Verbindung verbindung)
     {
         List<SegmentDto> segments = [];
 

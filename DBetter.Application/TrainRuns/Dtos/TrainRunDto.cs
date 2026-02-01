@@ -1,3 +1,4 @@
+using DBetter.Application.Connections.Dtos;
 using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Shared;
 using DBetter.Domain.PassengerInformationManagement;

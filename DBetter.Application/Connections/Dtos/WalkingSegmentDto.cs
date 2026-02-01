@@ -1,6 +1,6 @@
-namespace DBetter.Application.Requests.Dtos;
+namespace DBetter.Application.Connections.Dtos;
 
-public record WalkingSegmentDto : SegmentDto
+public record WalkingSegmentDto : TransferSegmentDto
 {
     public required int Distance { get; init; }
     

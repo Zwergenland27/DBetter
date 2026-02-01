@@ -13,6 +13,18 @@ public record MeansOfTransport(
     bool Busses,
     bool Boats)
 {
+    public MeansOfTransport(MeansOfTransport other)
+    {
+        HighSpeedTrains = other.HighSpeedTrains;
+        FastTrains = other.FastTrains;
+        RegionalTrains = other.RegionalTrains;
+        SuburbanTrains = other.SuburbanTrains;
+        UndergroundTrains = other.UndergroundTrains;
+        Trams = other.Trams;
+        Busses = other.Busses;
+        Boats = other.Boats;
+    }
+    
     public bool AnySelected => HighSpeedTrains || FastTrains || RegionalTrains || SuburbanTrains || UndergroundTrains ||
                                Trams || Busses || Boats;
 
@@ -29,5 +41,18 @@ public record MeansOfTransport(
         if(Boats) selectedCategories.Add(TransportCategory.Boat);
         
         return selectedCategories;
+    }
+
+    public MeansOfTransport Combine(MeansOfTransport other)
+    {
+        return new MeansOfTransport(
+            HighSpeedTrains || other.HighSpeedTrains,
+            FastTrains || other.FastTrains,
+            RegionalTrains || other.RegionalTrains,
+            SuburbanTrains || other.SuburbanTrains,
+            UndergroundTrains || other.UndergroundTrains,
+            Trams || other.Trams,
+            Busses || other.Busses,
+            Boats || other.Boats);
     }
 }

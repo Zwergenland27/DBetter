@@ -1,8 +1,12 @@
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using DBetter.Application;
+using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.Requests.IncreaseTransferTime;
 using DBetter.Domain.ConnectionRequests.Entities;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.Connections.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
@@ -11,18 +15,13 @@ namespace DBetter.Infrastructure.BahnDe.Connections;
 public interface IConnectionRequestFactory
 {
     ReiseAnfrage Build();
-    TeilstreckeAnfrage BuildWithIncreasedTransferTime(string ctxRecon);
+    TeilstreckeAnfrage BuildWithIncreasedTransferTime(string ctxRecon, FixedSubConnection fixedSubConnection, IncreaseTransferTimeMode mode);
 }
 
 public class ConnectionRequestFactory
     : IConnectionRequestFactory
 {
-    private record IncreasedTransferTimeParameters(string CtxRecon);
-
-    private IncreasedTransferTimeParameters _increasedTransferTimeParameters = null!;
-
-
-    private SuggestionRequest _suggestionRequest;
+    private readonly SuggestionRequest _suggestionRequest;
 
     private ConnectionRequestFactory(SuggestionRequest suggestionRequest)
     {
@@ -57,10 +56,23 @@ public class ConnectionRequestFactory
         };;
     }
 
-    public TeilstreckeAnfrage BuildWithIncreasedTransferTime(string ctxRecon)
+    public TeilstreckeAnfrage BuildWithIncreasedTransferTime(string ctxRecon, FixedSubConnection fixedSubConnection, IncreaseTransferTimeMode mode)
     {
-        _increasedTransferTimeParameters = new IncreasedTransferTimeParameters(ctxRecon);
-        throw new NotImplementedException();
+        return new TeilstreckeAnfrage
+        {
+            Klasse = Klasse.GetAliasFromComfortClass(_suggestionRequest.ComfortClass),
+            AnkunftSuche = GetIncreasedTransferTimeSearchMode(mode),
+            BikeCarriage = _suggestionRequest.AnyBikes,
+            FixedTeilstrecke = MapToFixedTeilstrecke(fixedSubConnection),
+            MaxUmstiege = _suggestionRequest.Route.MaxTransfers.Value,
+            NurDeutschlandTicketVerbindungen = _suggestionRequest.DeutschlandTicketConnectionsOnly,
+            OriginalCtxRecon = ctxRecon,
+            Produktgattungen = ToProduktgattungen(fixedSubConnection.MeansOfTransport),
+            Reisende = GetPassengers(),
+            SchnelleVerbindungen = _suggestionRequest.FastConnectionsOnly,
+            Zwischenhalte = GetStopovers(),
+            SitzplatzOnly = _suggestionRequest.SeatReservationOnly
+        };
     }
     
     private string GetRequestTime()
@@ -91,6 +103,33 @@ public class ConnectionRequestFactory
         }
         
         throw new UnreachableException("DepartureTime and ArrivalTime of request object are not set!");
+    }
+
+    private string GetIncreasedTransferTimeSearchMode(IncreaseTransferTimeMode mode)
+    {
+        return mode switch
+        {
+            IncreaseTransferTimeMode.ArriveEarlier => AnkunftSuche.Arrival,
+            IncreaseTransferTimeMode.DepartLater => AnkunftSuche.Departure,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    private FixedTeilstrecke MapToFixedTeilstrecke(FixedSubConnection fixedSubConnection)
+    {
+        return new FixedTeilstrecke
+        {
+            Begin = new TeilstreckenStop
+            {
+                ExtId = fixedSubConnection.StartEvaNumber.Value,
+                Zeitpunkt = fixedSubConnection.StartTime.ToBahnTime(),
+            },
+            End = new TeilstreckenStop
+            {
+                ExtId = fixedSubConnection.EndEvaNumber.Value,
+                Zeitpunkt = fixedSubConnection.EndTime.ToBahnTime(),
+            }
+        };
     }
 
     private List<Reisender> GetPassengers()

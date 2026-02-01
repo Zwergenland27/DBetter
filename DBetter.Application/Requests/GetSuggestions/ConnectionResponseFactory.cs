@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices.ComTypes;
+using DBetter.Application.Connections.Dtos;
 using DBetter.Application.Requests.Dtos;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.Connections;
@@ -16,6 +17,8 @@ public class ConnectionResponseFactory(
     List<Station> stations,
     List<PassengerInformation> passengerInformation)
 {
+
+    private int _transferIndex = 0;
     public ConnectionResponse MapToResponse(ConnectionDto dto)
     {
         var segments = dto.Segments.Select(MapToResponse).ToList();
@@ -26,6 +29,7 @@ public class ConnectionResponseFactory(
         if (firstSegment is WalkingSegmentResponse)
         {
             differentOrigin = true;
+            _transferIndex++;
             segments.Remove(firstSegment);
         }
         var lastSegment = segments.Last();
@@ -52,27 +56,29 @@ public class ConnectionResponseFactory(
         return dto switch
         {
             TransferSegmentDto transferSegmentSnapshot => MapToTransferSegmentResponse(transferSegmentSnapshot),
-            TransportSegmentDto transportSegmentSnapshot => MapToTransferSegmentResponse(transportSegmentSnapshot),
-            WalkingSegmentDto walkingSegmentSnapshot => MapToWalkingSegmentResponse(walkingSegmentSnapshot),
+            TransportSegmentDto transportSegmentSnapshot => MapToTransportSegmentResponse(transportSegmentSnapshot),
             _ => throw new ArgumentOutOfRangeException(nameof(dto))
-        };
-    }
-
-    private WalkingSegmentResponse MapToWalkingSegmentResponse(WalkingSegmentDto dto)
-    {
-        return new WalkingSegmentResponse
-        {
-            Distance = dto.Distance,
-            WalkDuration = dto.WalkDuration
         };
     }
 
     private TransferSegmentResponse MapToTransferSegmentResponse(TransferSegmentDto dto)
     {
-        return new TransferSegmentResponse();
+        if (dto is WalkingSegmentDto walkingSegmentDto)
+        {
+            return new WalkingSegmentResponse
+            {
+                TransferId = _transferIndex++,
+                Distance = walkingSegmentDto.Distance,
+                WalkDuration = walkingSegmentDto.WalkDuration,
+            };
+        }
+        return new TransferSegmentResponse
+        {
+            TransferId = _transferIndex++
+        };
     }
 
-    private TransportSegmentResponse MapToTransferSegmentResponse(TransportSegmentDto dto)
+    private TransportSegmentResponse MapToTransportSegmentResponse(TransportSegmentDto dto)
     {
         var originStationEva = dto.JourneyId.OriginEvaNumber;
         var originStationName = stations.FirstOrDefault(station => station.EvaNumber == originStationEva)?.Name;

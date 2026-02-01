@@ -5,5 +5,5 @@ namespace DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 /// </summary>
 public class TransferSegmentResponse : SegmentResponse
 {
-    
+    public required int TransferId { get; init; }
 }
