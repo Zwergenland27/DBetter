@@ -1,6 +1,4 @@
-using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns;
-using DBetter.Domain.TrainRuns.Snapshots;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +20,7 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
                    FROM "TrainRuns" tr
                    JOIN "TrainCirculations" tc ON tr."CirculationId" = tc."Id"
                    WHERE (tc."TrainId", tc."TimeTablePeriod", tr."OperatingDay") IN (
-                       {string.Join(",", compositeIdentifiers.Select(id => $"({id.TrainId.Value}, {id.TimeTablePeriod.Year}, '{id.OperatingDay.Date}')"))}
+                       {string.Join(",", compositeIdentifiers.Select(id => $"({id.TrainId.Value}, {id.TimeTablePeriod.Year}, '{id.OperatingDay.Date.ToString("yyyy-MM-dd")}')"))}
                    )
                    """;
         
