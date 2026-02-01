@@ -14,9 +14,21 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
         return db.TrainRuns.FirstOrDefaultAsync(r => r.Id == id);
     }
 
-    public Task<List<TrainRun>> GetManyAsync(IEnumerable<BahnJourneyId> jouneyIds)
+    public Task<List<TrainRun>> GetManyAsync(IEnumerable<TrainRunCompositeIdentifier> compositeIdentifiers)
     {
-        return db.TrainRuns.Where(tr => jouneyIds.Contains(tr.JourneyId)) .ToListAsync();   
+        
+        var sql = $"""
+                   SELECT tr.*
+                   FROM "TrainRuns" tr
+                   JOIN "TrainCirculations" tc ON tr."CirculationId" = tc."Id"
+                   WHERE (tc."TrainId", tc."TimeTablePeriod", tr."OperatingDay") IN (
+                       {string.Join(",", compositeIdentifiers.Select(id => $"({id.TrainId.Value}, {id.TimeTablePeriod.Year}, '{id.OperatingDay.Date}')"))}
+                   )
+                   """;
+        
+        return db.TrainRuns
+            .FromSqlRaw(sql)
+            .ToListAsync();
     }
 
     public void AddRange(IEnumerable<TrainRun> trainRuns)

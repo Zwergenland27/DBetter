@@ -13,8 +13,9 @@ public record BahnJourneyId(string Value)
     
     public OperatingDay OperatingDay => OperatingDay.Parse(Parse(Value)["DA"]);
 
-    public TimeTableCompositeIdentifier CompositeKey =>
-        TimeTableCompositeIdentifier.Create(TrainId, TimeTablePeriod.FromOperatingDay(OperatingDay));
+    public TimeTableCompositeIdentifier TimeTableCompositeIdentifier => new (TrainId, TimeTablePeriod.FromOperatingDay(OperatingDay));
+    
+    public TrainRunCompositeIdentifier TrainRunCompositeIdentifier => new (TrainId, TimeTablePeriod.FromOperatingDay(OperatingDay), OperatingDay);
     
     private static Dictionary<string, string> Parse(string value)
     {

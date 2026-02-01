@@ -140,7 +140,7 @@ public class ConnectionExtractor(
     {
         if (_journeyIds is null)
             throw new InvalidOperationException("Cannot extract train circulations before journeyIds have been extracted.");
-        ExistingTrainCirculations = await trainCirculationRepository.GetManyAsync(_journeyIds.Select(jid => jid.CompositeKey).Distinct());
+        ExistingTrainCirculations = await trainCirculationRepository.GetManyAsync(_journeyIds.Select(jid => jid.TimeTableCompositeIdentifier).Distinct());
     }
 
     private async Task ExtractTrainRuns()
@@ -148,7 +148,7 @@ public class ConnectionExtractor(
         if (_journeyIds is null)
             throw new InvalidOperationException("Cannot extract train runs before journeyIds have been extracted.");
         
-        ExistingTrainRuns = await trainRunRepository.GetManyAsync(_journeyIds);
+        ExistingTrainRuns = await trainRunRepository.GetManyAsync(_journeyIds.Select(jid => jid.TrainRunCompositeIdentifier).Distinct());
     }
 
     private async Task ExtractPassengerInformation(List<ConnectionDto> connections)
@@ -202,8 +202,8 @@ public class ConnectionExtractor(
         var transportSegments = connectionDto.Segments.OfType<TransportSegmentDto>();
         foreach (var transportSegment in transportSegments)
         {
-            var existingTrainCirculation = ExistingTrainCirculations.FirstOrDefault(tc =>
-                    tc.TrainId == transportSegment.JourneyId.TrainId);
+            var compositeKey = transportSegment.JourneyId.TimeTableCompositeIdentifier;
+            var existingTrainCirculation = ExistingTrainCirculations.FirstOrDefault(tc => tc.TrainId == compositeKey.TrainId && tc.TimeTablePeriod == compositeKey.TimeTablePeriod);
             if (existingTrainCirculation is not null)
             {
                 continue;
