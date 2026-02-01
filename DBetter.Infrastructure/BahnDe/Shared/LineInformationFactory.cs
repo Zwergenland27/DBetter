@@ -41,7 +41,18 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
         }
         else if (_category is TransportCategory.Replacement && splitLineInformation[0] is "Bus")
         {
-            _lineNumber = new LineNumber(splitLineInformation[1]);
+            var lineNumberContent = splitLineInformation[1];
+            var productClass = new string(lineNumberContent.TakeWhile(c => !char.IsDigit(c)).ToArray());
+            var number = new string(lineNumberContent.SkipWhile(c => !char.IsDigit(c)).ToArray());
+
+            if (number is "")
+            {
+                _lineNumber = new LineNumber(lineNumberContent);
+            }
+            else
+            {
+                _lineNumber = new LineNumber($"{productClass} {number}");
+            }
         }
         //InterCity lines that can also be used with regional ticket
         else if (splitLineInformation.Length > 2 && splitLineInformation[0] is "RE" && splitLineInformation[1].StartsWith("IC"))
