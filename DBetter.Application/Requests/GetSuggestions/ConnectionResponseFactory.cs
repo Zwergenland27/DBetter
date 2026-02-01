@@ -21,6 +21,7 @@ public class ConnectionResponseFactory(
     private int _transferIndex = 0;
     public ConnectionResponse MapToResponse(ConnectionDto dto)
     {
+        _transferIndex = 0;
         var segments = dto.Segments.Select(MapToResponse).ToList();
         var differentOrigin = false;
         var differentDestination = false;
