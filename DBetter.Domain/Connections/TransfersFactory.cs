@@ -108,7 +108,7 @@ internal class TransfersFactory(
 
         if (_secondStopoverSegmentIndex is null)
         {
-            return firstStopover!.MeansOfTransportNextSection;
+            return new(firstStopover!.MeansOfTransportNextSection);
         }
 
         if (transferSegmentIndex < _secondStopoverSegmentIndex)
@@ -116,7 +116,7 @@ internal class TransfersFactory(
             return firstStopover!.MeansOfTransportNextSection.Combine(secondStopover!.MeansOfTransportNextSection);
         }
         
-        return secondStopover!.MeansOfTransportNextSection;
+        return new(secondStopover!.MeansOfTransportNextSection);
     }
 
     private int? CalculateStopoverSegmentIndex(Stopover? stopover)
