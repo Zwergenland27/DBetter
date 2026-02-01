@@ -19,7 +19,7 @@ public record SuggestionRequest
     
     public required bool DeutschlandTicketConnectionsOnly { get; init; }
     
-    public bool AllPassengersOwnDeutschlandTicket => Passengers.All(p => p.OwnsDeutschlandTicket);
+    public bool AllPassengersOwnDeutschlandTicket => Passengers.Count > 0 && Passengers.All(p => p.OwnsDeutschlandTicket);
 
     public bool AnyBikes => Passengers.Any(p => p.Bikes > 0);
 
