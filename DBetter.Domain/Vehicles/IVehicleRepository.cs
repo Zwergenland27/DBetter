@@ -1,0 +1,14 @@
+using DBetter.Domain.Vehicles.ValueObjects;
+
+namespace DBetter.Domain.Vehicles;
+
+public interface IVehicleRepository
+{
+    void Add(Vehicle vehicle);
+    
+    Task<Vehicle?> GetAsync(VehicleId vehicleId);
+
+    Task<Vehicle?> FindByConstructionTypeAsync(List<string> coachSequence);
+
+    Task<Vehicle?> FindByCoachType(List<string> coachSequence);
+}

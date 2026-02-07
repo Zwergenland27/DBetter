@@ -5,6 +5,7 @@ using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.Users;
+using DBetter.Domain.Vehicles;
 using DBetter.Infrastructure.OutboxPattern;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,8 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     public DbSet<PassengerInformation> PassengerInformation { get; set; }
     
     public DbSet<TrainCirculation> TrainCirculations { get; set; }
+    
+    public DbSet<Vehicle> Vehicles { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
