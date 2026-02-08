@@ -87,7 +87,9 @@ public class BahnDeUrlFactory(SuggestionRequest suggestionRequest)
         {
             return $"{ArtErmaessigung.None}:{KlasseErmaessigung.GetAliasFromComfortClass(ComfortClass.Unknown)}";
         }
+        
         var uriDiscounts = discounts
+            .Where(d => d.Type is not DiscountType.DeutschlandTicket)
             .Select(GenerateUriDiscount)
             .ToList();
         
