@@ -50,7 +50,7 @@ public class Route : AggregateRoot<RouteId>
 
     public void UpdateFromRoute(List<StopSnapshot> stopSnapshots)
     {
-        var stopIndex = (short) (_stops.OrderBy(s => s.Id).Last().Id.Value + 1);
+        var stopIndex = (short) (_stops.OrderBy(s => s.Id.Value).Last().Id.Value + 1);
         foreach (var stop in stopSnapshots)
         {
             var existingStop = _stops.FirstOrDefault(s => s.StationId == stop.StationId);
@@ -74,7 +74,7 @@ public class Route : AggregateRoot<RouteId>
     
     public void UpdateFromTrainRun(List<StopSnapshot> stopSnapshots)
     {
-        var stopIndex = (short) (_stops.OrderBy(s => s.Id).Last().Id.Value + 1);
+        var stopIndex = (short) (_stops.OrderBy(s => s.Id.Value).Last().Id.Value + 1);
         foreach (var stop in stopSnapshots)
         {
             var existingStop = _stops.FirstOrDefault(s => s.StationId == stop.StationId);
