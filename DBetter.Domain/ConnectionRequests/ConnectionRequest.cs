@@ -28,7 +28,7 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
     
     public ComfortClass ComfortClass { get; private set; }
     
-    public Route Route { get; private set; }
+    public PlannedRoute PlannedRoute { get; private set; }
     
     public PaginationReference? EarlierReference { get; private set; }
     
@@ -45,14 +45,14 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
         DateTime? arrivalTime,
         List<Passenger> passengers,
         ComfortClass comfortClass,
-        Route route) : base(id)
+        PlannedRoute plannedRoute) : base(id)
     {
         OwnerId = ownerId;
         DepartureTime = departureTime;
         ArrivalTime = arrivalTime;
         _passengers = passengers;
         ComfortClass = comfortClass;
-        Route = route;
+        PlannedRoute = plannedRoute;
     }
 
     public static CanFail<ConnectionRequest> Create(
@@ -62,10 +62,10 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
         DateTime? arrivalTime,
         List<Passenger> passengers,
         ComfortClass comfortClass,
-        Route route)
+        PlannedRoute plannedRoute)
     {
         if (departureTime is null && arrivalTime is null) return DomainErrors.ConnectionRequest.NoTimeSpecified;
-        return new ConnectionRequest(id, ownerId, departureTime, arrivalTime, passengers, comfortClass, route);
+        return new ConnectionRequest(id, ownerId, departureTime, arrivalTime, passengers, comfortClass, plannedRoute);
     }
 
     public CanFail UpdateReferences(SuggestionMode suggestionMode, PaginationReference? earlierRef, PaginationReference? laterRef)
@@ -119,13 +119,13 @@ public class ConnectionRequest : AggregateRoot<ConnectionRequestId>
         DateTime? arrivalTime,
         List<Passenger> passengers,
         ComfortClass comfortClass,
-        Route route)
+        PlannedRoute plannedRoute)
     {
         DepartureTime = departureTime;
         ArrivalTime = arrivalTime;
         _passengers = passengers;
         ComfortClass = comfortClass;
-        Route = route;
+        PlannedRoute = plannedRoute;
         
         foreach(var connectionId in _suggestedConnectionIds)
         {

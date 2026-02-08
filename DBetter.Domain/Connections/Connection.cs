@@ -32,9 +32,9 @@ public class Connection : AggregateRoot<ConnectionId>
         ConnectionContextId contextId,
         DateOnly connectionDate,
         List<SegmentSnapshot> segments,
-        Route requestedRoute)
+        PlannedRoute plannedPlannedRoute)
     {
-        var transfersFactory = new TransfersFactory(segments, requestedRoute.MeansOfTransportFirstSection,  requestedRoute.FirstStopover, requestedRoute.SecondStopover);
+        var transfersFactory = new TransfersFactory(segments, plannedPlannedRoute.MeansOfTransportFirstSection,  plannedPlannedRoute.FirstStopover, plannedPlannedRoute.SecondStopover);
         
         return new Connection(ConnectionId.CreateNew(), contextId, connectionDate, transfersFactory.Extract());
     }

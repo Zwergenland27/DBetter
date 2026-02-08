@@ -11,18 +11,18 @@ public static class ParameterExtensions
     {
         List<StationId> stationIds =
         [
-            request.Route.OriginStationId,
-            request.Route.DestinationStationId
+            request.PlannedRoute.OriginStationId,
+            request.PlannedRoute.DestinationStationId
         ];
 
-        if(request.Route.FirstStopover is not null)
+        if(request.PlannedRoute.FirstStopover is not null)
         {
-            stationIds.Add(request.Route.FirstStopover.StationId);
+            stationIds.Add(request.PlannedRoute.FirstStopover.StationId);
         }
 
-        if(request.Route.SecondStopover is not null)
+        if(request.PlannedRoute.SecondStopover is not null)
         {
-            stationIds.Add(request.Route.SecondStopover.StationId);
+            stationIds.Add(request.PlannedRoute.SecondStopover.StationId);
         }
 
         return stationIds;

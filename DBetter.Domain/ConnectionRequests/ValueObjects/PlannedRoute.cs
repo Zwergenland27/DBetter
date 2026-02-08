@@ -4,7 +4,7 @@ using DBetter.Domain.Stations.ValueObjects;
 
 namespace DBetter.Domain.ConnectionRequests.ValueObjects;
 
-public class Route
+public class PlannedRoute
 {
     public StationId OriginStationId  { get; private init; }
     
@@ -20,9 +20,9 @@ public class Route
     
     public TransferTime MinTransferTime { get; private init; }
 
-    private Route(){}
+    private PlannedRoute(){}
 
-    private Route(
+    private PlannedRoute(
         StationId originStationId,
         MeansOfTransport meansOfTransportFirstSection,
         Stopover? firstStopover,
@@ -40,7 +40,7 @@ public class Route
         MinTransferTime = minTransferTime;
     }
 
-    public static CanFail<Route> Create(
+    public static CanFail<PlannedRoute> Create(
         StationId originStationId,
         MeansOfTransport onFirstSection,
         Stopover? firstStopOver,
@@ -49,7 +49,7 @@ public class Route
         TransferAmount maxTransfers,
         TransferTime minTransferTime)
     {
-        CanFail<Route> transferOptionsResult = new ();
+        CanFail<PlannedRoute> transferOptionsResult = new ();
         
         if (firstStopOver is null && secondStopOver is not null)
         {
@@ -63,7 +63,7 @@ public class Route
             transferOptionsResult.Failed(DomainErrors.ConnectionRequest.Route.NoVehicleAllowed);
         }
         
-        transferOptionsResult.Succeeded(new Route(
+        transferOptionsResult.Succeeded(new PlannedRoute(
             originStationId,
             onFirstSection,
             firstStopOver,
