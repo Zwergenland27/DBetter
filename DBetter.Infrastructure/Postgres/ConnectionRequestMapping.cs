@@ -91,7 +91,7 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
         
         builder.Property(o => o.ComfortClass);
 
-        builder.OwnsOne(cr => cr.Route, rb =>
+        builder.OwnsOne(cr => cr.PlannedRoute, rb =>
         {
             rb.Property(r => r.OriginStationId)
                 .HasConversion(

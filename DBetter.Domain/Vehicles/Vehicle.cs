@@ -8,6 +8,8 @@ public class Vehicle : AggregateRoot<VehicleId>
     private List<Coach> _coachSequence;
     
     public string Identifier { get; private set; }
+
+    public int MaxAllowedCouplings { get; private set; } = 3;
     
     public IReadOnlyList<Coach> CoachSequence => _coachSequence.AsReadOnly();
     

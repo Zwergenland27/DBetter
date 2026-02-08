@@ -46,6 +46,11 @@ public class RouteMapping : IEntityTypeConfiguration<Route>
                     id => id.Value,
                     value => new StopId(value));
             
+            sb.Property(s => s.RouteIndex)
+                .HasConversion(
+                    id => id.Value,
+                    value => new StopIndex(value));
+            
             sb.Property(s => s.StationId)
                 .HasConversion(
                     id => id.Value,
