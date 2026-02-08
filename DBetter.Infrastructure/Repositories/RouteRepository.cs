@@ -1,0 +1,25 @@
+using DBetter.Domain.Routes;
+using DBetter.Domain.TrainRuns.ValueObjects;
+using DBetter.Infrastructure.Postgres;
+using Microsoft.EntityFrameworkCore;
+
+namespace DBetter.Infrastructure.Repositories;
+
+public class RouteRepository(DBetterContext db) : IRouteRepository
+{
+    public void AddRange(IEnumerable<Route> routes)
+    {
+        db.AddRange(routes);
+    }
+
+    public Task<Route?> GetAsync(TrainRunId trainRunId)
+    {
+        return db.Routes.FirstOrDefaultAsync(r => r.TrainRunId == trainRunId);
+    }
+
+    public Task<List<Route>> GetManyAsync(IEnumerable<TrainRunId> trainRunIds)
+    {
+        return db.Routes.Where(r => trainRunIds.Contains(r.TrainRunId))
+            .ToListAsync();
+    }
+}

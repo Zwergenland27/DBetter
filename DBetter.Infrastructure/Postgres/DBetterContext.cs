@@ -1,6 +1,7 @@
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
@@ -30,6 +31,8 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     public DbSet<TrainCirculation> TrainCirculations { get; set; }
     
     public DbSet<Vehicle> Vehicles { get; set; }
+    
+    public DbSet<Route> Routes { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

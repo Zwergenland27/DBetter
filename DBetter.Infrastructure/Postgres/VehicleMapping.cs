@@ -21,6 +21,8 @@ public class VehicleMapping : IEntityTypeConfiguration<Vehicle>
 
         builder.Property(x => x.Identifier);
         
+        builder.Property(x => x.MaxAllowedCouplings);
+        
         builder.OwnsMany(x => x.CoachSequence, cb =>
         {
             cb.ToTable("VehicleCoaches");

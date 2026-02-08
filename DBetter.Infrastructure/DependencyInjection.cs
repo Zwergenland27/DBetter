@@ -7,10 +7,12 @@ using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.Users;
+using DBetter.Domain.Vehicles;
 using DBetter.Infrastructure.ApiMarketplace;
 using DBetter.Infrastructure.Authentication;
 using DBetter.Infrastructure.BahnDe;
@@ -56,6 +58,8 @@ public static class DependencyInjection
         services.AddScoped<IStationRepository, StationRepository>();
         services.AddScoped<IConnectionRequestRepository, ConnectionRequestRepository>();
         services.AddScoped<IConnectionRepository, ConnectionRepository>();
+        services.AddScoped<IVehicleRepository, VehicleRepository>();
+        services.AddScoped<IRouteRepository, RouteRepository>();
         return services;
     }
 }
