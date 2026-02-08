@@ -8,6 +8,7 @@ using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Errors;
 using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
@@ -20,6 +21,7 @@ public class IncreaseTransferTimeQueryHandler(
     IConnectionRepository connectionRepository,
     IConnectionRequestRepository connectionRequestRepository,
     ITrainCirculationRepository trainCirculationRepository,
+    IRouteRepository routeRepository,
     ITrainRunRepository trainRunRepository,
     IPassengerInformationRepository passengerInformationRepository,
     IStationRepository stationRepository) : QueryHandlerBase<IncreaseTransferTimeQuery, ConnectionResponse>
@@ -44,7 +46,7 @@ public class IncreaseTransferTimeQueryHandler(
         var transfer = connection.Transfers.FirstOrDefault(t => t.Id == query.TransferIndex);
         if (transfer is null) return DomainErrors.Connection.Transfer.Index.NotFound;
 
-        var requestedStationIds = connectionRequest.Route.GetRequestedStationIds();
+        var requestedStationIds = connectionRequest.PlannedRoute.GetRequestedStationIds();
         requestedStationIds.AddRange(connection.GetRequestedStationIds());
         
         var requestedStations = await stationRepository.GetManyAsync(requestedStationIds);
@@ -57,17 +59,19 @@ public class IncreaseTransferTimeQueryHandler(
         var extractor = new ConnectionExtractor(
                 trainCirculationRepository,
                 trainRunRepository,
+                routeRepository,
                 stationRepository,
                 passengerInformationRepository)
             .ForConnections([foundConnection]);
         
         await extractor.Extract();
-        var result = extractor.ExtractMissingInformation(connectionRequest.Route);
+        var result = extractor.ExtractMissingInformation(connectionRequest.PlannedRoute);
         
         passengerInformationRepository.AddRange(result.PassengerInformationToCreate);
         trainCirculationRepository.AddRange(result.TrainCirculationsToCreate);
         connectionRepository.AddRange(result.FoundConnections);
         trainRunRepository.AddRange(result.TrainRunsToCreate);
+        routeRepository.AddRange(result.RoutesToCreate);
         stationRepository.AddRange(result.StationsToCreate);
         
         connectionRequest.AddSuggestedConnections(result.FoundConnections);

@@ -28,7 +28,7 @@ public class UpsertConnectionRequestCommandHandler(
                 request.ArrivalTime,
                 request.Passengers,
                 request.ComfortClass,
-                request.Route);
+                request.PlannedRoute);
             if (newRequestResult.HasFailed) return newRequestResult.Errors;
             
             connectionRequestRepository.Add(newRequestResult.Value);
@@ -40,7 +40,7 @@ public class UpsertConnectionRequestCommandHandler(
                 request.ArrivalTime,
                 request.Passengers,
                 request.ComfortClass,
-                request.Route);
+                request.PlannedRoute);
         }
         await unitOfWork.CommitAsync(cancellationToken);
         

@@ -5,22 +5,22 @@ namespace DBetter.Application.Requests.GetSuggestions;
 
 public static class RouteExtensions
 {
-    public static List<StationId> GetRequestedStationIds(this Route route)
+    public static List<StationId> GetRequestedStationIds(this PlannedRoute plannedRoute)
     {
         var stationIds = new List<StationId>
         {
-            route.OriginStationId,
-            route.DestinationStationId
+            plannedRoute.OriginStationId,
+            plannedRoute.DestinationStationId
         };
 
-        if (route.FirstStopover is not null)
+        if (plannedRoute.FirstStopover is not null)
         {
-            stationIds.Add(route.FirstStopover.StationId);
+            stationIds.Add(plannedRoute.FirstStopover.StationId);
         }
 
-        if (route.SecondStopover is not null)
+        if (plannedRoute.SecondStopover is not null)
         {
-            stationIds.Add(route.SecondStopover.StationId);
+            stationIds.Add(plannedRoute.SecondStopover.StationId);
         }
 
         return stationIds.Distinct().ToList();

@@ -40,7 +40,7 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
             .Required()
             .Map(p => p.ComfortClass, DomainErrors.Shared.ComfortClass.Invalid);
         
-        var route = builder.ClassProperty(r => r.Route)
+        var route = builder.ClassProperty(r => r.PlannedRoute)
             .Required()
             .MapComplex(p => p.Route, MapRoute);
         
@@ -102,8 +102,8 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
         return builder.Build(() => Passenger.Create(id, userId, name, birthday, age, bikes, dogs, discounts.ToList()));
     }
 
-    private ValidatedRequiredProperty<Route> MapRoute(
-        RequiredPropertyBuilder<ConnectionRouteDto, Route> builder)
+    private ValidatedRequiredProperty<PlannedRoute> MapRoute(
+        RequiredPropertyBuilder<ConnectionRouteDto, PlannedRoute> builder)
     {
         var originStationId = builder.ClassProperty(r => r.OriginStationId)
             .Required()
@@ -133,7 +133,7 @@ public class CreateConnectionRequestCommandBuilder : IRequestBuilder<ConnectionR
             .Required()
             .Map(p => p.MinTransferTime, TransferTime.Create);
         
-        return builder.Build(() => Route.Create(
+        return builder.Build(() => PlannedRoute.Create(
             originStationId,
             meansOfTransportFirstSection,
             firstStopover,
@@ -215,4 +215,4 @@ public record UpsertConnectionRequestCommand(
     DateTime? ArrivalTime,
     List<Passenger> Passengers,
     ComfortClass ComfortClass,
-    Route Route) : ICommand<List<ConnectionResponse>>;
+    PlannedRoute PlannedRoute) : ICommand<List<ConnectionResponse>>;

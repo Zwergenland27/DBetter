@@ -1,10 +1,13 @@
 using CleanDomainValidation.Domain;
 using CleanMediator.Commands;
 using DBetter.Application.Abstractions.Persistence;
+using DBetter.Application.Connections.Dtos;
 using DBetter.Application.TrainRuns.Dtos;
 using DBetter.Contracts.TrainRuns.Queries.Get.Results;
 using DBetter.Domain.Errors;
 using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
@@ -16,6 +19,7 @@ public class GetTrainRunQueryHandler(
     IUnitOfWork unitOfWork,
     IStationRepository stationRepository,
     ITrainRunRepository trainRunRepository,
+    IRouteRepository routeRepository,
     ITrainCirculationRepository trainCirculationRepository,
     IExternalTrainRunProvider trainRunProvider,
     IPassengerInformationRepository passengerInformationRepository) : CommandHandlerBase<GetTrainRunQuery, TrainRunResponse>
@@ -28,9 +32,11 @@ public class GetTrainRunQueryHandler(
     {
         await unitOfWork.BeginTransaction(cancellationToken);
         var trainRun = await trainRunRepository.GetAsync(request.Id);
-
         if (trainRun is null) return DomainErrors.TrainRun.NotFound(request.Id);
 
+        var route = await routeRepository.GetAsync(request.Id);
+        if (route is null) throw new InvalidDataException("No route exists for the train run");
+        
         var trainCirculation = await trainCirculationRepository.GetAsync(trainRun.CirculationId);
         if (trainCirculation is null) throw new InvalidDataException("No train circulation exists for the train run");
         
@@ -48,6 +54,8 @@ public class GetTrainRunQueryHandler(
         
         trainRun.Update(trainRunDto.BikeCarriage);
         trainRun.Update(trainRunDto.Catering);
+        
+        route.UpdateFromTrainRun(ExtractStops(trainRunDto.Stops));
         
         var passengerInformationSnapshots = trainRunDto.PassengerInformation
             .Select(pimDto =>
@@ -95,5 +103,23 @@ public class GetTrainRunQueryHandler(
             _passengerInformationToCreate.Add(newInfoMessage);
             _existingPassengerInformation.Add(newInfoMessage);
         }
+    }
+    
+    private List<StopSnapshot> ExtractStops(List<StopDto> stopDtos)
+    {
+        var stops =  new List<StopSnapshot>();
+
+        foreach (var stop in stopDtos)
+        {
+            var station = _existingStations.First(s => s.EvaNumber == stop.EvaNumber);
+            stops.Add(new StopSnapshot(
+                stop.TrainRunIndex,
+                station.Id,
+                stop.ArrivalTime,
+                stop.DepartureTime,
+                stop.Attributes));
+        }
+        
+        return stops;
     }
 }

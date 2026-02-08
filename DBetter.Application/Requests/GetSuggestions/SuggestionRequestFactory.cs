@@ -40,7 +40,7 @@ public class SuggestionRequestFactory(
 
     private SuggestionRequestRoute MapRoute()
     {
-        var route = connectionRequest.Route;
+        var route = connectionRequest.PlannedRoute;
         return new SuggestionRequestRoute
         {
             Origin = requestedStations.First(station => station.Id == route.OriginStationId),

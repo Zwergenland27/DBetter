@@ -6,6 +6,7 @@ using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
 using DBetter.Domain.Errors;
 using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
@@ -19,6 +20,7 @@ public class GetConnectionSuggestionsQueryHandler(
     IConnectionRepository connectionRepository,
     IStationRepository stationRepository,
     ITrainRunRepository trainRunRepository,
+    IRouteRepository routeRepository,
     ITrainCirculationRepository trainCirculationRepository,
     IPassengerInformationRepository passengerInformationRepository) : QueryHandlerBase<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
 {
@@ -32,7 +34,7 @@ public class GetConnectionSuggestionsQueryHandler(
         
         if(connectionRequest.OwnerId != request.UserId) return DomainErrors.ConnectionRequest.Unauthorized;
 
-        var requestedStations = await stationRepository.GetManyAsync(connectionRequest.Route.GetRequestedStationIds());
+        var requestedStations = await stationRepository.GetManyAsync(connectionRequest.PlannedRoute.GetRequestedStationIds());
         
         var suggestionRequestFactory = new SuggestionRequestFactory(connectionRequest, requestedStations);
         
@@ -42,17 +44,19 @@ public class GetConnectionSuggestionsQueryHandler(
         var extractor = new ConnectionExtractor(
                 trainCirculationRepository,
                 trainRunRepository,
+                routeRepository,
                 stationRepository,
                 passengerInformationRepository)
             .ForConnections(suggestionsDto.Connections);
         
         await extractor.Extract();
-        var result = extractor.ExtractMissingInformation(connectionRequest.Route);
+        var result = extractor.ExtractMissingInformation(connectionRequest.PlannedRoute);
         
         passengerInformationRepository.AddRange(result.PassengerInformationToCreate);
         trainCirculationRepository.AddRange(result.TrainCirculationsToCreate);
         connectionRepository.AddRange(result.FoundConnections);
         trainRunRepository.AddRange(result.TrainRunsToCreate);
+        routeRepository.AddRange(result.RoutesToCreate);
         stationRepository.AddRange(result.StationsToCreate);
         
         connectionRequest.AddSuggestedConnections(result.FoundConnections);

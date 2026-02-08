@@ -4,6 +4,8 @@ using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainCirculations.ValueObjects;
@@ -15,14 +17,17 @@ namespace DBetter.Application.Requests;
 public class ConnectionExtractor(
     ITrainCirculationRepository trainCirculationRepository,
     ITrainRunRepository trainRunRepository,
+    IRouteRepository routeRepository,
     IStationRepository stationRepository,
     IPassengerInformationRepository passengerInformationRepository)
 {
-
+    
     public List<TrainCirculation>? ExistingTrainCirculations;
     public List<TrainCirculation>? TrainCirculationsToCreate;
     public List<TrainRun>? ExistingTrainRuns;
     public List<TrainRun>? TrainRunsToCreate;
+    public List<Route>? ExistingRoutes;
+    public List<Route>? RoutesToCreate;
     public List<Station>? ExistingStations;
     public List<Station>? StationsToCreate;
     public List<PassengerInformation>? ExistingPassengerInformation;
@@ -47,10 +52,11 @@ public class ConnectionExtractor(
         await ExtractStations(_connections);
         await ExtractTrainCirculations();
         await ExtractTrainRuns();
+        await ExtractRoutes();
         await ExtractPassengerInformation(_connections);
     }
 
-    public ConnectionExtractorResult ExtractMissingInformation(Route route)
+    public ConnectionExtractorResult ExtractMissingInformation(PlannedRoute route)
     {
         if (_connections is null)
             throw new InvalidOperationException("Cannot extract data before connections have been set");
@@ -59,8 +65,8 @@ public class ConnectionExtractor(
         {
             ExtractMissingPassengerInformation(connection);
             ExtractMissingTrainCirculations(connection);
-            ExtractMissingTrainRuns(connection);
             ExtractMissingStations(connection);
+            ExtractMissingTrainRunsWithRoutes(connection);
             ExtractMissingConnection(connection, route);
         }
 
@@ -68,6 +74,8 @@ public class ConnectionExtractor(
             throw new InvalidOperationException("Train circulations have not been extracted");
         if (TrainRunsToCreate is null)
             throw new InvalidOperationException("Train runs have not been extracted");
+        if( RoutesToCreate is null)
+            throw new InvalidOperationException("Routes have not been extracted");
         if (PassengerInformationToCreate is null)
             throw new InvalidOperationException("Passenger information have not been extracted");
         if (StationsToCreate is null)
@@ -78,6 +86,7 @@ public class ConnectionExtractor(
         return new ConnectionExtractorResult(
             TrainCirculationsToCreate,
             TrainRunsToCreate,
+            RoutesToCreate,
             PassengerInformationToCreate,
             StationsToCreate,
             FoundConnections);
@@ -151,6 +160,14 @@ public class ConnectionExtractor(
         ExistingTrainRuns = await trainRunRepository.GetManyAsync(_journeyIds.Select(jid => jid.TrainRunCompositeIdentifier).Distinct());
     }
 
+    private async Task ExtractRoutes()
+    {
+        if(ExistingTrainRuns is null)
+            throw new InvalidOperationException("Cannot extract routes before trainRuns have been extracted.");
+
+        ExistingRoutes = await routeRepository.GetManyAsync(ExistingTrainRuns.Select(tr => tr.Id));
+    }
+
     private async Task ExtractPassengerInformation(List<ConnectionDto> connections)
     {
         if(ExistingTrainRuns is null) throw new InvalidOperationException("Cannot extract passenger information before train runs have been extracted.");
@@ -215,7 +232,7 @@ public class ConnectionExtractor(
             TrainCirculationsToCreate.Add(newTrainCirculation);
         }
     }
-    private void ExtractMissingTrainRuns(ConnectionDto connectionDto)
+    private void ExtractMissingTrainRunsWithRoutes(ConnectionDto connectionDto)
     {
         if (ExistingTrainRuns is null)
             throw new InvalidOperationException(
@@ -224,11 +241,16 @@ public class ConnectionExtractor(
             throw new InvalidOperationException(
                 "Cannot extract missing train runs before existing AND missing train circulation have been extracted.");
 
+        if (ExistingRoutes is null)
+            throw new InvalidOperationException(
+                "Cannot extract missing train runs before existing routes have been extracted.");
+
         if (ExistingPassengerInformation is null || PassengerInformationToCreate is null)
             throw new InvalidOperationException(
                 "Cannot extract missing train runs before existing AND missing passenger information have been extracted.");
         
         TrainRunsToCreate ??= [];
+        RoutesToCreate ??= [];
         
         var transportSegments = connectionDto.Segments.OfType<TransportSegmentDto>();
         foreach (var transportSegment in transportSegments)
@@ -253,6 +275,9 @@ public class ConnectionExtractor(
                 existingTrainRun.Update(transportSegment.BikeCarriage);
                 existingTrainRun.Update(transportSegment.Catering);
                 existingTrainRun.ReconcilePassengerInformation(passengerInformationSnapshots);
+                
+                var existingRoute = ExistingRoutes.First(r => r.TrainRunId == existingTrainRun.Id);
+                existingRoute.UpdateFromRoute(ExtractStops(transportSegment.Stops));
                 continue;
             }
 
@@ -265,7 +290,34 @@ public class ConnectionExtractor(
             
             TrainRunsToCreate.Add(newTrainRun);
             ExistingTrainRuns.Add(newTrainRun);
+            
+            var newRoute = Route.CreateFromRoute(
+                newTrainRun.Id,
+                ExtractStops(transportSegment.Stops));
+            
+            RoutesToCreate.Add(newRoute);
+            ExistingRoutes.Add(newRoute);
         }
+    }
+
+    private List<StopSnapshot> ExtractStops(List<StopDto> stopDtos)
+    {
+        if(ExistingStations is null)
+            throw new InvalidOperationException("Cannot extract stops before existing stations have been extracted.");
+        var stops =  new List<StopSnapshot>();
+
+        foreach (var stop in stopDtos)
+        {
+            var station = ExistingStations.First(s => s.EvaNumber == stop.EvaNumber);
+            stops.Add(new StopSnapshot(
+                stop.TrainRunIndex,
+                station.Id,
+                stop.ArrivalTime,
+                stop.DepartureTime,
+                stop.Attributes));
+        }
+        
+        return stops;
     }
 
     private void ExtractMissingStations(ConnectionDto connectionDto)
@@ -286,7 +338,7 @@ public class ConnectionExtractor(
         }
     }
 
-    private void ExtractMissingConnection(ConnectionDto connectionDto, Route route)
+    private void ExtractMissingConnection(ConnectionDto connectionDto, PlannedRoute route)
     {
         if (ExistingStations is null)
             throw new InvalidOperationException(
