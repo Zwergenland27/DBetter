@@ -1,4 +1,5 @@
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.Routes.Events;
 using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Routes.Stops;
 using DBetter.Domain.Routes.ValueObjects;
@@ -91,6 +92,7 @@ public class Route : AggregateRoot<RouteId>
         if (Source is RouteSource.Historical or RouteSource.Connection)
         {
             Source = RouteSource.TrainRun;
+            RaiseDomainEvent(new RouteInitializedEvent(Id));
         }
         
         LastUpdatedAt = DateTime.UtcNow;
