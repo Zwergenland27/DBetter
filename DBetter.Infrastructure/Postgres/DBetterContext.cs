@@ -4,6 +4,7 @@ using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
+using DBetter.Domain.TrainCompositions;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.Users;
 using DBetter.Domain.Vehicles;
@@ -33,6 +34,8 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     public DbSet<Vehicle> Vehicles { get; set; }
     
     public DbSet<Route> Routes { get; set; }
+    
+    public DbSet<TrainComposition> TrainCompositions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
