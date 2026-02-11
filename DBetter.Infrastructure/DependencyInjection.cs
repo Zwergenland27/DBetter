@@ -10,6 +10,7 @@ using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
+using DBetter.Domain.TrainCompositions;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.Users;
 using DBetter.Domain.Vehicles;
@@ -60,6 +61,7 @@ public static class DependencyInjection
         services.AddScoped<IConnectionRepository, ConnectionRepository>();
         services.AddScoped<IVehicleRepository, VehicleRepository>();
         services.AddScoped<IRouteRepository, RouteRepository>();
+        services.AddScoped<ITrainCompositionRepository, TrainCompositionRepository>();
         return services;
     }
 }
