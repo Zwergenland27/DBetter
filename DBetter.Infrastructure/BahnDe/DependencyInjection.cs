@@ -1,8 +1,10 @@
 using System.Net;
 using DBetter.Application.Requests;
+using DBetter.Application.TrainCompositions;
 using DBetter.Application.TrainRuns;
 using DBetter.Infrastructure.BahnDe.Connections;
 using DBetter.Infrastructure.BahnDe.Stations;
+using DBetter.Infrastructure.BahnDe.TrainCompositions;
 using DBetter.Infrastructure.BahnDe.TrainRuns;
 using DBetter.Infrastructure.Monitoring;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +37,13 @@ public static class DependencyInjection
                 AutomaticDecompression = DecompressionMethods.GZip
             })
             .AddHttpMessageHandler<MetricHttpHandler>();
+
+        services.AddHttpClient<IExternalTrainCompositionProvider, BahnDeTrainCompositionProvider>(client =>
+                client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip
+            });
         return services;
     }
 }
