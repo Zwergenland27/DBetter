@@ -13,4 +13,5 @@ public interface IStationRepository
     Task<List<Station>> GetManyAsync(IEnumerable<StationId> stationIds);
     
     void AddRange(IEnumerable<Station> stations);
+    Task<List<Station>> FindManyAsync(IEnumerable<StationName> names);
 }

@@ -31,4 +31,9 @@ public class StationRepository(DBetterContext db) : IStationRepository
     {
         db.Stations.AddRange(stations);
     }
+
+    public Task<List<Station>> FindManyAsync(IEnumerable<StationName> names)
+    {
+        return db.Stations.Where(s => names.Contains(s.Name)).ToListAsync();
+    }
 }
