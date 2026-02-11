@@ -17,6 +17,11 @@ public class VehicleRepository(DBetterContext db) : IVehicleRepository
         return db.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId);
     }
 
+    public Task<List<Vehicle>> GetManyAsync(IEnumerable<VehicleId> vehicleIds)
+    {
+        return db.Vehicles.Where(v => vehicleIds.Contains(v.Id)).ToListAsync();
+    }
+
     public async Task<Vehicle?> FindByConstructionTypeAsync(List<string> coachSequence)
     {
         var existingVehicles = await db.Vehicles.ToListAsync();

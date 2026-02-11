@@ -3,6 +3,7 @@ using DBetter.Domain.Vehicles.ValueObjects;
 
 namespace DBetter.Domain.Vehicles;
 
+//TODO: Rename to vehicleType and make vehicle the concrete one
 public class Vehicle : AggregateRoot<VehicleId>
 {
     private List<Coach> _coachSequence;

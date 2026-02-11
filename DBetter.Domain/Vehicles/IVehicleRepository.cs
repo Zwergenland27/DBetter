@@ -7,6 +7,8 @@ public interface IVehicleRepository
     void Add(Vehicle vehicle);
     
     Task<Vehicle?> GetAsync(VehicleId vehicleId);
+    
+    Task<List<Vehicle>> GetManyAsync(IEnumerable<VehicleId> vehicleIds);
 
     Task<Vehicle?> FindByConstructionTypeAsync(List<string> coachSequence);
 
