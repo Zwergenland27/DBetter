@@ -1,6 +1,8 @@
 using CleanDomainValidation.Application;
 using CleanMediator;
+using DBetter.Application.TrainCompositions.Get;
 using DBetter.Application.TrainRuns.Queries.Get;
+using DBetter.Contracts.TrainCompositions.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get.Results;
 
@@ -28,5 +30,24 @@ public static class TrainRunModule
         .WithName("GetTrainRun")
         .Produces<TrainRunResponse>()
         .WithOpenApi();
+        
+        app.MapGet("train-runs/{id}/trainComposition", async (
+                IMediator mediator,
+                string id) =>
+            {
+                var query = Builder<GetTrainCompositionQuery>
+                    .WithName("TrainRun.GetComposition")
+                    .BindParameters(new GetTrainCompositionDto())
+                    .MapParameter(p => p.TrainRunId, id)
+                    .BuildUsing<GetTrainCompositionQueryBuilder>();
+
+                return await mediator.HandleQueryAsync(query, (GetTrainCompositionResultDto result) =>
+                {
+                    return Results.Ok(result);
+                });
+            })
+            .WithName("GetTrainComposition")
+            .Produces<GetTrainCompositionResultDto>()
+            .WithOpenApi();
     }
 }
