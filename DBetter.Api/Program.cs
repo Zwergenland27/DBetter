@@ -23,14 +23,13 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
     });
-    
+
     options.OperationFilter<SecurityRequirementsOperationFilter>();
-    
+
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "DBetter.Contracts.xml"));
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "DBetter.Api.xml"));
-    
-});
 
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("dev", policyBuilder =>
@@ -73,7 +72,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors("dev");   
+    app.UseCors("dev");
 }
 
 app.UseCors("prod");

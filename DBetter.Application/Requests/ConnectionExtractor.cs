@@ -1,5 +1,7 @@
 using DBetter.Application.Connections.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.TrainCompositions;
+using DBetter.Application.TrainCompositions.Dtos;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Connections;
@@ -9,8 +11,10 @@ using DBetter.Domain.Routes.Snapshots;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainCirculations.ValueObjects;
+using DBetter.Domain.TrainCompositions;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.TrainRuns.Snapshots;
+using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Application.Requests;
 
@@ -19,7 +23,8 @@ public class ConnectionExtractor(
     ITrainRunRepository trainRunRepository,
     IRouteRepository routeRepository,
     IStationRepository stationRepository,
-    IPassengerInformationRepository passengerInformationRepository)
+    IPassengerInformationRepository passengerInformationRepository,
+    ITrainCompositionQueryRepository trainCompositionRepository)
 {
     
     public List<TrainCirculation>? ExistingTrainCirculations;
@@ -33,6 +38,8 @@ public class ConnectionExtractor(
     public List<PassengerInformation>? ExistingPassengerInformation;
     public List<PassengerInformation>? PassengerInformationToCreate;
 
+    public List<TrainCompositionResultDto>? TrainCompositions;
+    
     public List<Connection>? FoundConnections;
     
     private List<BahnJourneyId>? _journeyIds;
@@ -107,13 +114,16 @@ public class ConnectionExtractor(
             throw new InvalidOperationException("Stations have not been extracted");
         if (FoundConnections is null)
             throw new InvalidOperationException("Connections have not been extracted");
+        if(TrainCompositions is null)
+            throw new InvalidOperationException("Train compositions have not been extracted");
         
         var responseFactory = new ConnectionResponseFactory(
             FoundConnections,
             ExistingTrainCirculations,
             ExistingTrainRuns, 
             ExistingStations, 
-            ExistingPassengerInformation);
+            ExistingPassengerInformation,
+            TrainCompositions);
             
         return _connections.Select(connection => responseFactory.MapToResponse(connection)).ToList();
     }
@@ -158,6 +168,7 @@ public class ConnectionExtractor(
             throw new InvalidOperationException("Cannot extract train runs before journeyIds have been extracted.");
         
         ExistingTrainRuns = await trainRunRepository.GetManyAsync(_journeyIds.Select(jid => jid.TrainRunCompositeIdentifier).Distinct());
+        TrainCompositions = await trainCompositionRepository.GetManyAsync(ExistingTrainRuns.Select(tr => tr.Id));
     }
 
     private async Task ExtractRoutes()

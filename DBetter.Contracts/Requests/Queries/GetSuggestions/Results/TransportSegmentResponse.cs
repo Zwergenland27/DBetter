@@ -1,4 +1,5 @@
 using DBetter.Contracts.Shared.DTOs;
+using DBetter.Contracts.TrainCompositions.Get;
 
 namespace DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 
@@ -82,4 +83,9 @@ public class TransportSegmentResponse : SegmentResponse
     /// Messages for passengers
     /// </summary>
     public required List<PassengerInformationResponse> PassengerInformation { get; set; }
+    
+    /// <summary>
+    /// Information about the train composition
+    /// </summary>
+    public required GetTrainCompositionResultDto? TrainComposition { get; init; }
 }

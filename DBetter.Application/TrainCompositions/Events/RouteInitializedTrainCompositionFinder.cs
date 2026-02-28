@@ -39,7 +39,7 @@ public class RouteInitializedTrainCompositionFinder(
         var result = await mediator.RunAsync(new GetTrainCompositionQuery(trainRun.Id), cancellationToken);
         if (result.HasFailed)
         {
-            if(result.Errors.Count == 1 && result.Errors.First().Code is "TrainComposition.NotFindable"or "TrainComposition.NotSupported") return CanFail.Success;
+            if(result.Errors.Count == 1 && result.Errors.First().Code is "TrainComposition.NotFindable" or "TrainComposition.NotSupported" or "TrainComposition.NotFound") return CanFail.Success;
             return result.Errors;
         }
         return CanFail.Success;

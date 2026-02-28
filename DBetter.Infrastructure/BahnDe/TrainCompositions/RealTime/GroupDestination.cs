@@ -1,4 +1,4 @@
-namespace DBetter.Infrastructure.BahnDe.TrainCompositions;
+namespace DBetter.Infrastructure.BahnDe.TrainCompositions.RealTime;
 
 public class GroupDestination
 {

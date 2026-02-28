@@ -2,6 +2,7 @@ using CleanDomainValidation.Domain;
 using CleanMediator.Commands;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Connections.Dtos;
+using DBetter.Application.TrainCompositions;
 using DBetter.Application.TrainRuns.Dtos;
 using DBetter.Contracts.TrainRuns.Queries.Get.Results;
 using DBetter.Domain.Errors;
@@ -22,7 +23,8 @@ public class GetTrainRunQueryHandler(
     IRouteRepository routeRepository,
     ITrainCirculationRepository trainCirculationRepository,
     IExternalTrainRunProvider trainRunProvider,
-    IPassengerInformationRepository passengerInformationRepository) : CommandHandlerBase<GetTrainRunQuery, TrainRunResponse>
+    IPassengerInformationRepository passengerInformationRepository,
+    ITrainCompositionQueryRepository trainCompositionRepository) : CommandHandlerBase<GetTrainRunQuery, TrainRunResponse>
 {
     private List<Station> _existingStations = [];
     private List<Station> _stationsToCreate = [];
@@ -72,8 +74,10 @@ public class GetTrainRunQueryHandler(
         
         await unitOfWork.CommitAsync(cancellationToken);
 
+        var trainComposition = await trainCompositionRepository.GetAsync(trainRun.Id);
+        
         var responseFactory = new TrainRunResponseFactory(trainCirculation, trainRun, _existingPassengerInformation, _existingStations);
-        return responseFactory.MapToResponse(trainRunDto);
+        return responseFactory.MapToResponse(trainRunDto, trainComposition);
     }
 
     private async Task ExtractStations(TrainRunDto trainRunDto)

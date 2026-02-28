@@ -13,7 +13,7 @@ public class Route : AggregateRoot<RouteId>
     
     public TrainRunId TrainRunId { get; private set; }
     
-    public IReadOnlyList<Stop> Stops => _stops.AsReadOnly();
+    public IReadOnlyList<Stop> Stops => _stops.OrderBy(s => s.RouteIndex.Value).ToList().AsReadOnly();
     
     public RouteSource Source { get; private set; }
     

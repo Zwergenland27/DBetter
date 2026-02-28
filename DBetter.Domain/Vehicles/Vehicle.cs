@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+using CleanDomainValidation.Domain;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.Vehicles.ValueObjects;
 
@@ -27,6 +29,11 @@ public class Vehicle : AggregateRoot<VehicleId>
     public static Vehicle CreateByConstructionType(string identifier, List<string> coachSequence)
     {
         var coaches = new List<Coach>();
+        if ((coachSequence.First() is "I4015" && coachSequence.Last() is "I4010") ||
+            coachSequence.First() is "I4010" && coachSequence.Last() is "I4015")
+        {
+            identifier = "401";
+        }
 
         byte coachId = 0;
         foreach (var coachConstructionType in coachSequence)
@@ -37,8 +44,9 @@ public class Vehicle : AggregateRoot<VehicleId>
         return new Vehicle(VehicleId.CreateNew(), identifier, coaches);
     }
     
-    public static Vehicle CreateByCoachType(string identifier, List<string> coachSequence)
+    public static Vehicle CreateByCoachType(List<string> coachSequence)
     {
+        coachSequence = coachSequence.Select(RemoveCoachNumber).ToList();
         var coaches = new List<Coach>();
 
         byte coachId = 0;
@@ -47,7 +55,7 @@ public class Vehicle : AggregateRoot<VehicleId>
             coaches.Add(Coach.CreateByCoachType(new CoachId(coachId), coachType));
             coachId++;
         }
-        return new Vehicle(VehicleId.CreateNew(), identifier, coaches);
+        return new Vehicle(VehicleId.CreateNew(), string.Join("|", coachSequence), coaches);
     }
 
     public bool MatchesConstructionType(List<string> coachSequence)
@@ -62,11 +70,17 @@ public class Vehicle : AggregateRoot<VehicleId>
     
     public bool MatchesCoachType(List<string> coachSequence)
     {
+        coachSequence = coachSequence.Select(RemoveCoachNumber).ToList();
         var normalOrder = string.Join('|', coachSequence);
         coachSequence.Reverse();
         var reversedOrder = string.Join('|', coachSequence);
 
-        var coachConstructionType = string.Join('|', _coachSequence.Select(cs => cs.CoachType));
+        var coachConstructionType = string.Join('|', _coachSequence.Where(cs => cs.CoachType is not null).Select(cs => cs.CoachType));
         return normalOrder == coachConstructionType ||  reversedOrder == coachConstructionType;
+    }
+
+    private static string RemoveCoachNumber(string coach)
+    {
+        return Regex.Replace(coach, @"-\d+$", "");
     }
 }

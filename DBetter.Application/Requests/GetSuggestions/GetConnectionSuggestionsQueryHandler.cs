@@ -1,6 +1,7 @@
 using CleanDomainValidation.Domain;
 using CleanMediator.Queries;
 using DBetter.Application.Abstractions.Persistence;
+using DBetter.Application.TrainCompositions;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
@@ -22,7 +23,8 @@ public class GetConnectionSuggestionsQueryHandler(
     ITrainRunRepository trainRunRepository,
     IRouteRepository routeRepository,
     ITrainCirculationRepository trainCirculationRepository,
-    IPassengerInformationRepository passengerInformationRepository) : QueryHandlerBase<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
+    IPassengerInformationRepository passengerInformationRepository,
+    ITrainCompositionQueryRepository trainCompositionRepository) : QueryHandlerBase<GetConnectionSuggestionsQuery, List<ConnectionResponse>>
 {
     public override async Task<CanFail<List<ConnectionResponse>>> Handle(GetConnectionSuggestionsQuery request, CancellationToken cancellationToken)
     {
@@ -46,7 +48,8 @@ public class GetConnectionSuggestionsQueryHandler(
                 trainRunRepository,
                 routeRepository,
                 stationRepository,
-                passengerInformationRepository)
+                passengerInformationRepository,
+                trainCompositionRepository)
             .ForConnections(suggestionsDto.Connections);
         
         await extractor.Extract();

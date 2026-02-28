@@ -1,21 +1,30 @@
 using DBetter.Application.Connections.Dtos;
 using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.Shared;
+using DBetter.Application.TrainCompositions.Dtos;
 using DBetter.Application.TrainRuns.Dtos;
+using DBetter.Contracts.TrainCompositions.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get.Results;
 using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
+using DBetter.Domain.TrainCompositions;
 using DBetter.Domain.TrainRuns;
+using DBetter.Domain.Vehicles;
 
 namespace DBetter.Application.TrainRuns.Queries.Get;
 
-public class TrainRunResponseFactory(TrainCirculation trainCirculation, TrainRun trainRun, List<PassengerInformation> passengerInformation, List<Station> stations)
+public class TrainRunResponseFactory(
+    TrainCirculation trainCirculation,
+    TrainRun trainRun, List<PassengerInformation> passengerInformation,
+    List<Station> stations)
 {
-    public TrainRunResponse MapToResponse(TrainRunDto dto)
+    public TrainRunResponse MapToResponse(TrainRunDto dto, TrainCompositionResultDto? composition)
     {
         return new TrainRunResponse
         {
+            TrainComposition = MapToResponse(composition),
             Id = trainRun.Id.Value.ToString(),
             CirculationId = trainRun.CirculationId.Value.ToString(),
             Operator = null,
@@ -26,6 +35,16 @@ public class TrainRunResponseFactory(TrainCirculation trainCirculation, TrainRun
             ServiceNumber = trainCirculation.ServiceInformation.ServiceNumber?.Value,
             Stops = dto.Stops.Select(MapToResponse).ToList(),
             PassengerInformation = passengerInformation.Select(pim => pim.ToResponse()).ToList()
+        };
+    }
+
+    private GetTrainCompositionResultDto? MapToResponse(TrainCompositionResultDto? composition)
+    {
+        if (composition is null) return null;
+        return new GetTrainCompositionResultDto
+        {
+            Vehicles = composition.Vehicles,
+            Source = composition.Source.ToString()
         };
     }
     

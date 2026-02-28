@@ -3,6 +3,7 @@ using CleanMediator.Queries;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
+using DBetter.Application.TrainCompositions;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Domain.ConnectionRequests;
 using DBetter.Domain.Connections;
@@ -24,7 +25,8 @@ public class IncreaseTransferTimeQueryHandler(
     IRouteRepository routeRepository,
     ITrainRunRepository trainRunRepository,
     IPassengerInformationRepository passengerInformationRepository,
-    IStationRepository stationRepository) : QueryHandlerBase<IncreaseTransferTimeQuery, ConnectionResponse>
+    IStationRepository stationRepository,
+    ITrainCompositionQueryRepository trainCompositionRepository) : QueryHandlerBase<IncreaseTransferTimeQuery, ConnectionResponse>
 {
     public override async Task<CanFail<ConnectionResponse>> Handle(IncreaseTransferTimeQuery query, CancellationToken cancellationToken)
     {
@@ -61,7 +63,8 @@ public class IncreaseTransferTimeQueryHandler(
                 trainRunRepository,
                 routeRepository,
                 stationRepository,
-                passengerInformationRepository)
+                passengerInformationRepository,
+                trainCompositionRepository)
             .ForConnections([foundConnection]);
         
         await extractor.Extract();

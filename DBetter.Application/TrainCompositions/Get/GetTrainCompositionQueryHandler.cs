@@ -10,6 +10,7 @@ using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainCompositions;
 using DBetter.Domain.TrainCompositions.Snapshots;
+using DBetter.Domain.TrainCompositions.ValueObjects;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Domain.Vehicles;
@@ -27,83 +28,162 @@ public class GetTrainCompositionQueryHandler(
     ITrainCompositionRepository trainCompositionRepository,
     ITrainCompositionPredictor predictor) : QueryHandlerBase<GetTrainCompositionQuery, GetTrainCompositionResultDto>
 {
+    private TrainRun? _trainRun;
+    private TrainCirculation? _trainCirculation;
+    private Route? _route;
+    private List<Station>? _relevantStations;
+    
     public override async Task<CanFail<GetTrainCompositionResultDto>> Handle(GetTrainCompositionQuery query, CancellationToken cancellationToken)
     {
         await unitOfWork.BeginTransaction(cancellationToken);
 
-        var trainRun = await trainRunRepository.GetAsync(query.TrainRunId);
-        if (trainRun is null) return DomainErrors.TrainRun.NotFound(query.TrainRunId);
+        _trainRun = await trainRunRepository.GetAsync(query.TrainRunId);
+        if (_trainRun is null) return DomainErrors.TrainRun.NotFound(query.TrainRunId);
 
-        var trainCirculation = await trainCirculationRepository.GetAsync(trainRun.CirculationId);
-        if (trainCirculation is null) throw new InvalidDataException("Train circulation not found for requested train run");
+        _trainCirculation = await trainCirculationRepository.GetAsync(_trainRun.CirculationId);
+        if (_trainCirculation is null) throw new InvalidDataException("Train circulation not found for requested train run");
+
+        if (_trainCirculation.ServiceInformation.ServiceNumber is null)
+            return DomainErrors.TrainComposition.NotFindable;
         
-        var route = await routeRepository.GetAsync(trainRun.Id);
-        if (route is null) throw new InvalidDataException("Route not found for requested train run");
+        _route = await routeRepository.GetAsync(_trainRun.Id);
+        if (_route is null) throw new InvalidDataException("Route not found for requested train run");
         
-        var firstStation = await stationRepository.GetAsync(route.Stops.OrderBy(s => s.RouteIndex.Value).First().StationId);
-        if(firstStation is null) throw new InvalidDataException("Station not found for requested route");
+        _relevantStations = await stationRepository.GetManyAsync(_route.Stops.Select(s => s.StationId));
+        
+        var trainComposition = await trainCompositionRepository.GetAsync(_trainRun.Id);
 
-        if (trainCirculation.ServiceInformation.ServiceNumber is null)
-            return Error.NotFound("TrainComposition.NotFindable",
-                "The train composition cannot be found because no service number was found for the train circulation.");
-
-        var trainComposition = await trainCompositionRepository.GetAsync(trainRun.Id);
+        
         if (trainComposition is not null)
         {
-            var foundVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
-            return new GetTrainCompositionResultDto
-            {
-                Vehicles = foundVehicles.Select(v => v.Identifier).ToList()
-            };
+            var updatedResult = await HandleExistingData(trainComposition);
+            await unitOfWork.CommitAsync(cancellationToken);
+            return updatedResult;
         }
+
+        var result = await HandleUnknownData();
+        await unitOfWork.CommitAsync(cancellationToken);
+        return result;
+    }
+
+    private async Task<GetTrainCompositionResultDto> HandleExistingData(TrainComposition trainComposition)
+    {
+        if (_route is null) throw new InvalidOperationException("Cannot handle data without route being extracted");
+        if(_relevantStations is null) throw new InvalidOperationException("Cannot handle data without relevant stations being extracted");
+        if(_trainRun is null) throw new InvalidOperationException("Cannot handle data without train run being extracted");
+        if(_trainCirculation?.ServiceInformation.ServiceNumber is null) throw new InvalidOperationException("Cannot handle data without train circulation being extracted with valid service number");
         
-        var timeDifference = route.Stops.First().DepartureTime!.Planned - DateTime.UtcNow;
+        var firstStop = _route.Stops.First();
+        var firstStation = _relevantStations.First(s => s.Id == firstStop.StationId);
+        var timeDifference = firstStop.DepartureTime!.Planned - DateTime.UtcNow;
         
-        //Past
-        if (timeDifference < -TimeSpan.FromHours(24))
+        if (trainComposition.Source is TrainFormationSource.RealTime || timeDifference.TotalHours > 24)
         {
-            return Error.NotFound(
-                "TrainComposition.InPast",
-                "The requested train composition has not been found in the system and is older than 24h");
-        } 
-        //Future
-        if (timeDifference > TimeSpan.FromHours(24))
-        {
-            return await GetPredictionAsync(trainCirculation.Id, trainRun.OperatingDay);
+            var foundVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
+            return new TrainCompositionResultFactory(trainComposition, foundVehicles)
+                .BuildResult();
         }
         
         var trainCompositionDto = await trainCompositionProvider.GetRealTimeDataAsync(
-            trainCirculation.ServiceInformation.ServiceNumber,
-            trainRun.OperatingDay.Date,
+            _trainCirculation.ServiceInformation.ServiceNumber,
+            _trainRun.OperatingDay.Date,
             firstStation.EvaNumber);
 
         if (trainCompositionDto is null)
         {
-            return await GetPredictionAsync(trainCirculation.Id, trainRun.OperatingDay);
+            var foundVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
+            return new TrainCompositionResultFactory(trainComposition, foundVehicles)
+                .BuildResult();
         }
+        
+        var (relevantVehicles, formationSnapshots) = await ExtractVehicles(trainCompositionDto);
+        trainComposition.Update(formationSnapshots);
+        
+        return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
+            .BuildResult();
+    }
 
-        if (trainCompositionDto.Vehicles.Any(tc => tc.Name.StartsWith("Zug")))
-            return Error.Conflict(
-                "TrainComposition.NotSupported",
-                "Train compositions containing only wagons is currently not supported.");
+    private async Task<CanFail<GetTrainCompositionResultDto>> HandleUnknownData()
+    {
+        if (_route is null) throw new InvalidOperationException("Cannot handle data without route being extracted");
+        if(_relevantStations is null) throw new InvalidOperationException("Cannot handle data without relevant stations being extracted");
+        if(_trainRun is null) throw new InvalidOperationException("Cannot handle data without train run being extracted");
+        if(_trainCirculation?.ServiceInformation.ServiceNumber is null) throw new InvalidOperationException("Cannot handle data without train circulation being extracted with valid service number");
         
-        var destinationStations = await stationRepository.FindManyAsync(trainCompositionDto.Vehicles.Select(tc => tc.DestinationStation));
+        var firstStop = _route.Stops.First();
+        var firstStation = _relevantStations.First(s => s.Id == firstStop.StationId);
+        var timeDifference = firstStop.DepartureTime!.Planned - DateTime.UtcNow;
         
+        //Past - reject
+        if (timeDifference < -TimeSpan.FromHours(24))
+        {
+            return DomainErrors.TrainComposition.InPast;
+        } 
+        
+        //Not in Future - try get realtime data
+        if (timeDifference <= TimeSpan.FromHours(24))
+        {
+            var trainCompositionDto = await trainCompositionProvider.GetRealTimeDataAsync(
+                _trainCirculation.ServiceInformation.ServiceNumber,
+                _trainRun.OperatingDay.Date,
+                firstStation.EvaNumber);
+
+            if (trainCompositionDto is not null)
+            {
+                var (relevantVehicles, formationSnapshots) = await ExtractVehicles(trainCompositionDto);
+                var trainComposition = TrainComposition.CreateFromRealtime(_trainRun.Id, formationSnapshots);
+                trainCompositionRepository.Add(trainComposition);
+                return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
+                    .BuildResult();
+            }
+        }
+        //In Future or no realtime data available
+        var lastStop = _route.Stops.Last();
+        var lastStation = _relevantStations.First(s => s.Id == lastStop.StationId);
+        
+        //Try get planned data
+        var plannedTrainCompositionDto = await trainCompositionProvider.GetPlannedDataAsync(
+            _trainCirculation.ServiceInformation.ServiceNumber,
+            firstStation.EvaNumber,
+            firstStop.DepartureTime!.Planned,
+            lastStation.EvaNumber,
+            lastStop.ArrivalTime!.Planned);
+
+        if (plannedTrainCompositionDto is not null)
+        {
+            var (relevantVehicles, formationSnapshots) = await ExtractVehicles(plannedTrainCompositionDto);
+            var trainComposition = TrainComposition.CreateFromRealtime(_trainRun.Id, formationSnapshots);
+            trainCompositionRepository.Add(trainComposition);
+            return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
+                .BuildResult();
+        }
+        
+        //Neither realtime nor planned data available - predict on history
+        var predictedTrainCompositionDto = await predictor.PredictAsync(_trainCirculation.Id, _trainRun.OperatingDay);
+        if (predictedTrainCompositionDto is not null)
+        {
+            var trainComposition = TrainComposition.CreateFromPrediction(_trainRun.Id, predictedTrainCompositionDto.PredictedComposition);
+            trainCompositionRepository.Add(trainComposition);
+            var relevantVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
+            return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
+                .BuildResult();
+        }
+        
+        return DomainErrors.TrainComposition.NotFound;
+    }
+
+    private async Task<(List<Vehicle>, List<FormationVehicleSnapshot>)> ExtractVehicles(TrainCompositionDto trainCompositionDto)
+    {
+        if(_route is null) throw new InvalidOperationException("Cannot handle data without route being extracted");
+        if (_relevantStations is null) throw new InvalidOperationException("Cannot handle data without relevant stations being extracted");
+        
+        var firstStationId = _route.Stops.First().StationId;
         var relevantVehicles = new List<Vehicle>();
         var formationVehicles = new List<FormationVehicleSnapshot>();
         
         foreach (var vehicle in trainCompositionDto.Vehicles)
         {
-            var matchingStations = destinationStations.Where(s => s.Name == vehicle.DestinationStation).ToList();
-
-            var destinationStation = matchingStations.First();
-            
-            //For stations with multiple ids like Berlin Hbf
-            if (matchingStations.Count > 1)
-            {
-                destinationStation =
-                    matchingStations.First(station => route.Stops.Select(s => s.StationId).Contains(station.Id));
-            }
+            var destinationStation = _relevantStations.First(station => station.Name == vehicle.DestinationStation);
             
             var coachSequence = vehicle.Coaches.Select(c => c.ConstructionType).ToList();
             
@@ -119,36 +199,47 @@ public class GetTrainCompositionQueryHandler(
             }
             
             formationVehicles.Add(new FormationVehicleSnapshot(
-                firstStation.Id,
+                firstStationId,
                 destinationStation.Id,
                 existingVehicle.Id));
             relevantVehicles.Add(existingVehicle);
         }
 
-        trainComposition = TrainComposition.CreateFromRealtime(trainRun.Id, formationVehicles);
-        trainCompositionRepository.Add(trainComposition);
-        
-        await unitOfWork.CommitAsync(cancellationToken);
-
-        return new GetTrainCompositionResultDto
-        {
-            Vehicles = trainComposition.Vehicles
-                .Select(fv => relevantVehicles.First(v => v.Id == fv.VehicleId).Identifier).ToList()
-        };
+        return (relevantVehicles, formationVehicles);
     }
-
-    private async Task<CanFail<GetTrainCompositionResultDto>> GetPredictionAsync(TrainCirculationId trainCirculationId, OperatingDay operatingDay)
+    
+    private async Task<(List<Vehicle>, List<FormationVehicleSnapshot>)> ExtractVehicles(PlannedTrainCompositionDto trainCompositionDto)
     {
-        var trainComposition = await predictor.PredictAsync(trainCirculationId, operatingDay);
-        if (trainComposition is null)
-            return Error.NotFound("TrainComposition.NotFound", "The requested train composition could not be found");
+        if(_route is null) throw new InvalidOperationException("Cannot handle data without route being extracted");
+        if (_relevantStations is null) throw new InvalidOperationException("Cannot handle data without relevant stations being extracted");
         
-        var vehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
+        var firstStationId = _route.Stops.First().StationId;
+        var lastStationId = _route.Stops.Last().StationId;
+        var relevantVehicles = new List<Vehicle>();
+        var formationVehicles = new List<FormationVehicleSnapshot>();
         
-        return new GetTrainCompositionResultDto
+        foreach (var vehicle in trainCompositionDto.Vehicles)
         {
-            Vehicles = trainComposition.Vehicles
-                .Select(fv => vehicles.First(v => v.Id == fv.VehicleId).Identifier).ToList()
-        };
+            var coachSequence = vehicle.Coaches.Select(c => c.ConstructionType).ToList();
+            
+            var existingVehicle = relevantVehicles.FirstOrDefault(v => v.MatchesCoachType(coachSequence));
+            if (existingVehicle is null)
+            {
+                existingVehicle = await vehicleRepository.FindByCoachType(coachSequence);   
+            }
+            if (existingVehicle is null)
+            {
+                existingVehicle = Vehicle.CreateByCoachType(coachSequence);
+                vehicleRepository.Add(existingVehicle);
+            }
+            
+            formationVehicles.Add(new FormationVehicleSnapshot(
+                firstStationId,
+                lastStationId,
+                existingVehicle.Id));
+            relevantVehicles.Add(existingVehicle);
+        }
+
+        return (relevantVehicles, formationVehicles);
     }
 }

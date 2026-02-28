@@ -5,5 +5,7 @@ namespace DBetter.Domain.TrainCompositions;
 
 public interface ITrainCompositionPredictor
 {
-    Task<TrainComposition?> PredictAsync(TrainCirculationId trainCirculationId, OperatingDay operatingDay);
+    Task<PredictionResult?> PredictAsync(TrainCirculationId trainCirculationId, OperatingDay operatingDay);
 }
+
+public record PredictionResult(TrainComposition PredictedComposition, double Score, double Probability);

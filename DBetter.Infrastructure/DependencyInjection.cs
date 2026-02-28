@@ -2,6 +2,7 @@ using CleanMessageBus.Abstractions.DependencyInjection;
 using CleanMessageBus.RabbitMQ.DependencyInjection;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Stations;
+using DBetter.Application.TrainCompositions;
 using DBetter.Application.Users;
 using DBetter.Domain.Abstractions;
 using DBetter.Domain.ConnectionRequests;
@@ -29,6 +30,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddMemoryCache();
         services.AddRepositories();
         services.AddPostgres(configuration);
         services.AddOutbox();
@@ -62,6 +64,8 @@ public static class DependencyInjection
         services.AddScoped<IVehicleRepository, VehicleRepository>();
         services.AddScoped<IRouteRepository, RouteRepository>();
         services.AddScoped<ITrainCompositionRepository, TrainCompositionRepository>();
+        services.AddScoped<ITrainCompositionQueryRepository, TrainCompositionQueryRepository>();
+        services.AddScoped<ITrainCompositionPredictor, SimpleTrainCompositionPredictor>();
         return services;
     }
 }

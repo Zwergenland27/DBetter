@@ -1,12 +1,15 @@
 using System.Runtime.InteropServices.ComTypes;
 using DBetter.Application.Connections.Dtos;
 using DBetter.Application.Requests.Dtos;
+using DBetter.Application.TrainCompositions.Dtos;
 using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
+using DBetter.Contracts.TrainCompositions.Get;
 using DBetter.Domain.Connections;
 using DBetter.Domain.PassengerInformationManagement;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
+using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Application.Requests.GetSuggestions;
 
@@ -15,7 +18,8 @@ public class ConnectionResponseFactory(
     List<TrainCirculation> trainCirculations,
     List<TrainRun> trainRuns,
     List<Station> stations,
-    List<PassengerInformation> passengerInformation)
+    List<PassengerInformation> passengerInformation,
+    List<TrainCompositionResultDto> trainCompositionResults)
 {
 
     private int _transferIndex = 0;
@@ -107,7 +111,20 @@ public class ConnectionResponseFactory(
             PassengerInformation = trainRun.PassengerInformation
                 .Select(pim => passengerInformation.First(pi => pi.Id == pim.InformationId).ToResponse())
                 .ToList(),
-            Stops = dto.Stops.Select(MapToResponse).ToList()
+            Stops = dto.Stops.Select(MapToResponse).ToList(),
+            TrainComposition = MapToResponse(trainRun.Id)
+        };
+    }
+    
+    private GetTrainCompositionResultDto? MapToResponse(TrainRunId trainRunId)
+    {
+        var composition = trainCompositionResults.FirstOrDefault(c => c.TrainRunId == trainRunId.Value.ToString());
+        if (composition is null) return null;
+
+        return new GetTrainCompositionResultDto
+        {
+            Vehicles = composition.Vehicles,
+            Source = composition.Source.ToString()
         };
     }
 
