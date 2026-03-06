@@ -30,6 +30,14 @@ public class TrainCompositionMapping : IEntityTypeConfiguration<TrainComposition
                 value => new TrainRunId(value));
 
         builder.Property(x => x.Source);
+        
+        builder.Property(x => x.DepartureTime);
+
+        builder.Property(x => x.LastUpdate);
+        
+        builder.Property(x => x.CurrentUpdateInterval);
+
+        builder.Ignore(x => x.IsNextCheckAllowed);
 
         builder.OwnsMany(x => x.Vehicles, vb =>
         {

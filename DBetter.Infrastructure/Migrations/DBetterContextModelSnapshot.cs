@@ -167,6 +167,15 @@ namespace DBetter.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("CurrentUpdateInterval")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DepartureTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Source")
                         .HasColumnType("integer");
 

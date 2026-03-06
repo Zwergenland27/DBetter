@@ -29,15 +29,25 @@ public class TrainCompositionQueryRepository(DBetterContext db, IMemoryCache cac
                                                                                WHERE tc."TrainRun" = {trainRunId.Value}
                                                                                """).ToListAsync();
         var results = Map(rawResults);
-        cache.Set(cacheKey, results, new MemoryCacheEntryOptions
+        if (results is null)
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-        });
+            cache.Set(cacheKey, results, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20)
+            });
+        }
+        else
+        {
+            cache.Set(cacheKey, results, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });   
+        }
 
         return results;
     }
 
-    public async Task<List<TrainCompositionResultDto>?> GetManyAsync(IEnumerable<TrainRunId> trainRunIds)
+    public async Task<List<TrainCompositionResultDto>> GetManyAsync(IEnumerable<TrainRunId> trainRunIds)
     {
         var results = new List<TrainCompositionResultDto>();
 

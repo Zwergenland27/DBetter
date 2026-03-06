@@ -4,5 +4,6 @@ public enum TrainFormationSource
 {
     SeatingPlan,
     RealTime,
-    Prediction
+    Prediction,
+    None
 }

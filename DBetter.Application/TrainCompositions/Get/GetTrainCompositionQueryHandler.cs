@@ -52,16 +52,15 @@ public class GetTrainCompositionQueryHandler(
         _relevantStations = await stationRepository.GetManyAsync(_route.Stops.Select(s => s.StationId));
         
         var trainComposition = await trainCompositionRepository.GetAsync(_trainRun.Id);
-
         
-        if (trainComposition is not null)
+        if (trainComposition is not null && trainComposition.Source is not TrainFormationSource.None)
         {
             var updatedResult = await HandleExistingData(trainComposition);
             await unitOfWork.CommitAsync(cancellationToken);
             return updatedResult;
         }
 
-        var result = await HandleUnknownData();
+        var result = await HandleUnknownData(trainComposition);
         await unitOfWork.CommitAsync(cancellationToken);
         return result;
     }
@@ -77,8 +76,12 @@ public class GetTrainCompositionQueryHandler(
         var firstStation = _relevantStations.First(s => s.Id == firstStop.StationId);
         var timeDifference = firstStop.DepartureTime!.Planned - DateTime.UtcNow;
         
-        if (trainComposition.Source is TrainFormationSource.RealTime || timeDifference.TotalHours > 24)
+        if (trainComposition.Source is TrainFormationSource.RealTime || timeDifference.TotalHours > 8 || !trainComposition.IsNextCheckAllowed)
         {
+            if (trainComposition.IsNextCheckAllowed)
+            {
+                trainComposition.ScheduleUpdate();
+            }
             var foundVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
             return new TrainCompositionResultFactory(trainComposition, foundVehicles)
                 .BuildResult();
@@ -91,20 +94,26 @@ public class GetTrainCompositionQueryHandler(
 
         if (trainCompositionDto is null)
         {
+            trainComposition.ScheduleUpdate();
             var foundVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
             return new TrainCompositionResultFactory(trainComposition, foundVehicles)
                 .BuildResult();
         }
         
         var (relevantVehicles, formationSnapshots) = await ExtractVehicles(trainCompositionDto);
-        trainComposition.Update(formationSnapshots);
+        trainComposition.UpdateFromRealTime(formationSnapshots);
         
         return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
             .BuildResult();
     }
 
-    private async Task<CanFail<GetTrainCompositionResultDto>> HandleUnknownData()
+    private async Task<CanFail<GetTrainCompositionResultDto>> HandleUnknownData(TrainComposition? baseObject)
     {
+        if (baseObject is not null && !baseObject.IsNextCheckAllowed)
+        {
+            baseObject.ScheduleUpdate();
+            return DomainErrors.TrainComposition.NotFound;
+        }
         if (_route is null) throw new InvalidOperationException("Cannot handle data without route being extracted");
         if(_relevantStations is null) throw new InvalidOperationException("Cannot handle data without relevant stations being extracted");
         if(_trainRun is null) throw new InvalidOperationException("Cannot handle data without train run being extracted");
@@ -115,13 +124,13 @@ public class GetTrainCompositionQueryHandler(
         var timeDifference = firstStop.DepartureTime!.Planned - DateTime.UtcNow;
         
         //Past - reject
-        if (timeDifference < -TimeSpan.FromHours(24))
+        if (timeDifference < -TimeSpan.FromHours(8))
         {
             return DomainErrors.TrainComposition.InPast;
         } 
         
         //Not in Future - try get realtime data
-        if (timeDifference <= TimeSpan.FromHours(24))
+        if (timeDifference <= TimeSpan.FromHours(8))
         {
             var trainCompositionDto = await trainCompositionProvider.GetRealTimeDataAsync(
                 _trainCirculation.ServiceInformation.ServiceNumber,
@@ -131,8 +140,19 @@ public class GetTrainCompositionQueryHandler(
             if (trainCompositionDto is not null)
             {
                 var (relevantVehicles, formationSnapshots) = await ExtractVehicles(trainCompositionDto);
-                var trainComposition = TrainComposition.CreateFromRealtime(_trainRun.Id, formationSnapshots);
-                trainCompositionRepository.Add(trainComposition);
+
+                TrainComposition trainComposition;
+                if (baseObject is not null)
+                {
+                    baseObject.UpdateFromRealTime(formationSnapshots);
+                    trainComposition = baseObject;
+                }
+                else
+                {
+                    trainComposition = TrainComposition.CreateFromRealtime(_trainRun.Id, firstStop.DepartureTime, formationSnapshots);
+                    trainCompositionRepository.Add(trainComposition);
+                }
+                
                 return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
                     .BuildResult();
             }
@@ -152,8 +172,19 @@ public class GetTrainCompositionQueryHandler(
         if (plannedTrainCompositionDto is not null)
         {
             var (relevantVehicles, formationSnapshots) = await ExtractVehicles(plannedTrainCompositionDto);
-            var trainComposition = TrainComposition.CreateFromRealtime(_trainRun.Id, formationSnapshots);
-            trainCompositionRepository.Add(trainComposition);
+
+            TrainComposition trainComposition;
+            if (baseObject is not null)
+            {
+                baseObject.UpdateFromPlanned(formationSnapshots);
+                trainComposition = baseObject;
+            }
+            else
+            {
+                trainComposition = TrainComposition.CreateFromPlanned(_trainRun.Id, firstStop.DepartureTime, formationSnapshots);
+                trainCompositionRepository.Add(trainComposition);   
+            }
+            
             return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
                 .BuildResult();
         }
@@ -162,11 +193,26 @@ public class GetTrainCompositionQueryHandler(
         var predictedTrainCompositionDto = await predictor.PredictAsync(_trainCirculation.Id, _trainRun.OperatingDay);
         if (predictedTrainCompositionDto is not null)
         {
-            var trainComposition = TrainComposition.CreateFromPrediction(_trainRun.Id, predictedTrainCompositionDto.PredictedComposition);
-            trainCompositionRepository.Add(trainComposition);
+            TrainComposition trainComposition;
+            if (baseObject is not null)
+            {
+                baseObject.UpdateFromPrediction(predictedTrainCompositionDto.PredictedComposition);
+                trainComposition = baseObject;
+            }
+            else
+            {
+                trainComposition = TrainComposition.CreateFromPrediction(_trainRun.Id, firstStop.DepartureTime, predictedTrainCompositionDto.PredictedComposition);
+                trainCompositionRepository.Add(trainComposition);
+            }
             var relevantVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
             return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
                 .BuildResult();
+        }
+
+        if (baseObject is null)
+        {
+            var trainComposition = TrainComposition.CreateNotFound(_trainRun.Id, firstStop.DepartureTime);
+            trainCompositionRepository.Add(trainComposition);
         }
         
         return DomainErrors.TrainComposition.NotFound;

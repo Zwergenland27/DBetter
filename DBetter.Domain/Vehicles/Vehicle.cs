@@ -32,7 +32,11 @@ public class Vehicle : AggregateRoot<VehicleId>
         if ((coachSequence.First() is "I4015" && coachSequence.Last() is "I4010") ||
             coachSequence.First() is "I4010" && coachSequence.Last() is "I4015")
         {
-            identifier = "401";
+            var br401Coaches = new Br401Factory().GenerateFromConstructionTypes(coachSequence);
+            if (!br401Coaches.HasFailed)
+            {
+                return new Vehicle(VehicleId.CreateNew(), "401", br401Coaches.Value);
+            }
         }
 
         byte coachId = 0;
@@ -47,6 +51,14 @@ public class Vehicle : AggregateRoot<VehicleId>
     public static Vehicle CreateByCoachType(List<string> coachSequence)
     {
         coachSequence = coachSequence.Select(RemoveCoachNumber).ToList();
+        if (coachSequence.First().EndsWith("401.LDV"))
+        {
+            var br401Coaches = new Br401Factory().GenerateFromCoachTypes(coachSequence);
+            if (!br401Coaches.HasFailed)
+            {
+                return new Vehicle(VehicleId.CreateNew(), "401", br401Coaches.Value);
+            }
+        }
         var coaches = new List<Coach>();
 
         byte coachId = 0;

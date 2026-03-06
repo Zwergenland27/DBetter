@@ -18,6 +18,11 @@ public class Coach : Entity<CoachId>
         CoachType = coachType;
     }
 
+    internal static Coach Create(CoachId id, string constructionType, string coachType)
+    {
+        return new Coach(id, constructionType, coachType);
+    }
+
     internal static Coach CreateByConstructionType(CoachId id, string constructionType)
     {
         return new Coach(id, constructionType, null);

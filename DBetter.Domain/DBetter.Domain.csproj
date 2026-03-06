@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="DBetter.Domain.Tests"/>
       <PackageReference Include="Zwergenland.CleanDomainValidation" Version="1.1.1" />
       <PackageReference Include="Zwergenland.CleanMediator" Version="1.1.1" />
       <PackageReference Include="Zwergenland.CleanMessageBus.Abstractions" Version="1.1.0" />

@@ -8,6 +8,9 @@ using DBetter.Infrastructure.BahnDe.TrainCompositions;
 using DBetter.Infrastructure.BahnDe.TrainRuns;
 using DBetter.Infrastructure.Monitoring;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
+using Polly;
+using Polly.Retry;
 
 namespace DBetter.Infrastructure.BahnDe;
 
@@ -29,9 +32,9 @@ public static class DependencyInjection
                 AutomaticDecompression = DecompressionMethods.GZip
             })
             .AddHttpMessageHandler<MetricHttpHandler>();
-        
-        services.AddHttpClient<IExternalTrainRunProvider, BahnDeTrainRunProvider>(
-                client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
+
+        services.AddHttpClient<IExternalTrainRunProvider, BahnDeTrainRunProvider>(client =>
+                client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip
@@ -43,7 +46,8 @@ public static class DependencyInjection
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip
-            });
+            })
+            .AddHttpMessageHandler<MetricHttpHandler>();
         return services;
     }
 }

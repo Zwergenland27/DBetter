@@ -5,6 +5,7 @@ using CleanMediator.Queries;
 using CleanMessageBus.Abstractions;
 using CleanMessageBus.Abstractions.Attributes;
 using DBetter.Application.TrainCompositions.Get;
+using DBetter.Domain.Errors;
 using DBetter.Domain.Routes;
 using DBetter.Domain.Routes.Events;
 using DBetter.Domain.TrainCirculations;
@@ -39,7 +40,7 @@ public class RouteInitializedTrainCompositionFinder(
         var result = await mediator.RunAsync(new GetTrainCompositionQuery(trainRun.Id), cancellationToken);
         if (result.HasFailed)
         {
-            if(result.Errors.Count == 1 && result.Errors.First().Code is "TrainComposition.NotFindable" or "TrainComposition.NotSupported" or "TrainComposition.NotFound") return CanFail.Success;
+            if(result.Errors.Count == 1 && result.Errors.First() == DomainErrors.TrainComposition.NotFound || result.Errors.First() == DomainErrors.TrainComposition.NotFindable) return CanFail.Success;
             return result.Errors;
         }
         return CanFail.Success;

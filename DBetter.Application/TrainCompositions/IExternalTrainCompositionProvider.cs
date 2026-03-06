@@ -7,7 +7,7 @@ namespace DBetter.Application.TrainCompositions;
 
 public interface IExternalTrainCompositionProvider
 {
-    Task<TrainCompositionDto?> GetRealTimeDataAsync(ServiceNumber ServiceNumber, DateOnly Date, EvaNumber AtStation);
+    Task<TrainCompositionDto?> GetRealTimeDataAsync(ServiceNumber serviceNumber, DateOnly date, EvaNumber atStation);
 
     Task<PlannedTrainCompositionDto?> GetPlannedDataAsync(ServiceNumber serviceNumber, EvaNumber originStation, DateTime deparureTime, EvaNumber destinationStation, DateTime arrivalTime);
 }

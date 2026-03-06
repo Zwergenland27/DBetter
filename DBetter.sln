@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Infrastructure", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Domain", "DBetter.Domain\DBetter.Domain.csproj", "{CEE11E83-D60F-49A4-A665-A9174565BACD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBetter.Domain.Tests", "DBetter.Domain.Tests\DBetter.Domain.Tests.csproj", "{965B73E9-FE6E-4FC7-81FA-A3B20B19D49E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{CEE11E83-D60F-49A4-A665-A9174565BACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEE11E83-D60F-49A4-A665-A9174565BACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEE11E83-D60F-49A4-A665-A9174565BACD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{965B73E9-FE6E-4FC7-81FA-A3B20B19D49E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{965B73E9-FE6E-4FC7-81FA-A3B20B19D49E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{965B73E9-FE6E-4FC7-81FA-A3B20B19D49E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{965B73E9-FE6E-4FC7-81FA-A3B20B19D49E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

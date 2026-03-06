@@ -28,7 +28,7 @@ public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainComposit
                 tc => tc.TrainRun,
                 tr => tr.Id,
                 (tc, tr) => new { TrainComposition = tc, tr.OperatingDay, TrainCirculationId = tr.CirculationId })
-            .Where(r => r.TrainCirculationId == trainCirculationId)
+            .Where(r => r.TrainCirculationId == trainCirculationId && r.TrainComposition.Source != TrainFormationSource.None)
             .Select(r => new TrainCompositionOfOperatingDay(r.TrainComposition, r.OperatingDay))
             .ToListAsync();
 

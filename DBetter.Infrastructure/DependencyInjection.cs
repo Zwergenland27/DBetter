@@ -18,6 +18,7 @@ using DBetter.Domain.Vehicles;
 using DBetter.Infrastructure.ApiMarketplace;
 using DBetter.Infrastructure.Authentication;
 using DBetter.Infrastructure.BahnDe;
+using DBetter.Infrastructure.Jobs;
 using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.Repositories;
@@ -33,7 +34,7 @@ public static class DependencyInjection
         services.AddMemoryCache();
         services.AddRepositories();
         services.AddPostgres(configuration);
-        services.AddOutbox();
+        services.AddOutbox(configuration);
         services.AddJwtAuthentication(configuration);
         services.AddBahnApi();
         services.AddApiMarketplace(configuration);
@@ -66,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<ITrainCompositionRepository, TrainCompositionRepository>();
         services.AddScoped<ITrainCompositionQueryRepository, TrainCompositionQueryRepository>();
         services.AddScoped<ITrainCompositionPredictor, SimpleTrainCompositionPredictor>();
+        services.AddScoped<ITrainCompositionScraper, TrainCompositionScraper>();
         return services;
     }
 }

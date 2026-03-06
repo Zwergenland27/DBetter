@@ -10,23 +10,38 @@ using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Infrastructure.BahnDe.TrainCompositions.Planned;
 using DBetter.Infrastructure.BahnDe.TrainCompositions.RealTime;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Http.Resilience;
+using Polly;
+using Polly.Retry;
 
 namespace DBetter.Infrastructure.BahnDe.TrainCompositions;
 
 public class BahnDeTrainCompositionProvider(HttpClient http) : IExternalTrainCompositionProvider
 {
-    private static readonly List<string> _categoryPlaceholder = [
+    private static readonly List<string> CategoryPlaceholder = [
         "ICE",
         "IC"
     ];
-    public async Task<TrainCompositionDto?> GetRealTimeDataAsync(ServiceNumber ServiceNumber, DateOnly Date, EvaNumber AtStation)
+    public async Task<TrainCompositionDto?> GetRealTimeDataAsync(ServiceNumber serviceNumber, DateOnly date, EvaNumber atStation)
     {
-        var administrationId = 80;
+        var resiliencePipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
+            .AddRetry(new HttpRetryStrategyOptions
+            {
+                MaxRetryAttempts = 4,
+                Delay = TimeSpan.FromSeconds(5),
+                ShouldHandle = BahnDeRetryStrategyOptions.IsTransient
+            })
+            .Build();
+            
+        const int administrationId = 80;
         var random = new Random();
-        var category = _categoryPlaceholder[random.Next(0,  _categoryPlaceholder.Count - 1)];
-        var date = Date.ToString("yyyy-MM-dd");
-        var time = $"{date}T00:00:00.000Z";
-        var response = await http.GetAsync($"reisebegleitung/wagenreihung/vehicle-sequence?=administrationId={administrationId}&category={category}&date={date}&evaNumber={AtStation.Value}&number={ServiceNumber.Value}&time={time}");
+        var category = CategoryPlaceholder[random.Next(0,  CategoryPlaceholder.Count - 1)];
+        var dateString = date.ToString("yyyy-MM-dd");
+        var time = $"{dateString}T00:00:00.000Z";
+
+        var url = $"reisebegleitung/wagenreihung/vehicle-sequence?=administrationId={administrationId}&category={category}&date={dateString}&evaNumber={atStation.Value}&number={serviceNumber.Value}&time={time}";
+        
+        var response = await resiliencePipeline.ExecuteAsync(async ct => await http.GetAsync(url, ct));
 
         if (!response.IsSuccessStatusCode)
         {
@@ -70,6 +85,7 @@ public class BahnDeTrainCompositionProvider(HttpClient http) : IExternalTrainCom
         var response = await http.GetAsync($"gsd/gsd_v3?data={uri}");
         if (!response.IsSuccessStatusCode)
         {
+            if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Conflict) return null;
             throw new BahnDeException("BahnDeTrainCompositionProvider.GetPlanned", $"Requesting planned train composition from bahn.de failed with status code {response.StatusCode}");
         }
         
