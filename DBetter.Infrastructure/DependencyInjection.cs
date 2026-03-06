@@ -1,5 +1,6 @@
 using CleanMessageBus.Abstractions.DependencyInjection;
 using CleanMessageBus.RabbitMQ.DependencyInjection;
+using DBetter.Application.Abstractions.Caching;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Stations;
 using DBetter.Application.TrainCompositions;
@@ -18,6 +19,7 @@ using DBetter.Domain.Vehicles;
 using DBetter.Infrastructure.ApiMarketplace;
 using DBetter.Infrastructure.Authentication;
 using DBetter.Infrastructure.BahnDe;
+using DBetter.Infrastructure.Caching;
 using DBetter.Infrastructure.Jobs;
 using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
@@ -31,7 +33,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddMemoryCache();
+        services.AddCaching();
         services.AddRepositories();
         services.AddPostgres(configuration);
         services.AddOutbox(configuration);

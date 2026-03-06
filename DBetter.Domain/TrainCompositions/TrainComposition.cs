@@ -55,7 +55,9 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
                 formation.ToStop));
             formationIndex++;
         }
-        return new TrainComposition(TrainCompositionId.CreateNew(), formationSections, trainRunId, TrainFormationSource.RealTime, departureTime, DateTime.UtcNow);
+        var trainComposition = new TrainComposition(TrainCompositionId.CreateNew(), formationSections, trainRunId, TrainFormationSource.RealTime, departureTime, DateTime.UtcNow);
+        trainComposition.RaiseDomainEvent(new TrainCompositionUpdated(trainComposition.TrainRun));
+        return trainComposition;
     }
 
     public static TrainComposition CreateFromPrediction(TrainRunId trainRunId, TravelTime departureTime, TrainComposition predictedComposition)
@@ -65,6 +67,7 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
             .ToList(); 
         var trainComposition = new TrainComposition(TrainCompositionId.CreateNew(), formations, trainRunId, TrainFormationSource.Prediction, departureTime, DateTime.UtcNow);
         trainComposition.ScheduleUpdate();
+        trainComposition.RaiseDomainEvent(new TrainCompositionUpdated(trainComposition.TrainRun));
         return trainComposition;
     }
     
@@ -83,6 +86,7 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
         }
         var trainComposition = new TrainComposition(TrainCompositionId.CreateNew(), formationSections, trainRunId, TrainFormationSource.SeatingPlan, departureTime, DateTime.UtcNow);
         trainComposition.ScheduleUpdate();
+        trainComposition.RaiseDomainEvent(new TrainCompositionUpdated(trainComposition.TrainRun));
         return trainComposition;
     }
 
@@ -90,6 +94,7 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
     {
         var trainComposition = new TrainComposition(TrainCompositionId.CreateNew(), [], trainRunId, TrainFormationSource.None, departureTime, DateTime.UtcNow);
         trainComposition.ScheduleUpdate();
+        trainComposition.RaiseDomainEvent(new TrainCompositionUpdated(trainComposition.TrainRun));
         return trainComposition;
     }
 
@@ -101,6 +106,7 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
         UpdateFormations(formations);
         //TODO: Cancel schedules
         Source = TrainFormationSource.RealTime;
+        RaiseDomainEvent(new TrainCompositionUpdated(TrainRun));
     }
 
     public void UpdateFromPlanned(List<FormationVehicleSnapshot> formations)
@@ -109,6 +115,7 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
         ScheduleUpdate();
         UpdateFormations(formations);
         Source = TrainFormationSource.SeatingPlan;
+        RaiseDomainEvent(new TrainCompositionUpdated(TrainRun));
     }
 
     public void UpdateFromPrediction(TrainComposition predictedComposition)
@@ -126,6 +133,7 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
         }
         LastUpdate = DateTime.UtcNow;
         Source = TrainFormationSource.Prediction;
+        RaiseDomainEvent(new TrainCompositionUpdated(TrainRun));
     }
 
     private void UpdateFormations(List<FormationVehicleSnapshot> formations)

@@ -1,3 +1,4 @@
+using DBetter.Application.Abstractions.Caching;
 using DBetter.Domain.Vehicles;
 using DBetter.Domain.Vehicles.ValueObjects;
 using DBetter.Infrastructure.Postgres;
@@ -8,7 +9,7 @@ namespace DBetter.Infrastructure.Repositories;
 
 public class VehicleRepository(
     DBetterContext db,
-    IMemoryCache cache) : IVehicleRepository
+    ICache cache) : IVehicleRepository
 {
     public void Add(Vehicle vehicle)
     {

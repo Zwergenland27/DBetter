@@ -1,15 +1,15 @@
+using DBetter.Application.Abstractions.Caching;
 using DBetter.Application.TrainCompositions;
 using DBetter.Application.TrainCompositions.Dtos;
 using DBetter.Domain.TrainCompositions.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.Postgres;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace DBetter.Infrastructure.Repositories;
 
-public class TrainCompositionQueryRepository(DBetterContext db, IMemoryCache cache) : ITrainCompositionQueryRepository
+public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : ITrainCompositionQueryRepository
 {
     private record RawTrainCompositionResultDto(Guid TrainRun, int Source, string Identifier);
     
@@ -31,16 +31,16 @@ public class TrainCompositionQueryRepository(DBetterContext db, IMemoryCache cac
         var results = Map(rawResults);
         if (results is null)
         {
-            cache.Set(cacheKey, results, new MemoryCacheEntryOptions
+            cache.Set(cacheKey, results, new CachingOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20)
+                Duration = TimeSpan.FromSeconds(20)
             });
         }
         else
         {
-            cache.Set(cacheKey, results, new MemoryCacheEntryOptions
+            cache.Set(cacheKey, results, new CachingOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                Duration = TimeSpan.FromMinutes(5)
             });   
         }
 
