@@ -4,7 +4,7 @@ public class CachingOptions
 {
     public static CachingOptions Default { get; } = new()
     {
-        Duration = TimeSpan.MaxValue
+        Duration = TimeSpan.FromDays(1),
     };
     public TimeSpan Duration { get; init; }
 }

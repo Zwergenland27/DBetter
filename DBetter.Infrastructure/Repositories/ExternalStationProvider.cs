@@ -1,3 +1,4 @@
+using DBetter.Application.Abstractions.Caching;
 using DBetter.Application.Stations;
 using DBetter.Application.Stations.Dtos;
 using DBetter.Domain.Stations;
@@ -9,6 +10,7 @@ using DBetter.Infrastructure.BahnDe.Stations;
 namespace DBetter.Infrastructure.Repositories;
 
 public class ExternalStationProvider(
+    ICache cache,
     StaDaService stada,
     TimetablesService timetables,
     StationService stationService) : IExternalStationProvider
@@ -39,11 +41,24 @@ public class ExternalStationProvider(
 
     public async Task<List<StationQueryDto>> FindAsync(string query)
     {
+        if (cache.TryGetValue<List<StationQueryDto>>($"stationProvider:find:{query}", out var stations))
+        {
+            return stations;
+        }
+        
         var haltestellen = await stationService.FindAsync(query, 5);
-        return haltestellen
+        
+        var dtos = haltestellen
             .Select(halt => halt.ToSnapshot())
             .OfType<StationQueryDto>()
             .ToList();
+        
+        cache.Set($"stationProvider:find:{query}", dtos, new CachingOptions
+        {
+            Duration = TimeSpan.FromHours(8)
+        });
+
+        return dtos;
     }
 
     private async Task<(Coordinates? Position, StationInfoId? StationInfoId, Ril100Identifier? Ril100)?> TryGetStadaInformation(EvaNumber evaNumber)

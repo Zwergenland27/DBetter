@@ -23,6 +23,7 @@ using DBetter.Infrastructure.Caching;
 using DBetter.Infrastructure.Jobs;
 using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
+using DBetter.Infrastructure.RealtimeNotification;
 using DBetter.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddCaching();
+        services.AddRealtimeNotification();
         services.AddRepositories();
         services.AddPostgres(configuration);
         services.AddOutbox(configuration);

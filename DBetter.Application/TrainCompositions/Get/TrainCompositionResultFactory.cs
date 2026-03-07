@@ -12,6 +12,7 @@ public class TrainCompositionResultFactory(
     {
         return new GetTrainCompositionResultDto
         {
+            TrainRunId = trainComposition.TrainRun.Value.ToString(),
             Vehicles = trainComposition.Vehicles
                 .Select(v => relevantVehicles.First(rv => rv.Id == v.VehicleId).Identifier)
                 .ToList(),

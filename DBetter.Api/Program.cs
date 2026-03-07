@@ -2,6 +2,7 @@ using DBetter.Api;
 using DBetter.Application;
 using DBetter.Infrastructure;
 using DBetter.Infrastructure.Monitoring;
+using DBetter.Infrastructure.RealtimeNotification;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi.Models;
@@ -78,6 +79,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors("prod");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<TrainCompositionHub>("/rt/trainCompositions");
 
 app.AddStationEndpoints();
 app.AddUserEndpoints();
