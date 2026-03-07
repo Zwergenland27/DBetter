@@ -1,6 +1,7 @@
 using DBetter.Application.Stations.Dtos;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 namespace DBetter.Infrastructure.BahnDe.Stations;
 
@@ -31,6 +32,12 @@ public class Haltestelle
     /// <example>13.731409</example>
     public required float Lon { get; set; }
     
+    /// <summary>
+    /// Available products of the station
+    /// </summary>
+    /// <remarks>Only set when place is a station</remarks>
+    public required List<string> Products { get; set; }
+    
     public StationQueryDto? ToSnapshot()
     {
         var evaNumber = EvaNumber.Create(ExtId);
@@ -43,6 +50,7 @@ public class Haltestelle
 
         return new StationQueryDto
         {
+            AvailableMeansOfTransport = Produktgattung.GetMeansOfTransportObject(Products),
             EvaNumber = evaNumber.Value,
             Name = name.Value,
             Location = location

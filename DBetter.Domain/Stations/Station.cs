@@ -1,4 +1,5 @@
 using DBetter.Domain.Abstractions;
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Stations.Events;
 using DBetter.Domain.Stations.ValueObjects;
 
@@ -15,6 +16,8 @@ public class Station : AggregateRoot<StationId>
     public StationInfoId? InfoId { get; private set; }
     
     public Ril100Identifier? Ril100 { get; private set; }
+    
+    public MeansOfTransport AvailableMeansOfTransport { get; private set; }
 
     private Station(
         StationId id,
@@ -31,18 +34,20 @@ public class Station : AggregateRoot<StationId>
         StationId id,
         EvaNumber evaNumber,
         StationName name,
-        Coordinates location) : base(id)
+        Coordinates location,
+        MeansOfTransport availableMeansOfTransport) : base(id)
     {
         EvaNumber = evaNumber;
         Name = name;
         Location = location;
+        AvailableMeansOfTransport = availableMeansOfTransport;
     }
 
     private Station() : base(null!){}
     
-    public static Station Create(EvaNumber evaNumber, StationName name, Coordinates location)
+    public static Station Create(EvaNumber evaNumber, StationName name, Coordinates location, MeansOfTransport availableMeansOfTransport)
     {
-        var station = new Station(StationId.CreateNew(), evaNumber, name, location);
+        var station = new Station(StationId.CreateNew(), evaNumber, name, location, availableMeansOfTransport);
         station.RaiseDomainEvent(new UnknownStationCreatedEvent(station.Id));
         return station;
     }
@@ -62,6 +67,11 @@ public class Station : AggregateRoot<StationId>
     public void Update(StationInfoId infoId)
     {
         InfoId = infoId;
+    }
+
+    public void Update(MeansOfTransport availableMeansOfTransport)
+    {
+        AvailableMeansOfTransport = availableMeansOfTransport;
     }
 
     public void Update(Ril100Identifier ri100Identifier)

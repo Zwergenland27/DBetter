@@ -1,10 +1,12 @@
 using DBetter.Application.Abstractions.Caching;
 using DBetter.Application.Stations;
 using DBetter.Application.Stations.Dtos;
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.Stations;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Infrastructure.ApiMarketplace.StaDa;
 using DBetter.Infrastructure.ApiMarketplace.Timetables;
+using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 using DBetter.Infrastructure.BahnDe.Stations;
 
 namespace DBetter.Infrastructure.Repositories;
@@ -20,6 +22,7 @@ public class ExternalStationProvider(
         Coordinates? location = null;
         StationInfoId? stationInfoId = null;
         Ril100Identifier? ril100 = null;
+        MeansOfTransport? meansOfTransport = null;
 
         var stadaResult = await TryGetStadaInformation(evaNumber);
 
@@ -29,14 +32,18 @@ public class ExternalStationProvider(
             stationInfoId = stadaResult.Value.StationInfoId;
             ril100 = stadaResult.Value.Ril100;
         }
-
-        location ??= await TryGetLocation(evaNumber);
+        
+        var (locationResult, meansOfTransportResult) = await TryGetBahnDeInformation(evaNumber);
+        location ??= locationResult;
+        meansOfTransport ??= meansOfTransportResult;
+        
         ril100 ??= await TryGetRil100(evaNumber);
 
         return new StationProviderDto(
             location,
             stationInfoId,
-            ril100);
+            ril100,
+            meansOfTransport);
     }
 
     public async Task<List<StationQueryDto>> FindAsync(string query)
@@ -77,7 +84,7 @@ public class ExternalStationProvider(
         
         if (coordinates is not null)
         {
-            position = new Coordinates(coordinates[0], coordinates[1]);
+            position = new Coordinates(coordinates[1], coordinates[0]);
         }
         
         var stationInfoResult = StationInfoId.Create(stadaInformation.Number.ToString());
@@ -99,19 +106,19 @@ public class ExternalStationProvider(
         return (position, stationInfoId, ril100);
     }
 
-    private async Task<Coordinates?> TryGetLocation(EvaNumber evaNumber)
+    private async Task<(Coordinates?, MeansOfTransport?)> TryGetBahnDeInformation(EvaNumber evaNumber)
     {
         var stationResults = await stationService.FindAsync(evaNumber.Value);
         var stationData = stationResults.FirstOrDefault(station => station.ExtId == evaNumber.Value);
 
         if (stationData is null)
         {
-            return null;
+            return (null, null);
         }
 
-        return new Coordinates(
+        return (new Coordinates(
             stationData.Lat,
-            stationData.Lon);
+            stationData.Lon), Produktgattung.GetMeansOfTransportObject(stationData.Products));
     }
 
     private async Task<Ril100Identifier?> TryGetRil100(EvaNumber evaNumber)

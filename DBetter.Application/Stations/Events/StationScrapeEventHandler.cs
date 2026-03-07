@@ -34,6 +34,11 @@ public class StationScrapeEventHandler(
         { 
             station.Update(stationInfos.Ril100);   
         }
+
+        if (stationInfos.AvailableMeansOfTransport is not null)
+        {
+            station.Update(stationInfos.AvailableMeansOfTransport);
+        }
         
         await unitOfWork.CommitAsync(cancellationToken);
         return CanFail.Success;

@@ -47,7 +47,7 @@ public class FindStationsQueryHandler(
         foreach (var result in fuzzyResults)
         {
             if (existingStations.Any(station => station.EvaNumber == result.EvaNumber)) continue;
-            yetUnknownStations.Add(Station.Create(result.EvaNumber, result.Name, result.Location));
+            yetUnknownStations.Add(Station.Create(result.EvaNumber, result.Name, result.Location, result.AvailableMeansOfTransport));
         }
         
         stationRepository.AddRange(yetUnknownStations);

@@ -1,3 +1,4 @@
+using DBetter.Domain.ConnectionRequests.ValueObjects;
 using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 
@@ -59,5 +60,18 @@ public static class Produktgattung
         if (!transportCategories.Any())
             throw new BahnDeException("Mapping.Produktgattung", $"transport category {transportCategory} not found");
         return transportCategories;
+    }
+
+    public static MeansOfTransport GetMeansOfTransportObject(List<string> products)
+    {
+        return new MeansOfTransport( 
+            products.Any(p => GetAliasesFromTransportCategory(TransportCategory.HighSpeedTrain).Contains(p)),
+            products.Any(p => GetAliasesFromTransportCategory(TransportCategory.FastTrain).Contains(p)), 
+            products.Any(p => GetAliasesFromTransportCategory(TransportCategory.RegionalTrain).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.SuburbanTrain).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.UndergroundTrain).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.Tram).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.Bus).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.Boat).Contains(p)));
     }
 }

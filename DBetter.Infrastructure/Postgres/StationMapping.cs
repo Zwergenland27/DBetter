@@ -43,6 +43,8 @@ public class StationMapping : IEntityTypeConfiguration<Station>
                 rl100 => rl100 != null ? rl100.Value : null,
                 value => value != null ? Ril100Identifier.Create(value).Value : null);
 
+        builder.OwnsOne(station => station.AvailableMeansOfTransport);
+
         builder.OwnsOne(station => station.Location);
     }
 }
