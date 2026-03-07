@@ -15,6 +15,11 @@ public class TrainRunResponse {
     public required string Id { get; set; }
     
     /// <summary>
+    /// Date time of the last train run update
+    /// </summary>
+    public required DateTime LastUpdatedAt { get; set; }
+    
+    /// <summary>
     /// Id of the corresponding train circulation
     /// </summary>
     public required string CirculationId { get; set; }

@@ -18,6 +18,7 @@ public class TrainCompositionUpdatedRealtimeNotifier(
         
         await realtimeNotifier.Notify(@event.TrainRun.Value.ToString(), "Update", new GetTrainCompositionResultDto
         {
+            LastUpdatedAt = newData.LastUpdatedAt,
             TrainRunId = newData.TrainRunId,
             Source = newData.Source.ToString(),
             Vehicles = newData.Vehicles

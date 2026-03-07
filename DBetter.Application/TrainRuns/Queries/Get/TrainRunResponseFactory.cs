@@ -23,6 +23,7 @@ public class TrainRunResponseFactory(
         {
             TrainComposition = MapToResponse(composition),
             Id = trainRun.Id.Value.ToString(),
+            LastUpdatedAt = route.LastUpdatedAt,
             CirculationId = trainRun.CirculationId.Value.ToString(),
             Operator = null,
             BikeCarriage = trainRun.BikeCarriage.ToResponse(),
@@ -40,6 +41,7 @@ public class TrainRunResponseFactory(
         if (composition is null) return null;
         return new GetTrainCompositionResultDto
         {
+            LastUpdatedAt = composition.LastUpdatedAt,
             TrainRunId = composition.TrainRunId,
             Vehicles = composition.Vehicles,
             Source = composition.Source.ToString()

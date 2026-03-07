@@ -123,6 +123,7 @@ public class ConnectionResponseFactory(
 
         return new GetTrainCompositionResultDto
         {
+            LastUpdatedAt = composition.LastUpdatedAt,
             TrainRunId = trainRunId.Value.ToString(),
             Vehicles = composition.Vehicles,
             Source = composition.Source.ToString()

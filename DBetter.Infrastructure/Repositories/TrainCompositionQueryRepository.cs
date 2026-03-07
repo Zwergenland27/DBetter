@@ -11,7 +11,7 @@ namespace DBetter.Infrastructure.Repositories;
 
 public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : ITrainCompositionQueryRepository
 {
-    private record RawTrainCompositionResultDto(Guid TrainRun, int Source, string Identifier);
+    private record RawTrainCompositionResultDto(Guid TrainRun, int Source, string Identifier, DateTime LastUpdate);
     
     public async Task<TrainCompositionResultDto?> GetAsync(TrainRunId trainRunId)
     {
@@ -22,7 +22,7 @@ public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : 
             return cached;
         }
         var rawResults = await db.Database.SqlQuery<RawTrainCompositionResultDto>($"""
-                                                                               SELECT tc."TrainRun", tc."Source", v."Identifier"
+                                                                               SELECT tc."TrainRun", tc."Source", v."Identifier", tc."LastUpdate"
                                                                                FROM "TrainCompositions" tc
                                                                                JOIN "FormationVehicles" fv ON tc."Id" = fv."TrainCompositionId"
                                                                                JOIN "Vehicles" v ON fv."VehicleId" = v."Id"
@@ -68,9 +68,11 @@ public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : 
 
         var id = rawResults.First().TrainRun;
         var source = (TrainFormationSource) rawResults.First().Source;
+        var lastUpdatedAt = rawResults.Last().LastUpdate;
 
         return new TrainCompositionResultDto
         {
+            LastUpdatedAt = lastUpdatedAt,
             TrainRunId = id.ToString(),
             Source = source,
             Vehicles = rawResults.Select(r => r.Identifier).ToList()
