@@ -72,6 +72,7 @@ public static class DependencyInjection
         services.AddScoped<ITrainCompositionQueryRepository, TrainCompositionQueryRepository>();
         services.AddScoped<ITrainCompositionPredictor, SimpleTrainCompositionPredictor>();
         services.AddScoped<ITrainCompositionScraper, TrainCompositionScraper>();
+        services.AddScoped<IDelayCheckScraper, DelayCheckScraper>();
         return services;
     }
 }

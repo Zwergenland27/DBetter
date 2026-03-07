@@ -60,6 +60,10 @@ public class RouteMapping : IEntityTypeConfiguration<Route>
             
             sb.OwnsOne(s => s.DepartureTime);
 
+            sb.OwnsOne(s => s.Demand);
+
+            sb.OwnsOne(s => s.Platform);
+
             sb.OwnsOne(s => s.Attributes);
 
         }).UsePropertyAccessMode(PropertyAccessMode.Field);

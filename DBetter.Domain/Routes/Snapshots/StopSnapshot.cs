@@ -1,4 +1,5 @@
 using DBetter.Domain.Routes.ValueObjects;
+using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 
@@ -9,4 +10,6 @@ public record StopSnapshot(
     StationId StationId,
     TravelTime? ArrivalTime,
     TravelTime? DepartureTime,
+    Demand Demand,
+    Platform? Platform,
     StopAttributes Attributes);

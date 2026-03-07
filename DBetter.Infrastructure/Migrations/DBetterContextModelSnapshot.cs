@@ -820,6 +820,54 @@ namespace DBetter.Infrastructure.Migrations
                                         .HasForeignKey("StopId", "StopRouteId");
                                 });
 
+                            b1.OwnsOne("DBetter.Domain.Shared.Demand", "Demand", b2 =>
+                                {
+                                    b2.Property<short>("StopId")
+                                        .HasColumnType("smallint");
+
+                                    b2.Property<Guid>("StopRouteId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<int>("FirstClass")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int>("SecondClass")
+                                        .HasColumnType("integer");
+
+                                    b2.HasKey("StopId", "StopRouteId");
+
+                                    b2.ToTable("RouteStops");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("StopId", "StopRouteId");
+                                });
+
+                            b1.OwnsOne("DBetter.Domain.TrainRuns.ValueObjects.Platform", "Platform", b2 =>
+                                {
+                                    b2.Property<short>("StopId")
+                                        .HasColumnType("smallint");
+
+                                    b2.Property<Guid>("StopRouteId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<string>("Planned")
+                                        .IsRequired()
+                                        .HasColumnType("text");
+
+                                    b2.Property<string>("Real")
+                                        .HasColumnType("text");
+
+                                    b2.Property<int>("Type")
+                                        .HasColumnType("integer");
+
+                                    b2.HasKey("StopId", "StopRouteId");
+
+                                    b2.ToTable("RouteStops");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("StopId", "StopRouteId");
+                                });
+
                             b1.OwnsOne("DBetter.Domain.TrainRuns.ValueObjects.StopAttributes", "Attributes", b2 =>
                                 {
                                     b2.Property<short>("StopId")
@@ -856,7 +904,12 @@ namespace DBetter.Infrastructure.Migrations
                             b1.Navigation("Attributes")
                                 .IsRequired();
 
+                            b1.Navigation("Demand")
+                                .IsRequired();
+
                             b1.Navigation("DepartureTime");
+
+                            b1.Navigation("Platform");
                         });
 
                     b.Navigation("Stops");

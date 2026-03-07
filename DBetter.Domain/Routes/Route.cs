@@ -42,7 +42,15 @@ public class Route : AggregateRoot<RouteId>
         short stopIndex = 0;
         foreach (var stop in stopSnapshots)
         {
-            stops.Add(new Stop(new StopId(stopIndex), stop.RouteIndex, stop.StationId, stop.DepartureTime, stop.ArrivalTime, stop.Attributes));
+            stops.Add(new Stop(
+                new StopId(stopIndex),
+                stop.RouteIndex,
+                stop.StationId,
+                stop.DepartureTime,
+                stop.ArrivalTime,
+                stop.Demand,
+                stop.Platform,
+                stop.Attributes));
             stopIndex++;
         }
         
@@ -57,11 +65,25 @@ public class Route : AggregateRoot<RouteId>
             var existingStop = _stops.FirstOrDefault(s => s.StationId == stop.StationId);
             if (existingStop is not null)
             {
-                existingStop.Update(stop.RouteIndex, stop.DepartureTime, stop.ArrivalTime, stop.Attributes);
+                existingStop.Update(
+                    stop.RouteIndex,
+                    stop.DepartureTime,
+                    stop.ArrivalTime,
+                    stop.Demand,
+                    stop.Platform,
+                    stop.Attributes);
                 continue;
             }
             
-            _stops.Add(new Stop(new StopId(stopIndex), stop.RouteIndex, stop.StationId, stop.DepartureTime, stop.ArrivalTime, stop.Attributes));
+            _stops.Add(new Stop(
+                new StopId(stopIndex),
+                stop.RouteIndex,
+                stop.StationId,
+                stop.DepartureTime,
+                stop.ArrivalTime,
+                stop.Demand,
+                stop.Platform,
+                stop.Attributes));
             stopIndex++;
         }
 
@@ -81,12 +103,38 @@ public class Route : AggregateRoot<RouteId>
             var existingStop = _stops.FirstOrDefault(s => s.StationId == stop.StationId);
             if (existingStop is not null)
             {
-                existingStop.Update(stop.RouteIndex, stop.DepartureTime, stop.ArrivalTime, stop.Attributes);
+                existingStop.Update(
+                    stop.RouteIndex, 
+                    stop.DepartureTime,
+                    stop.ArrivalTime,
+                    stop.Demand,
+                    stop.Platform,
+                    stop.Attributes);
                 continue;
             }
             
-            _stops.Add(new Stop(new StopId(stopIndex), stop.RouteIndex, stop.StationId, stop.DepartureTime, stop.ArrivalTime, stop.Attributes));
+            _stops.Add(new Stop(
+                new StopId(stopIndex),
+                stop.RouteIndex,
+                stop.StationId,
+                stop.DepartureTime,
+                stop.ArrivalTime,
+                stop.Demand,
+                stop.Platform,
+                stop.Attributes));
             stopIndex++;
+        }
+        
+        var arrivalTime = Stops.Last().ArrivalTime!;
+        var latestArrivalTime = arrivalTime.Real ?? arrivalTime.Planned;
+        if (arrivalTime.Real < arrivalTime.Planned)
+        {
+            latestArrivalTime = arrivalTime.Planned;
+        }
+
+        if (DateTime.UtcNow - latestArrivalTime < TimeSpan.FromHours(2))
+        {
+            RaiseDomainEvent(new DelayCheckScheduledEvent(TrainRunId, latestArrivalTime.Add(TimeSpan.FromHours(2))));
         }
 
         if (Source is RouteSource.Historical or RouteSource.Connection)

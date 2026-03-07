@@ -1,26 +1,23 @@
-using DBetter.Application.Connections.Dtos;
-using DBetter.Application.Requests.Dtos;
 using DBetter.Application.Requests.GetSuggestions;
-using DBetter.Application.Shared;
 using DBetter.Application.TrainCompositions.Dtos;
-using DBetter.Application.TrainRuns.Dtos;
 using DBetter.Contracts.TrainCompositions.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get.Results;
 using DBetter.Domain.PassengerInformationManagement;
+using DBetter.Domain.Routes;
+using DBetter.Domain.Routes.Stops;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
-using DBetter.Domain.TrainCompositions;
 using DBetter.Domain.TrainRuns;
-using DBetter.Domain.Vehicles;
 
 namespace DBetter.Application.TrainRuns.Queries.Get;
 
 public class TrainRunResponseFactory(
     TrainCirculation trainCirculation,
-    TrainRun trainRun, List<PassengerInformation> passengerInformation,
+    TrainRun trainRun,
+    List<PassengerInformation> passengerInformation,
     List<Station> stations)
 {
-    public TrainRunResponse MapToResponse(TrainRunDto dto, TrainCompositionResultDto? composition)
+    public TrainRunResponse MapToResponse(Route route, TrainCompositionResultDto? composition)
     {
         return new TrainRunResponse
         {
@@ -33,7 +30,7 @@ public class TrainRunResponseFactory(
             TransportCategory = trainCirculation.ServiceInformation.TransportCategory.ToString(),
             Line = trainCirculation.ServiceInformation.LineNumber?.Value,
             ServiceNumber = trainCirculation.ServiceInformation.ServiceNumber?.Value,
-            Stops = dto.Stops.Select(MapToResponse).ToList(),
+            Stops = route.Stops.Select(MapToResponse).ToList(),
             PassengerInformation = passengerInformation.Select(pim => pim.ToResponse()).ToList()
         };
     }
@@ -49,26 +46,26 @@ public class TrainRunResponseFactory(
         };
     }
     
-    private StopResponse MapToResponse(StopDto dto)
+    private StopResponse MapToResponse(Stop stop)
     {
-        var station = stations.First(station => station.EvaNumber == dto.EvaNumber);
-        var attributes = dto.Attributes;
+        var station = stations.First(station => station.Id == stop.StationId);
+        var attributes = stop.Attributes;
 
         return new StopResponse
         {
             Id = station.Id.Value.ToString(),
             Ril100 = station.Ril100?.Value,
-            ArrivalTime = dto.ArrivalTime?.ToResponse(),
-            DepartureTime = dto.DepartureTime?.ToResponse(),
-            Demand = dto.Demand.ToResponse(),
+            ArrivalTime = stop.ArrivalTime?.ToResponse(),
+            DepartureTime = stop.DepartureTime?.ToResponse(),
+            Demand = stop.Demand.ToResponse(),
             IsAdditional = attributes.IsAdditional,
             IsCancelled = attributes.IsCancelled,
             IsEntryOnly = attributes.IsEntryOnly,
             IsExitOnly = attributes.IsExitOnly,
             IsRequestOnly = attributes.IsRequestStop,
             Name = station.Name.Value,
-            Platform = dto.Platform?.ToResponse(),
-            StopIndex = dto.TrainRunIndex.Value,
+            Platform = stop.Platform?.ToResponse(),
+            StopIndex = stop.RouteIndex.Value,
         };
     }
 }

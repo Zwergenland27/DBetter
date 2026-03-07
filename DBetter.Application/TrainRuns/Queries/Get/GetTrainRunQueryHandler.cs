@@ -1,5 +1,6 @@
 using CleanDomainValidation.Domain;
 using CleanMediator.Commands;
+using DBetter.Application.Abstractions;
 using DBetter.Application.Abstractions.Caching;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Connections.Dtos;
@@ -28,10 +29,10 @@ public class GetTrainRunQueryHandler(
     IPassengerInformationRepository passengerInformationRepository,
     ITrainCompositionQueryRepository trainCompositionRepository) : CommandHandlerBase<GetTrainRunQuery, TrainRunResponse>
 {
-    private List<Station> _existingStations = [];
-    private List<Station> _stationsToCreate = [];
-    private List<PassengerInformation> _existingPassengerInformation = [];
-    private List<PassengerInformation> _passengerInformationToCreate = [];
+    private List<Station>? _existingStations;
+    private List<Station>? _stationsToCreate;
+    private List<PassengerInformation>? _existingPassengerInformation;
+    private List<PassengerInformation>? _passengerInformationToCreate;
     public override async Task<CanFail<TrainRunResponse>> Handle(GetTrainRunQuery request, CancellationToken cancellationToken)
     {
         if (cache.TryGetValue<TrainRunResponse>($"trainRun:get:{request.Id.Value}", out var result))
@@ -48,43 +49,60 @@ public class GetTrainRunQueryHandler(
         
         var trainCirculation = await trainCirculationRepository.GetAsync(trainRun.CirculationId);
         if (trainCirculation is null) throw new InvalidDataException("No train circulation exists for the train run");
-        
-        var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainRun.JourneyId);
-        _existingPassengerInformation = await passengerInformationRepository.GetManyAsync(trainRun.PassengerInformation.Select(im => im.InformationId));
-        _existingPassengerInformation.AddRange(await passengerInformationRepository.FindManyAsync(trainRunDto.PassengerInformation.Select(pim => pim.OriginalText)));
-        _existingPassengerInformation = _existingPassengerInformation.Distinct().ToList();
-        
-        await ExtractStations(trainRunDto);
-        ExtractMissingStations(trainRunDto);
-        ExtractMissingPassengerInformation(trainRunDto);
-        
-        stationRepository.AddRange(_stationsToCreate);
-        passengerInformationRepository.AddRange(_passengerInformationToCreate);
-        
-        trainRun.Update(trainRunDto.BikeCarriage);
-        trainRun.Update(trainRunDto.Catering);
-        
-        route.UpdateFromTrainRun(ExtractStops(trainRunDto.Stops));
-        
-        var passengerInformationSnapshots = trainRunDto.PassengerInformation
-            .Select(pimDto =>
-            {
-                var pim = _existingPassengerInformation.First(im => im.Text == pimDto.OriginalText);
-                return new TrainRunPassengerInformationSnapshot(pim.Id, pimDto.FromStopIndex, pimDto.ToStopIndex);
-            }).ToList();
-        trainRun.ReconcilePassengerInformation(passengerInformationSnapshots);
-        
-        if (trainRunDto.ServiceNumbers.Any())
+
+        try
         {
-            trainCirculation.Update(trainRunDto.ServiceNumbers.First());   
+            var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainRun.JourneyId);
+            _existingPassengerInformation =
+                await passengerInformationRepository.GetManyAsync(
+                    trainRun.PassengerInformation.Select(im => im.InformationId));
+            _existingPassengerInformation.AddRange(
+                await passengerInformationRepository.FindManyAsync(
+                    trainRunDto.PassengerInformation.Select(pim => pim.OriginalText)));
+            _existingPassengerInformation = _existingPassengerInformation.Distinct().ToList();
+
+            await ExtractStations(trainRunDto);
+            ExtractMissingStations(trainRunDto);
+            ExtractMissingPassengerInformation(trainRunDto);
+            
+            if(_stationsToCreate is null) throw new InvalidOperationException("Stations must be extracted before updating the route");
+            if(_passengerInformationToCreate is null) throw new InvalidOperationException("Passenger information must be extracted before updating the train run");
+
+            stationRepository.AddRange(_stationsToCreate);
+            passengerInformationRepository.AddRange(_passengerInformationToCreate);
+
+            trainRun.Update(trainRunDto.BikeCarriage);
+            trainRun.Update(trainRunDto.Catering);
+
+            route.UpdateFromTrainRun(ExtractStops(trainRunDto.Stops));
+
+            var passengerInformationSnapshots = trainRunDto.PassengerInformation
+                .Select(pimDto =>
+                {
+                    var pim = _existingPassengerInformation.First(im => im.Text == pimDto.OriginalText);
+                    return new TrainRunPassengerInformationSnapshot(pim.Id, pimDto.FromStopIndex, pimDto.ToStopIndex);
+                }).ToList();
+            trainRun.ReconcilePassengerInformation(passengerInformationSnapshots);
+
+            if (trainRunDto.ServiceNumbers.Any())
+            {
+                trainCirculation.Update(trainRunDto.ServiceNumbers.First());
+            }
+        }
+        catch (ServiceException ex)
+        {
         }
         
         await unitOfWork.CommitAsync(cancellationToken);
 
         var trainComposition = await trainCompositionRepository.GetAsync(trainRun.Id);
+
+        
+        _existingStations ??= await stationRepository.GetManyAsync(route.Stops.Select(s => s.StationId));
+        _existingPassengerInformation ??= await passengerInformationRepository.GetManyAsync(trainRun.PassengerInformation.Select(im => im.InformationId));
         
         var responseFactory = new TrainRunResponseFactory(trainCirculation, trainRun, _existingPassengerInformation, _existingStations);
-        var response = responseFactory.MapToResponse(trainRunDto, trainComposition);
+        var response = responseFactory.MapToResponse(route, trainComposition);
         
         cache.Set($"trainRun:get:{request.Id.Value}", response, new CacheDurationStrategy(route.Stops.First().DepartureTime!, route.Stops.Last().ArrivalTime!).GetOptimalCachingOptions());
         
@@ -99,6 +117,9 @@ public class GetTrainRunQueryHandler(
     
     private void ExtractMissingStations(TrainRunDto trainRunDto)
     {
+        if (_existingStations is null)
+            throw new InvalidOperationException("Cannot extract stations before loading existing ones.");
+        _stationsToCreate ??= [];
         var unknownStations = trainRunDto.GetUnknownStations(_existingStations);
         foreach (var station in unknownStations)
         {
@@ -110,6 +131,9 @@ public class GetTrainRunQueryHandler(
     
     private void ExtractMissingPassengerInformation(TrainRunDto trainRunDto)
     {
+        _passengerInformationToCreate ??= [];
+        if (_existingPassengerInformation is null)
+            throw new InvalidOperationException("Cannot extract passenger information before loading existing ones.");
         var unknownPassengerInformation = trainRunDto.GetUnknownPassengerInformation(_existingPassengerInformation);
         
         foreach (var passengerInformation in unknownPassengerInformation)
@@ -122,6 +146,8 @@ public class GetTrainRunQueryHandler(
     
     private List<StopSnapshot> ExtractStops(List<StopDto> stopDtos)
     {
+        if (_existingStations is null)
+            throw new InvalidOperationException("Cannot extract stops before loading existing stations.");
         var stops =  new List<StopSnapshot>();
 
         foreach (var stop in stopDtos)
@@ -132,6 +158,8 @@ public class GetTrainRunQueryHandler(
                 station.Id,
                 stop.ArrivalTime,
                 stop.DepartureTime,
+                stop.Demand,
+                stop.Platform,
                 stop.Attributes));
         }
         

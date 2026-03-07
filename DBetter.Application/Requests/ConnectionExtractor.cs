@@ -325,6 +325,8 @@ public class ConnectionExtractor(
                 station.Id,
                 stop.ArrivalTime,
                 stop.DepartureTime,
+                stop.Demand,
+                stop.Platform,
                 stop.Attributes));
         }
         
