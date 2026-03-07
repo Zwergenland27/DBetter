@@ -43,6 +43,7 @@ public class TrainRunResponseFactory(
         if (composition is null) return null;
         return new GetTrainCompositionResultDto
         {
+            TrainRunId = composition.TrainRunId,
             Vehicles = composition.Vehicles,
             Source = composition.Source.ToString()
         };

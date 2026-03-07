@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DBetter.Application.Abstractions.Caching;
 using DBetter.Application.TrainRuns;
 using DBetter.Application.TrainRuns.Dtos;
 using DBetter.Domain.TrainCirculations.ValueObjects;
@@ -10,10 +11,16 @@ using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.TrainRuns;
 
-public class BahnDeTrainRunProvider(HttpClient http) : IExternalTrainRunProvider
+public class BahnDeTrainRunProvider(
+    ICache cache,
+    HttpClient http) : IExternalTrainRunProvider
 {
     public async Task<TrainRunDto> GetTrainRunAsync(BahnJourneyId journeyId)
     {
+        if (cache.TryGetValue<TrainRunDto>($"trainRunProvider:get:{journeyId}", out var trainRunDto))
+        {
+            return trainRunDto;
+        }
         var escapedJourneyId = Uri.EscapeDataString(journeyId.Value);
         var response = await http.GetAsync($"reiseloesung/fahrt?journeyId={escapedJourneyId}");
 
@@ -35,6 +42,13 @@ public class BahnDeTrainRunProvider(HttpClient http) : IExternalTrainRunProvider
                 "Response from bahn.de could not be parsed");
         }
         
-        return new RouteSnapshotFactory(fahrt).ExtractSnapshot();
+        var result = new RouteSnapshotFactory(fahrt).ExtractSnapshot();
+
+        cache.Set($"trainRunProvider:get:{journeyId}", result, new CachingOptions
+        {
+            Duration = TimeSpan.FromSeconds(15)
+        });
+        
+        return result;
     }
 }

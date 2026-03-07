@@ -1,5 +1,6 @@
 using CleanDomainValidation.Domain;
 using CleanMediator.Commands;
+using DBetter.Application.Abstractions.Caching;
 using DBetter.Application.Abstractions.Persistence;
 using DBetter.Application.Connections.Dtos;
 using DBetter.Application.TrainCompositions;
@@ -17,6 +18,7 @@ using DBetter.Domain.TrainRuns.Snapshots;
 namespace DBetter.Application.TrainRuns.Queries.Get;
 
 public class GetTrainRunQueryHandler(
+    ICache cache,
     IUnitOfWork unitOfWork,
     IStationRepository stationRepository,
     ITrainRunRepository trainRunRepository,
@@ -32,6 +34,11 @@ public class GetTrainRunQueryHandler(
     private List<PassengerInformation> _passengerInformationToCreate = [];
     public override async Task<CanFail<TrainRunResponse>> Handle(GetTrainRunQuery request, CancellationToken cancellationToken)
     {
+        if (cache.TryGetValue<TrainRunResponse>($"trainRun:get:{request.Id.Value}", out var result))
+        {
+            return result;
+        }
+        
         await unitOfWork.BeginTransaction(cancellationToken);
         var trainRun = await trainRunRepository.GetAsync(request.Id);
         if (trainRun is null) return DomainErrors.TrainRun.NotFound(request.Id);
@@ -77,7 +84,11 @@ public class GetTrainRunQueryHandler(
         var trainComposition = await trainCompositionRepository.GetAsync(trainRun.Id);
         
         var responseFactory = new TrainRunResponseFactory(trainCirculation, trainRun, _existingPassengerInformation, _existingStations);
-        return responseFactory.MapToResponse(trainRunDto, trainComposition);
+        var response = responseFactory.MapToResponse(trainRunDto, trainComposition);
+        
+        cache.Set($"trainRun:get:{request.Id.Value}", response, new CacheDurationStrategy(route.Stops.First().DepartureTime!, route.Stops.Last().ArrivalTime!).GetOptimalCachingOptions());
+        
+        return response;
     }
 
     private async Task ExtractStations(TrainRunDto trainRunDto)

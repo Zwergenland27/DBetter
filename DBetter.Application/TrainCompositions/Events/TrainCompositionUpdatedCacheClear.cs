@@ -10,6 +10,7 @@ public class TrainCompositionUpdatedCacheClear(ICache cache): DomainEventHandler
     public override Task<CanFail> Handle(TrainCompositionUpdated @event, CancellationToken cancellationToken)
     {
         cache.Remove($"composition:{@event.TrainRun.Value}");
+        cache.Remove($"trainRun:get:{@event.TrainRun.Value}");
         return Task.FromResult(CanFail.Success);
     }
 }
