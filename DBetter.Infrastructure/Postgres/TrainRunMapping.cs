@@ -36,7 +36,7 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRun>
         builder.Property(x => x.JourneyId)
             .HasConversion(
                 jid => jid.Value,
-                value => new BahnJourneyId(value));
+                value => BahnJourneyId.Create(value));
 
         builder.Property(x => x.CirculationId)
             .HasConversion(

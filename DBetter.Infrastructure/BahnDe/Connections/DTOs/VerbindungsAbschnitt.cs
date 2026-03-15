@@ -156,7 +156,7 @@ public class VerbindungsAbschnitt : IHasMessage, IHasDemandInformation
 
     public BahnJourneyId GetJourneyId(){
         if(JourneyId is null) throw new BahnDeException("Verbindungsabschnitt", "A walking section does not have a journeyId");
-        return new BahnJourneyId(JourneyId);
+        return BahnJourneyId.Create(JourneyId);
     }
 
     public List<EvaNumber> GetEvaNumbers(){

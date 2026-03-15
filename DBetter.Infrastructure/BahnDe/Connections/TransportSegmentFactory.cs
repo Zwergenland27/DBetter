@@ -13,7 +13,7 @@ public class TransportSegmentFactory(VerbindungsAbschnitt abschnitt)
 {
     public TransportSegmentDto GetTransportSegment()
     {
-        var journeyId = new BahnJourneyId(abschnitt.JourneyId!);
+        var journeyId = BahnJourneyId.Create(abschnitt.JourneyId!);
 
         StationName? destination = null;
         var givenDestination = abschnitt.Verkehrsmittel.Richtung;

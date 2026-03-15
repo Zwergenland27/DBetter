@@ -8,7 +8,6 @@ using DBetter.Domain.TrainRuns;
 namespace DBetter.Application.Requests;
 
 public record ConnectionExtractorResult(
-    List<TrainCirculation> TrainCirculationsToCreate,
     List<TrainRun> TrainRunsToCreate,
     List<Route> RoutesToCreate,
     List<PassengerInformation> PassengerInformationToCreate,

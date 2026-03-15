@@ -3,6 +3,7 @@ using DBetter.Application.Requests;
 using DBetter.Application.TrainCompositions;
 using DBetter.Application.TrainRuns;
 using DBetter.Infrastructure.BahnDe.Connections;
+using DBetter.Infrastructure.BahnDe.Departures;
 using DBetter.Infrastructure.BahnDe.Stations;
 using DBetter.Infrastructure.BahnDe.TrainCompositions;
 using DBetter.Infrastructure.BahnDe.TrainRuns;
@@ -43,6 +44,14 @@ public static class DependencyInjection
 
         services.AddHttpClient<IExternalTrainCompositionProvider, BahnDeTrainCompositionProvider>(client =>
                 client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip
+            })
+            .AddHttpMessageHandler<MetricHttpHandler>();
+
+        services
+            .AddHttpClient<DepartureProvider>(client => client.BaseAddress = new Uri("https://www.bahn.de/web/api/"))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip

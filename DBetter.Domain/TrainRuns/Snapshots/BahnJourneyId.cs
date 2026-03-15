@@ -1,11 +1,18 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Domain.TrainRuns.Snapshots;
 
-public record BahnJourneyId(string Value)
+public record BahnJourneyId
 {
+    public string Value { get; private init; }
+
+    private BahnJourneyId(string value)
+    {
+        Value = value;
+    }
     public TrainId TrainId => TrainId.Create(Parse(Value)["ZI"]).Value;
     public EvaNumber DestinationEvaNumber => EvaNumber.Create(Parse(Value)["LS"]).Value;
     
@@ -32,5 +39,11 @@ public record BahnJourneyId(string Value)
         }
 
         return data;
+    }
+
+    public static BahnJourneyId Create(string value)
+    {
+        var normalizedValue = value.Replace("#RT#3#", "#RT#1#");
+        return new BahnJourneyId(normalizedValue);
     }
 }

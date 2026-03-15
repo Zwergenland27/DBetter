@@ -19,6 +19,11 @@ public static class DependencyInjection
                     .ForJob(OutboxProcessor.JobKey)
                     .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(10).RepeatForever()));
             
+            options.AddJob<ScrapeLongDistanceTrainsJob>(ScrapeLongDistanceTrainsJob.JobKey)
+                .AddTrigger(trigger => trigger
+                    .ForJob(ScrapeLongDistanceTrainsJob.JobKey)
+                    .WithCronSchedule("0 0 3 * * ?"));
+            
             options.UsePersistentStore(store =>
             {
                 store.UsePostgres(settings.ConnectionString);

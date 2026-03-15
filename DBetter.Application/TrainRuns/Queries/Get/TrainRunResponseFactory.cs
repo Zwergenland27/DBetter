@@ -29,7 +29,7 @@ public class TrainRunResponseFactory(
             BikeCarriage = trainRun.BikeCarriage.ToResponse(),
             Catering = trainRun.Catering.ToResponse(),
             TransportCategory = trainCirculation.ServiceInformation.TransportCategory.ToString(),
-            Line = trainCirculation.ServiceInformation.LineNumber?.Value,
+            Line = trainCirculation.ServiceInformation.LineNumber?.Number,
             ServiceNumber = trainCirculation.ServiceInformation.ServiceNumber?.Value,
             Stops = route.Stops.Select(MapToResponse).ToList(),
             PassengerInformation = passengerInformation.Select(pim => pim.ToResponse()).ToList()

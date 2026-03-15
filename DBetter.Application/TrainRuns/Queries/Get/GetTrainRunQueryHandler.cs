@@ -50,9 +50,7 @@ public class GetTrainRunQueryHandler(
         var trainCirculation = await trainCirculationRepository.GetAsync(trainRun.CirculationId);
         if (trainCirculation is null) throw new InvalidDataException("No train circulation exists for the train run");
 
-        try
-        {
-            var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainRun.JourneyId);
+        var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainRun.JourneyId);
             _existingPassengerInformation =
                 await passengerInformationRepository.GetManyAsync(
                     trainRun.PassengerInformation.Select(im => im.InformationId));
@@ -88,17 +86,19 @@ public class GetTrainRunQueryHandler(
             {
                 trainCirculation.Update(trainRunDto.ServiceNumbers.First());
             }
-        }
-        catch (ServiceException ex)
-        {
-        }
+            
+            trainCirculationRepository.Save(trainCirculation);
         
         await unitOfWork.CommitAsync(cancellationToken);
 
         var trainComposition = await trainCompositionRepository.GetAsync(trainRun.Id);
-
         
         _existingStations ??= await stationRepository.GetManyAsync(route.Stops.Select(s => s.StationId));
+        var missingStations = route.Stops.Where(stop => _existingStations.All(s => s.Id != stop.StationId)).ToList();
+        if (missingStations.Any())
+        {
+            _existingStations.AddRange(await stationRepository.GetManyAsync(missingStations.Select(s => s.StationId)));
+        }
         _existingPassengerInformation ??= await passengerInformationRepository.GetManyAsync(trainRun.PassengerInformation.Select(im => im.InformationId));
         
         var responseFactory = new TrainRunResponseFactory(trainCirculation, trainRun, _existingPassengerInformation, _existingStations);

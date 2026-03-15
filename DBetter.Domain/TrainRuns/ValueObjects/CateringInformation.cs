@@ -25,4 +25,9 @@ public record CateringInformation(
             FromStopIndex: newFromStopIndex,
             ToStopIndex: newToStopIndex);
     }
+
+    public static CateringInformation Unknown => new (
+        CateringType.None,
+        new StopIndex(0),
+        new StopIndex(0));
 }

@@ -4,13 +4,20 @@ public record LineNumber
 {
     public string Number { get; private init; }
     
-    public string? Prefix { get; private init; }
+    public string? ProductClass { get; private init; }
 
-    private LineNumber(string number, string? prefix)
+    internal LineNumber(string number, string? productClass)
     {
         Number = number;
-        Prefix = prefix;
+        ProductClass = productClass;
     }
+
+    internal LineNumber Update(LineNumber newLineNumber)
+    {
+        if (newLineNumber.Number == Number) return this;
+        return this with { Number = newLineNumber.Number };
+    }
+    
     public static LineNumber Create(string value)
     {
         var splitted = value.Split(" ");

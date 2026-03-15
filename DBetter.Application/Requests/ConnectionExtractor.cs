@@ -28,7 +28,6 @@ public class ConnectionExtractor(
 {
     
     public List<TrainCirculation>? ExistingTrainCirculations;
-    public List<TrainCirculation>? TrainCirculationsToCreate;
     public List<TrainRun>? ExistingTrainRuns;
     public List<TrainRun>? TrainRunsToCreate;
     public List<Route>? ExistingRoutes;
@@ -76,8 +75,8 @@ public class ConnectionExtractor(
             ExtractMissingTrainRunsWithRoutes(connection);
             ExtractMissingConnection(connection, route);
         }
-
-        if (TrainCirculationsToCreate is null)
+        
+        if(ExistingTrainCirculations is null)
             throw new InvalidOperationException("Train circulations have not been extracted");
         if (TrainRunsToCreate is null)
             throw new InvalidOperationException("Train runs have not been extracted");
@@ -90,8 +89,9 @@ public class ConnectionExtractor(
         if (FoundConnections is null)
             throw new InvalidOperationException("Connections have not been extracted");
 
+        trainCirculationRepository.Save(ExistingTrainCirculations);
+        
         return new ConnectionExtractorResult(
-            TrainCirculationsToCreate,
             TrainRunsToCreate,
             RoutesToCreate,
             PassengerInformationToCreate,
@@ -225,7 +225,6 @@ public class ConnectionExtractor(
         if (ExistingTrainCirculations is null)
             throw new InvalidOperationException(
                 "Cannot extract missing train circulations before existing train circulation information have been extracted.");
-        TrainCirculationsToCreate ??= [];
         
         var transportSegments = connectionDto.Segments.OfType<TransportSegmentDto>();
         foreach (var transportSegment in transportSegments)
@@ -240,7 +239,6 @@ public class ConnectionExtractor(
             var newTrainCirculation =
                 TrainCirculation.Create(transportSegment.JourneyId, transportSegment.Composition.First());
             ExistingTrainCirculations.Add(newTrainCirculation);
-            TrainCirculationsToCreate.Add(newTrainCirculation);
         }
     }
     private void ExtractMissingTrainRunsWithRoutes(ConnectionDto connectionDto)
@@ -248,9 +246,9 @@ public class ConnectionExtractor(
         if (ExistingTrainRuns is null)
             throw new InvalidOperationException(
                 "Cannot extract missing train runs before existing train runs have been extracted.");
-        if (ExistingTrainCirculations is null || TrainCirculationsToCreate is null)
+        if (ExistingTrainCirculations is null)
             throw new InvalidOperationException(
-                "Cannot extract missing train runs before existing AND missing train circulation have been extracted.");
+                "Cannot extract missing train runs before train circulation have been extracted.");
 
         if (ExistingRoutes is null)
             throw new InvalidOperationException(

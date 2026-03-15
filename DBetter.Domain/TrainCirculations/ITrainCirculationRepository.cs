@@ -7,5 +7,6 @@ public interface ITrainCirculationRepository
     Task<TrainCirculation?> GetAsync(TrainCirculationId id);
     Task<List<TrainCirculation>> GetManyAsync(IEnumerable<TimeTableCompositeIdentifier> timeTableIdentifier);
     
-    void AddRange(IEnumerable<TrainCirculation> trainCirculations);
+    void Save(TrainCirculation trainCirculation);
+    void Save(IEnumerable<TrainCirculation> trainCirculations);
 }

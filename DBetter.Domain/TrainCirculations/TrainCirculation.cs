@@ -11,7 +11,7 @@ public class TrainCirculation : AggregateRoot<TrainCirculationId>
     
     public ServiceInformation ServiceInformation { get; private set; }
 
-    private TrainCirculation(
+    internal TrainCirculation(
         TrainCirculationId id,
         TimeTablePeriod timeTablePeriod,
         TrainId trainId,
@@ -21,8 +21,6 @@ public class TrainCirculation : AggregateRoot<TrainCirculationId>
         TimeTablePeriod = timeTablePeriod;
         ServiceInformation = serviceInformation;
     }
-    
-    private TrainCirculation() : base(null!){}
 
 
     public static TrainCirculation Create(BahnJourneyId journeyId, ServiceInformation serviceInformation)
@@ -32,5 +30,10 @@ public class TrainCirculation : AggregateRoot<TrainCirculationId>
     public void Update(ServiceNumber newServiceNumber)
     {
         ServiceInformation = ServiceInformation.UpdateServiceNumber(newServiceNumber);
+    }
+
+    public void Update(LineNumber newLineNumber)
+    {
+        ServiceInformation = ServiceInformation.UpdateLineNumber(newLineNumber);
     }
 }

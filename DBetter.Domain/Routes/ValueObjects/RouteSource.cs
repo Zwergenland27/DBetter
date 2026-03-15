@@ -14,5 +14,9 @@ public enum RouteSource
     /// <summary>
     /// Route is generated based on previous route information
     /// </summary>
-    Historical
+    Historical,
+    /// <summary>
+    /// Empty route is generates by the departure
+    /// </summary>
+    Departure
 }

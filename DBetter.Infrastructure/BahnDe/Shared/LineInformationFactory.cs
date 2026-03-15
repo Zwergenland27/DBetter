@@ -69,9 +69,11 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
         else if (splitLineInformation.Length == 2 && splitLineInformation[0].All(char.IsLetter))
         {
             _lineNumber = LineNumber.Create($"{splitLineInformation[0]} {splitLineInformation[1]}");
-            
-            //TODO: line number is sometimes the train number, like in ICEs or TGVs and should be extracted for a correct data model
-            //This should not be done using static filters (like only for ices) because sometimes a normal train is also missing its line number
+
+            if (_category is TransportCategory.HighSpeedTrain or TransportCategory.FastTrain)
+            {
+                _serviceNumber = new ServiceNumber(int.Parse(splitLineInformation[1]));
+            }
         }
         //Trains with service number and without any additional names
         else if (splitLineInformation.Length == 2 && splitLineInformation[0].Any(char.IsDigit))

@@ -56,7 +56,6 @@ public class GetConnectionSuggestionsQueryHandler(
         var result = extractor.ExtractMissingInformation(connectionRequest.PlannedRoute);
         
         passengerInformationRepository.AddRange(result.PassengerInformationToCreate);
-        trainCirculationRepository.AddRange(result.TrainCirculationsToCreate);
         connectionRepository.AddRange(result.FoundConnections);
         trainRunRepository.AddRange(result.TrainRunsToCreate);
         routeRepository.AddRange(result.RoutesToCreate);

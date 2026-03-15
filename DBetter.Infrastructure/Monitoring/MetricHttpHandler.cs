@@ -56,6 +56,7 @@ public class MetricHttpHandler : DelegatingHandler
         if (path.Contains("db-api-marketplace/apis/timetables/v1")) return "Timetables";
         if (path.Contains("reisebegleitung/wagenreihung")) return "TrainCompositionRT";
         if (path.Contains("gsd/gsd_v3")) return "TrainCompositionSP";
+        if (path.Contains("reiseloesung/abfahrten")) return "Departures";
         
         throw new InvalidDataException($"Endpoint {path} currently not present in metrics");
     }

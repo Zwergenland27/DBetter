@@ -104,7 +104,7 @@ public class ConnectionResponseFactory(
             Demand = dto.Demand.ToResponse(),
             Origin = originStationName?.NormalizedValue,
             Destination = destinationStationName?.NormalizedValue ?? dto.Destination?.NormalizedValue,
-            Line = serviceInformation.LineNumber?.Value,
+            Line = serviceInformation.LineNumber?.Number,
             ServiceNumber = serviceInformation.ServiceNumber?.Value,
             Operator = null,
             TransportCategory = serviceInformation.TransportCategory.ToString(),

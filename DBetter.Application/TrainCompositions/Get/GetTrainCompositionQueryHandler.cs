@@ -121,16 +121,17 @@ public class GetTrainCompositionQueryHandler(
         
         var firstStop = _route.Stops.First();
         var firstStation = _relevantStations.First(s => s.Id == firstStop.StationId);
-        var timeDifference = firstStop.DepartureTime!.Planned - DateTime.UtcNow;
+        var timeSinceDeparture = firstStop.DepartureTime!.Planned - DateTime.UtcNow;
+        var timeSinceArrival = _route.Stops.Last().ArrivalTime!.Planned - DateTime.UtcNow;
         
         //Past - reject
-        if (timeDifference < -TimeSpan.FromHours(8))
+        if (timeSinceArrival < -TimeSpan.FromHours(8))
         {
             return DomainErrors.TrainComposition.InPast;
         } 
         
         //Not in Future - try get realtime data
-        if (timeDifference <= TimeSpan.FromHours(8))
+        if (timeSinceDeparture <= TimeSpan.FromHours(8))
         {
             var trainCompositionDto = await trainCompositionProvider.GetRealTimeDataAsync(
                 _trainCirculation.ServiceInformation.ServiceNumber,

@@ -25,4 +25,9 @@ public record BikeCarriageInformation(
             FromStopIndex: newFromStopIndex,
             ToStopIndex: newToStopIndex);
     }
+
+    public static BikeCarriageInformation Unknown => new (
+        BikeCarriageStatus.NoInfo,
+        new StopIndex(0),
+        new StopIndex(0));
 }
