@@ -65,6 +65,13 @@ public class LineInformationFactory(string produktGattung, string fullLineInform
                 _serviceNumber = new ServiceNumber(int.Parse(serviceNumberContent));
             }
         }
+        //Trains without a line number, but with a service number like FEX (<NR>)
+        else if (splitLineInformation.Length == 2 && splitLineInformation[0].All(char.IsLetter) &&
+                 splitLineInformation[1].StartsWith('(') && splitLineInformation[1].EndsWith(')'))
+        {
+            _lineNumber = LineNumber.Create(splitLineInformation[0]);
+            _serviceNumber = new ServiceNumber(int.Parse(splitLineInformation[1]));
+        }
         //Trains without dedicated train number
         else if (splitLineInformation.Length == 2 && splitLineInformation[0].All(char.IsLetter))
         {
