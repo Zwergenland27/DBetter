@@ -6,6 +6,7 @@ public static partial class DomainErrors
 {
     public static class Station
     {
+        public static Error NotFound => Error.NotFound("Station.NotFound", "A station with the specified id was not found.");
         public static class Id
         {
             public static Error Invalid(string value) => Error.Validation("Station.Id.Invalid", $"{value} is no valid guid.");

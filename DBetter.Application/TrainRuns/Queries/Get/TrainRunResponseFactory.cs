@@ -1,5 +1,6 @@
 using DBetter.Application.Requests.GetSuggestions;
 using DBetter.Application.TrainCompositions.Dtos;
+using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
 using DBetter.Contracts.TrainCompositions.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get.Results;
 using DBetter.Domain.PassengerInformationManagement;
@@ -8,6 +9,7 @@ using DBetter.Domain.Routes.Stops;
 using DBetter.Domain.Stations;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainRuns;
+using StopResponse = DBetter.Contracts.TrainRuns.Queries.Get.Results.StopResponse;
 
 namespace DBetter.Application.TrainRuns.Queries.Get;
 
@@ -19,6 +21,17 @@ public class TrainRunResponseFactory(
 {
     public TrainRunResponse MapToResponse(Route route, TrainCompositionResultDto? composition)
     {
+        var serviceInformation = trainCirculation.ServiceInformation;
+        LineInformationResponse? lineInformation = null;
+        if (serviceInformation.LineNumber is not null)
+        {
+            lineInformation = new LineInformationResponse
+            {
+                Number = serviceInformation.LineNumber.Number,
+                ProductClass = serviceInformation.LineNumber.ProductClass,
+                ServiceNumber = serviceInformation.ServiceNumber?.Value,
+            };
+        }
         return new TrainRunResponse
         {
             TrainComposition = MapToResponse(composition),
@@ -28,9 +41,8 @@ public class TrainRunResponseFactory(
             Operator = null,
             BikeCarriage = trainRun.BikeCarriage.ToResponse(),
             Catering = trainRun.Catering.ToResponse(),
-            TransportCategory = trainCirculation.ServiceInformation.TransportCategory.ToString(),
-            Line = trainCirculation.ServiceInformation.LineNumber?.Number,
-            ServiceNumber = trainCirculation.ServiceInformation.ServiceNumber?.Value,
+            TransportCategory = serviceInformation.TransportCategory.ToString(),
+            Line = lineInformation,
             Stops = route.Stops.Select(MapToResponse).ToList(),
             PassengerInformation = passengerInformation.Select(pim => pim.ToResponse()).ToList()
         };

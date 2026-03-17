@@ -6,6 +6,8 @@ namespace DBetter.Domain.Routes;
 public interface IRouteRepository
 {
     void AddRange(IEnumerable<Route> routes);
+    
+    void Add(Route route);
 
     Task<Route?> GetAsync(TrainRunId trainRunId);
     

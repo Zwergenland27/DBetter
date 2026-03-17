@@ -51,44 +51,47 @@ public class GetTrainRunQueryHandler(
         if (trainCirculation is null) throw new InvalidDataException("No train circulation exists for the train run");
 
         var trainRunDto = await trainRunProvider.GetTrainRunAsync(trainRun.JourneyId);
-            _existingPassengerInformation =
-                await passengerInformationRepository.GetManyAsync(
-                    trainRun.PassengerInformation.Select(im => im.InformationId));
-            _existingPassengerInformation.AddRange(
-                await passengerInformationRepository.FindManyAsync(
-                    trainRunDto.PassengerInformation.Select(pim => pim.OriginalText)));
-            _existingPassengerInformation = _existingPassengerInformation.Distinct().ToList();
+        _existingPassengerInformation =
+            await passengerInformationRepository.GetManyAsync(
+                trainRun.PassengerInformation.Select(im => im.InformationId));
+        _existingPassengerInformation.AddRange(
+            await passengerInformationRepository.FindManyAsync(
+                trainRunDto.PassengerInformation.Select(pim => pim.OriginalText)));
+        _existingPassengerInformation = _existingPassengerInformation.Distinct().ToList();
 
-            await ExtractStations(trainRunDto);
-            ExtractMissingStations(trainRunDto);
-            ExtractMissingPassengerInformation(trainRunDto);
-            
-            if(_stationsToCreate is null) throw new InvalidOperationException("Stations must be extracted before updating the route");
-            if(_passengerInformationToCreate is null) throw new InvalidOperationException("Passenger information must be extracted before updating the train run");
+        await ExtractStations(trainRunDto);
+        ExtractMissingStations(trainRunDto);
+        ExtractMissingPassengerInformation(trainRunDto);
 
-            stationRepository.AddRange(_stationsToCreate);
-            passengerInformationRepository.AddRange(_passengerInformationToCreate);
+        if (_stationsToCreate is null)
+            throw new InvalidOperationException("Stations must be extracted before updating the route");
+        if (_passengerInformationToCreate is null)
+            throw new InvalidOperationException(
+                "Passenger information must be extracted before updating the train run");
 
-            trainRun.Update(trainRunDto.BikeCarriage);
-            trainRun.Update(trainRunDto.Catering);
+        stationRepository.AddRange(_stationsToCreate);
+        passengerInformationRepository.AddRange(_passengerInformationToCreate);
 
-            route.UpdateFromTrainRun(ExtractStops(trainRunDto.Stops));
+        trainRun.Update(trainRunDto.BikeCarriage);
+        trainRun.Update(trainRunDto.Catering);
 
-            var passengerInformationSnapshots = trainRunDto.PassengerInformation
-                .Select(pimDto =>
-                {
-                    var pim = _existingPassengerInformation.First(im => im.Text == pimDto.OriginalText);
-                    return new TrainRunPassengerInformationSnapshot(pim.Id, pimDto.FromStopIndex, pimDto.ToStopIndex);
-                }).ToList();
-            trainRun.ReconcilePassengerInformation(passengerInformationSnapshots);
+        route.UpdateFromTrainRun(ExtractStops(trainRunDto.Stops));
 
-            if (trainRunDto.ServiceNumbers.Any())
+        var passengerInformationSnapshots = trainRunDto.PassengerInformation
+            .Select(pimDto =>
             {
-                trainCirculation.Update(trainRunDto.ServiceNumbers.First());
-            }
-            
-            trainCirculationRepository.Save(trainCirculation);
-        
+                var pim = _existingPassengerInformation.First(im => im.Text == pimDto.OriginalText);
+                return new TrainRunPassengerInformationSnapshot(pim.Id, pimDto.FromStopIndex, pimDto.ToStopIndex);
+            }).ToList();
+        trainRun.ReconcilePassengerInformation(passengerInformationSnapshots);
+
+        if (trainRunDto.ServiceNumbers.Any())
+        {
+            trainCirculation.Update(trainRunDto.ServiceNumbers.First());
+        }
+
+        trainCirculationRepository.Save(trainCirculation);
+
         await unitOfWork.CommitAsync(cancellationToken);
 
         var trainComposition = await trainCompositionRepository.GetAsync(trainRun.Id);

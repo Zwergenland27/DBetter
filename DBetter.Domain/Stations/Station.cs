@@ -78,4 +78,9 @@ public class Station : AggregateRoot<StationId>
     {
         Ril100 = ri100Identifier;
     }
+
+    public void ScrapeDepartures(DateOnly forDay)
+    {
+        RaiseDomainEvent(new StationDeparturesScrapingScheduledEvent(Id, forDay));
+    }
 }

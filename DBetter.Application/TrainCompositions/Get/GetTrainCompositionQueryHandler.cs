@@ -230,8 +230,9 @@ public class GetTrainCompositionQueryHandler(
         
         foreach (var vehicle in trainCompositionDto.Vehicles)
         {
-            var destinationStation = _relevantStations.First(station => station.Name == vehicle.DestinationStation);
-            
+            var destinationStation = _relevantStations.FirstOrDefault(station => station.Name == vehicle.DestinationStation) ??
+                                     _relevantStations.First(station => station.Id == _route.Stops.Last().StationId); //Fallback for the case the destination station is the short station name
+
             var coachSequence = vehicle.Coaches.Select(c => c.ConstructionType).ToList();
             
             var existingVehicle = relevantVehicles.FirstOrDefault(v => v.MatchesConstructionType(coachSequence));

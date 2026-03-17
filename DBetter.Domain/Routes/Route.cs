@@ -125,15 +125,18 @@ public class Route : AggregateRoot<RouteId>
         foreach (var stop in stopSnapshots)
         {
             var existingStop = _stops.FirstOrDefault(s => s.StationId == stop.StationId);
-            if (existingStop is not null && (containsRealTimeInformation || !inPast))
+            if (existingStop is not null)
             {
-                existingStop.Update(
-                    stop.RouteIndex, 
-                    stop.DepartureTime,
-                    stop.ArrivalTime,
-                    stop.Demand,
-                    stop.Platform,
-                    stop.Attributes);
+                if (containsRealTimeInformation || !inPast)
+                {
+                    existingStop.Update(
+                        stop.RouteIndex, 
+                        stop.DepartureTime,
+                        stop.ArrivalTime,
+                        stop.Demand,
+                        stop.Platform,
+                        stop.Attributes);
+                }
                 continue;
             }
             

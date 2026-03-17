@@ -93,6 +93,17 @@ public class ConnectionResponseFactory(
         var trainCirculation = trainCirculations.First(tc => tc.TrainId == dto.JourneyId.TrainId);
         var trainRun = trainRuns.First(tr => tr.CirculationId == trainCirculation.Id && tr.OperatingDay == dto.JourneyId.OperatingDay);
         var serviceInformation = trainCirculation.ServiceInformation;
+
+        LineInformationResponse? lineInformation = null;
+        if (serviceInformation.LineNumber is not null)
+        {
+            lineInformation = new LineInformationResponse
+            {
+                Number = serviceInformation.LineNumber.Number,
+                ProductClass = serviceInformation.LineNumber.ProductClass,
+                ServiceNumber = serviceInformation.ServiceNumber?.Value,
+            };
+        }
         
         return new TransportSegmentResponse
         {
@@ -104,8 +115,7 @@ public class ConnectionResponseFactory(
             Demand = dto.Demand.ToResponse(),
             Origin = originStationName?.NormalizedValue,
             Destination = destinationStationName?.NormalizedValue ?? dto.Destination?.NormalizedValue,
-            Line = serviceInformation.LineNumber?.Number,
-            ServiceNumber = serviceInformation.ServiceNumber?.Value,
+            Line = lineInformation,
             Operator = null,
             TransportCategory = serviceInformation.TransportCategory.ToString(),
             PassengerInformation = trainRun.PassengerInformation

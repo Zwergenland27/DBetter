@@ -8,7 +8,7 @@ using DBetter.Domain.TrainRuns.Events;
 
 namespace DBetter.Application.TrainRuns.Events;
 
-[Throttled(RequestInterval = 1000)]
+[Throttled(RequestInterval = 2000)]
 public class TrainRunScrapeEventHandler(IMediator mediator) : DomainEventHandlerBase<TrainRunScrapingScheduledEvent>
 {
     public override async Task<CanFail> Handle(TrainRunScrapingScheduledEvent @event, CancellationToken cancellationToken)

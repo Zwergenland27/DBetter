@@ -40,18 +40,12 @@ public class TrainRunResponse {
     /// Line number
     /// </summary>
     /// <example>RE 2</example>
-    public required string? Line { get; set; }
+    public required LineInformationResponse? Line { get; set; }
     
     /// <summary>
     /// Stops of the train run
     /// </summary>
     public required List<StopResponse> Stops { get; set; }
-
-    /// <summary>
-    /// Service number of the train run
-    /// </summary>
-    /// <example>1645</example>
-    public required int? ServiceNumber { get; set; }
     
     /// <summary>
     /// Information about bike carriage

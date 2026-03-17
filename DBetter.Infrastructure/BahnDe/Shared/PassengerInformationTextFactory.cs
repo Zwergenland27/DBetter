@@ -3,6 +3,7 @@ using DBetter.Contracts.Requests.CreateRequest;
 using DBetter.Domain.PassengerInformationManagement.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
+using DBetter.Infrastructure.BahnDe.Departures;
 using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
 
 namespace DBetter.Infrastructure.BahnDe.Shared;

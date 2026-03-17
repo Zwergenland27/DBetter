@@ -12,6 +12,23 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
         return db.TrainRuns.FirstOrDefaultAsync(r => r.Id == id);
     }
 
+    public Task<TrainRun?> GetAsync(TrainRunCompositeIdentifier identifier)
+    {
+        var sql = $"""
+                   SELECT tr.*
+                   FROM "TrainRuns" tr
+                   JOIN "TrainCirculations" tc ON tr."CirculationId" = tc."Id"
+                   WHERE 
+                       tc."TrainId" = {identifier.TrainId.Value} AND
+                       tc."TimeTablePeriod" = {identifier.TimeTablePeriod.Year} AND
+                       tr."OperatingDay" = '{identifier.OperatingDay.Date.ToString("yyyy-MM-dd")}'
+                   """;
+        
+        return db.TrainRuns
+            .FromSqlRaw(sql)
+            .FirstOrDefaultAsync();
+    }
+
     public Task<List<TrainRun>> GetManyAsync(IEnumerable<TrainRunCompositeIdentifier> compositeIdentifiers)
     {
         
@@ -32,5 +49,10 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
     public void AddRange(IEnumerable<TrainRun> trainRuns)
     {
         db.TrainRuns.AddRange(trainRuns);
+    }
+
+    public void Add(TrainRun trainRun)
+    {
+        db.TrainRuns.Add(trainRun);
     }
 }

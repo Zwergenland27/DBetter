@@ -5,6 +5,7 @@ namespace DBetter.Domain.TrainCirculations;
 public interface ITrainCirculationRepository
 {
     Task<TrainCirculation?> GetAsync(TrainCirculationId id);
+    Task<TrainCirculation?> GetAsync(TimeTableCompositeIdentifier identifier);
     Task<List<TrainCirculation>> GetManyAsync(IEnumerable<TimeTableCompositeIdentifier> timeTableIdentifier);
     
     void Save(TrainCirculation trainCirculation);

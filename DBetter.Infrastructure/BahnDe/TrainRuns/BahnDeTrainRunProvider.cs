@@ -8,13 +8,26 @@ using DBetter.Domain.TrainRuns.Snapshots;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Routes;
 using DBetter.Infrastructure.BahnDe.TrainRuns.DTOs;
+using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Logging;
+using Polly;
 
 namespace DBetter.Infrastructure.BahnDe.TrainRuns;
 
 public class BahnDeTrainRunProvider(
+    ILogger<BahnDeTrainRunProvider> logger,
     ICache cache,
     HttpClient http) : IExternalTrainRunProvider
 {
+    private ResiliencePipeline<HttpResponseMessage> _resiliencePipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
+        .AddRetry(new HttpRetryStrategyOptions
+        {
+            MaxRetryAttempts = 4,
+            Delay = TimeSpan.FromSeconds(5),
+            ShouldHandle = BahnDeRetryStrategyOptions.IsTransient
+        })
+        .Build();
+    
     public async Task<TrainRunDto> GetTrainRunAsync(BahnJourneyId journeyId)
     {
         if (cache.TryGetValue<TrainRunDto>($"trainRunProvider:get:{journeyId}", out var trainRunDto))
@@ -22,10 +35,12 @@ public class BahnDeTrainRunProvider(
             return trainRunDto;
         }
         var escapedJourneyId = Uri.EscapeDataString(journeyId.Value);
-        var response = await http.GetAsync($"reiseloesung/fahrt?journeyId={escapedJourneyId}");
-
+        var response = await _resiliencePipeline.ExecuteAsync(async ct =>
+            await http.GetAsync($"reiseloesung/fahrt?journeyId={escapedJourneyId}", ct));
+        
         if (!response.IsSuccessStatusCode)
         {
+            logger.LogError("Train run with journey Id {BahnJourneyId} returned {ResponseStatusCode}", journeyId.Value, response.StatusCode);
             throw new BahnDeException("BahnDeRouteProvider.GetRoute", $"Requesting route from bahn.de failed with status code {response.StatusCode}");
         }
         

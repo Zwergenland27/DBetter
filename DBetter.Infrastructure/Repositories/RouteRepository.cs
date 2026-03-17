@@ -13,6 +13,11 @@ public class RouteRepository(DBetterContext db) : IRouteRepository
         db.AddRange(routes);
     }
 
+    public void Add(Route route)
+    {
+        db.Add(route);
+    }
+
     public Task<Route?> GetAsync(TrainRunId trainRunId)
     {
         return db.Routes.FirstOrDefaultAsync(r => r.TrainRunId == trainRunId);

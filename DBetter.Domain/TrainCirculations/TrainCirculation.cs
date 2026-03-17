@@ -32,6 +32,11 @@ public class TrainCirculation : AggregateRoot<TrainCirculationId>
         ServiceInformation = ServiceInformation.UpdateServiceNumber(newServiceNumber);
     }
 
+    public void Update(ServiceInformation newServiceInformation)
+    {
+        ServiceInformation = newServiceInformation;
+    }
+
     public void Update(LineNumber newLineNumber)
     {
         ServiceInformation = ServiceInformation.UpdateLineNumber(newLineNumber);

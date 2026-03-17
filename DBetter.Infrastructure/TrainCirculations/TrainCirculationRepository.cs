@@ -13,6 +13,13 @@ public class TrainCirculationRepository(DBetterContext db) : ITrainCirculationRe
         return persistenceDto?.ToDomain();
     }
 
+    public async Task<TrainCirculation?> GetAsync(TimeTableCompositeIdentifier identifier)
+    {
+        var persistenceDto = await db.TrainCirculations.FirstOrDefaultAsync(tc =>
+            tc.TimeTablePeriod == identifier.TimeTablePeriod.Year && tc.TrainId == identifier.TrainId.Value);
+        return persistenceDto?.ToDomain();
+    }
+
     public async Task<List<TrainCirculation>> GetManyAsync(IEnumerable<TimeTableCompositeIdentifier> timeTableIdentifier)
     {
         var sql = $"""
