@@ -33,6 +33,9 @@ jobs:
           username: ${{vars.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
 
+      - name: Restore dependencies
+        run: dotnet restore
+
       - name: Publish Container
         run: |
           dotnet publish ${{ vars.PROJECT_NAME }} \
