@@ -33,18 +33,12 @@ jobs:
           username: ${{vars.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
 
-      - name: Restore dependencies
-        run: dotnet restore
-
       - name: Publish Container
         run: |
           dotnet publish ${{ vars.PROJECT_NAME }} \
-          --no-restore \
-          --no-build \
           --configuration Release \
           --os linux \
           --arch x64 \
-          --no-self-contained \
           /t:PublishContainer \
           -p:ContainerRegistry=registry-1.docker.io \
           -p:ContainerRepository=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.CONTAINER_NAME }} \
