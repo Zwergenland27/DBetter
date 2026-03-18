@@ -27,13 +27,10 @@ jobs:
           echo Version: $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Log in to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{vars.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
       - name: Publish Container
+        env:
+          SDK_CONTAINER_REGISTRY_UNAME: ${{ vars.DOCKERHUB_USERNAME }}
+          SDK_CONTAINER_REGISTRY_PWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           dotnet publish ${{ vars.PROJECT_NAME }} \
           --configuration Release \
