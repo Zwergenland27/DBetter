@@ -1,6 +1,7 @@
 using CleanDomainValidation.Domain;
-using DBetter.Application.Abstractions.Messaging;
-using MediatR;
+using CleanMediator;
+using CleanMediator.Commands;
+using CleanMediator.Queries;
 
 namespace DBetter.Api;
 
@@ -14,7 +15,7 @@ public static class RequestExtensions
     {
         if(requestResult.HasFailed) return requestResult.HandleFailure("Request is invalid");
         
-        var executionResult = await mediator.Send(requestResult.Value);
+        var executionResult = await mediator.ExecuteAsync(requestResult.Value);
         if (executionResult.HasFailed) return executionResult.HandleFailure();
         return onSuccess();
     }
@@ -27,7 +28,7 @@ public static class RequestExtensions
     {
         if(requestResult.HasFailed) return requestResult.HandleFailure("Request is invalid");
         
-        var executionResult = await mediator.Send(requestResult.Value);
+        var executionResult = await mediator.ExecuteAsync(requestResult.Value);
         if (executionResult.HasFailed) return executionResult.HandleFailure();
         return onSuccess(executionResult.Value);
     }
@@ -40,7 +41,7 @@ public static class RequestExtensions
     {
         if(requestResult.HasFailed) return requestResult.HandleFailure("Request is invalid");
         
-        var executionResult = await mediator.Send(requestResult.Value);
+        var executionResult = await mediator.RunAsync(requestResult.Value);
         if (executionResult.HasFailed) return executionResult.HandleFailure();
         return onSuccess(executionResult.Value);
     }

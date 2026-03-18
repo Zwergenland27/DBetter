@@ -9,7 +9,7 @@ public record RouteId(Guid Value)
     {
         return new(Guid.NewGuid());
     }
-    
+
     public static CanFail<RouteId> Create(string value)
     {
         if (Guid.TryParse(value, out var guid))
@@ -19,4 +19,4 @@ public record RouteId(Guid Value)
 
         return DomainErrors.Route.Id.Invalid(value);
     }
-};
+}

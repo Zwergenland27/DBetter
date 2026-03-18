@@ -11,11 +11,13 @@ public class Ermaessigung
     /// <summary>
     /// Discount type
     /// </summary>
+    /// <remarks>Use <see cref="ArtErmaessigung"/> to serialize / deserialize this string</remarks>
     public required string Art { get; set; }
     
     /// <summary>
     /// Comfort class where the discount is valid
     /// </summary>
+    /// <remarks>Use <see cref="KlasseErmaessigung"/> to serialize / deserialize this string</remarks>
     public required string Klasse { get; set; }
 
     public static Ermaessigung None()

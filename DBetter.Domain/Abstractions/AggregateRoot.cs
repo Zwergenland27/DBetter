@@ -1,4 +1,4 @@
-using MediatR;
+using CleanMessageBus.Abstractions;
 
 namespace DBetter.Domain.Abstractions;
 

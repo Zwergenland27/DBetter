@@ -1,17 +1,7 @@
 namespace DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
-/// <summary>
-/// Indicates wether the request time should be interpreted as departure or arrival time
-/// </summary>
-public enum AnkunftSuche
+public static class AnkunftSuche
 {
-    /// <summary>
-    /// Departure
-    /// </summary>
-    ABFAHRT,
-    
-    /// <summary>
-    /// Arrival
-    /// </summary>
-    ANKUNFT
+    public static readonly string Departure = "ABFAHRT";
+    public static readonly string Arrival = "ANKUNFT";
 }

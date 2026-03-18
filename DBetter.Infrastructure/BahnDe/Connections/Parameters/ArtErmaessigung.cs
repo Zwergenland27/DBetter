@@ -10,7 +10,7 @@ public static class ArtErmaessigung
 {
     private record DiscountWithAlias(string Alias, DiscountType Type, string UrlId);
     
-    private static List<DiscountWithAlias> _discountTypes =
+    private static readonly DiscountWithAlias[] DiscountTypes =
     [
         new("BAHNCARD25", DiscountType.BahnCard25, "17"),
         new("BAHNCARDBUSINESS25", DiscountType.BahnCard25Business, "19"),
@@ -29,11 +29,11 @@ public static class ArtErmaessigung
     /// </summary>
     public static string None => "KEINE_ERMAESSIGUNG";
 
-    public static string NoneId => "16";
+    public static string NoneUrlId => "16";
 
     public static DiscountType GetTypeFromAlias(string alias)
     {
-        var result = _discountTypes.FirstOrDefault(x => x.Alias == alias);
+        var result = DiscountTypes.FirstOrDefault(x => x.Alias == alias);
 
         if (result is null)
         {
@@ -45,7 +45,7 @@ public static class ArtErmaessigung
 
     public static string GetAliasFromType(DiscountType discountType)
     {
-        var result = _discountTypes.FirstOrDefault(x => x.Type == discountType);
+        var result = DiscountTypes.FirstOrDefault(x => x.Type == discountType);
 
         if (result is null)
         {
@@ -56,15 +56,13 @@ public static class ArtErmaessigung
     }
 
 
-    public static string GetUrlIdFromAlias(string alias)
+    public static string GetUrlIdFromType(DiscountType discountType)
     {
-        if (alias == None) return NoneId;
-        
-        var result = _discountTypes.FirstOrDefault(x => x.Alias == alias);
+        var result = DiscountTypes.FirstOrDefault(x => x.Type == discountType);
 
         if (result is null)
         {
-            throw new BahnDeException("Mapping.ArtErmaessigung", $"Alias {alias} not found");
+            throw new BahnDeException("Mapping.ArtErmaessigung", $"Discount type {discountType} not found");
         }
         
         return result.UrlId;

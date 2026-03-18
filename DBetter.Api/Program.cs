@@ -2,6 +2,7 @@ using DBetter.Api;
 using DBetter.Application;
 using DBetter.Infrastructure;
 using DBetter.Infrastructure.Monitoring;
+using DBetter.Infrastructure.RealtimeNotification;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi.Models;
@@ -23,14 +24,13 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
     });
-    
+
     options.OperationFilter<SecurityRequirementsOperationFilter>();
-    
+
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "DBetter.Contracts.xml"));
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "DBetter.Api.xml"));
-    
-});
 
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("dev", policyBuilder =>
@@ -73,17 +73,19 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors("dev");   
+    app.UseCors("dev");
 }
 
 app.UseCors("prod");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<TrainCompositionHub>("/rt/trainCompositions");
+
 app.AddStationEndpoints();
 app.AddUserEndpoints();
 app.AddAuthenticationEndpoints();
-app.AddConnectionEndpoints();
-app.AddRouteEndpoints();
+app.AddRequestEndpoints();
+app.AddTrainRunEndpoints();
 
 app.Run();

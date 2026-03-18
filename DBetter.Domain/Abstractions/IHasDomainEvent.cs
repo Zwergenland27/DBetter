@@ -1,3 +1,5 @@
+using CleanMessageBus.Abstractions;
+
 namespace DBetter.Domain.Abstractions;
 
 public interface IHasDomainEvent

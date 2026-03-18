@@ -1,0 +1,27 @@
+using DBetter.Application.Shared;
+using DBetter.Domain.Shared;
+using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainCirculations.ValueObjects;
+using DBetter.Domain.TrainRuns.Snapshots;
+using DBetter.Domain.TrainRuns.ValueObjects;
+
+namespace DBetter.Application.Connections.Dtos;
+
+public record TransportSegmentDto : SegmentDto
+{
+    public required BahnJourneyId JourneyId { get; init; }
+    
+    public required Demand Demand { get; init; }
+    
+    public required List<StopDto> Stops { get; init; }
+    
+    public required StationName? Destination { get; init; }
+    
+    public required List<ServiceInformation> Composition { get; init; }
+    
+    public required BikeCarriageInformation BikeCarriage { get; init; }
+    
+    public required CateringInformation Catering { get; init; }
+    
+    public required List<PassengerInformationDto> PassengerInformation { get; init; }
+}

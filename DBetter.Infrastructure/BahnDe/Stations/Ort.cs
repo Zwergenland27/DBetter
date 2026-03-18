@@ -33,4 +33,6 @@ public class Ort
     /// </summary>
     /// <example>13.731409</example>
     public required float Lon { get; set; }
+    
+    public required List<string> Products { get; set; }
 }

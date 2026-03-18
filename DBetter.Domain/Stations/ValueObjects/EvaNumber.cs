@@ -11,6 +11,8 @@ namespace DBetter.Domain.Stations.ValueObjects;
 public record EvaNumber
 {
     public string Value { get; init; }
+    public bool IsGerman => Value.StartsWith("80");
+
     private EvaNumber(string value)
     {
         Value = value;

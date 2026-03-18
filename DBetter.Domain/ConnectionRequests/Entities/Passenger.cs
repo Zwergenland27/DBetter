@@ -69,4 +69,11 @@ public class Passenger : Entity<PassengerId>
         
         return new Passenger(id, userId, name, birthday, age, bikes, dogs, discounts);
     }
+
+    public int CalculateAge()
+    {
+        if (Age is null) throw new InvalidOperationException("use of the birthday field is currently not supported");
+
+        return Age.Value;
+    }
 }

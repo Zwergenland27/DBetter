@@ -1,4 +1,6 @@
 using DBetter.Application.Abstractions.Persistence;
+using DBetter.Domain.Abstractions;
+using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -25,8 +27,24 @@ public class UnitOfWork(DBetterContext context) : IUnitOfWork, IAsyncDisposable
             throw new InvalidOperationException("Cannot commit a transaction that has not been started.");
         }
         
+        var outboxMessages = context.ChangeTracker
+            .Entries<IHasDomainEvent>()
+            .Select(x => x.Entity)
+            .SelectMany(aggregateRoot =>
+            {
+                var domainEvents = aggregateRoot.DomainEvents;
+                aggregateRoot.ClearDomainEvents();
+                return domainEvents;
+            })
+            .Select(OutboxMessage.FromEvent)
+            .ToList();
+        
+        context.OutboxMessages.AddRange(outboxMessages);
+        
         await context.SaveChangesAsync(cancellationToken);
+        
         await _transaction.CommitAsync(cancellationToken);
+        
         await _transaction.DisposeAsync();
         _transaction = null;
     }

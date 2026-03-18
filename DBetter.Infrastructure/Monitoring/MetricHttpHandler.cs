@@ -50,10 +50,13 @@ public class MetricHttpHandler : DelegatingHandler
     {
         if (path.Contains("angebote/fahrplan")) return "connections";
         if (path.Contains("angebote/teilstrecke")) return "increased";
-        if( path.Contains("reiseloesung/fahrt")) return "route";
+        if( path.Contains("reiseloesung/fahrt")) return "train-run";
         if( path.Contains("reiseloesung/orte")) return "stations";
         if (path.Contains("db-api-marketplace/apis/station-data/v2")) return "StaDa";
         if (path.Contains("db-api-marketplace/apis/timetables/v1")) return "Timetables";
+        if (path.Contains("reisebegleitung/wagenreihung")) return "TrainCompositionRT";
+        if (path.Contains("gsd/gsd_v3")) return "TrainCompositionSP";
+        if (path.Contains("reiseloesung/abfahrten")) return "Departures";
         
         throw new InvalidDataException($"Endpoint {path} currently not present in metrics");
     }

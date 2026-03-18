@@ -1,5 +1,5 @@
 using CleanDomainValidation.Domain;
-using DBetter.Application.Abstractions.Messaging;
+using CleanMediator.Commands;
 using DBetter.Contracts.Users;
 using DBetter.Contracts.Users.Commands;
 using DBetter.Domain.Errors;
@@ -7,9 +7,9 @@ using DBetter.Domain.Users;
 
 namespace DBetter.Application.Users.Commands.Register;
 
-public class RegisterUserCommandHandler(IUserRepository repository) : ICommandHandler<RegisterCommand, IUserResult>
+public class RegisterUserCommandHandler(IUserRepository repository) : CommandHandlerBase<RegisterCommand, IUserResult>
 {
-    public async Task<CanFail<IUserResult>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public override async Task<CanFail<IUserResult>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var existingUser = await repository.GetByEmailAsync(request.Email);
         if (existingUser is not null) return DomainErrors.User.Exists;

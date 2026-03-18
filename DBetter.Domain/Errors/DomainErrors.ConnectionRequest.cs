@@ -16,6 +16,14 @@ public static partial class DomainErrors
             "ConnectionRequest.NotFound",
             "A connection request with the specified id was not found");
         
+        public static Error ReferencesNotInitialized => Error.Conflict(
+            "ConnectionRequest.ReferencesNotInitialized",
+            "The pagination references have not been initialized yet");
+        
+        public static Error Unauthorized => Error.Forbidden(
+            "ConnectionRequest.Unauthorized",
+            "You are not authorized to access this request");
+        
         public static class Id
         {
             public static Error Invalid(string value) => Error.Validation("ConnectionRequest.Id.Invalid", $"{value} is no valid guid.");
@@ -77,6 +85,15 @@ public static partial class DomainErrors
                     "ConnectionRequest.Route.MinTransferTime.Max43",
                     "The transfer time cannot be more than 43 minutes");
             }
+        }
+
+        public static class ConnectionResults
+        {
+            public static Error NotSuggested => Error.NotFound("ConnectionRequests.ConnectionResults.NotSuggested",
+                "The connection request has not suggested the connection");
+
+            public static Error NothingFound => Error.NotFound("ConnectionRequests.ConnectionResults.NothingFound",
+                "No connection could be found for the request");
         }
     }
 }

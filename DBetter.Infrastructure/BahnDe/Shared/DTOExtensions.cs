@@ -1,9 +1,10 @@
 using DBetter.Application;
 using DBetter.Contracts.Shared.DTOs;
 using DBetter.Domain.Connections.ValueObjects;
-using DBetter.Domain.Routes.ValueObjects;
 using DBetter.Domain.Shared;
 using DBetter.Domain.Stations.ValueObjects;
+using DBetter.Domain.TrainCirculations.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.BahnDe.Connections.DTOs;
 using DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
@@ -17,34 +18,7 @@ public static class DTOExtensions
         "STR",
         "Fähre"
     ];
-    public static List<PassengerInfo> GetDomainMessages(this IHasMessage obj)
-    {
-        return [];
-    }
     
-    public static List<RoutePassengerInformation> GetDomainSectionMessages(this IHasMessage obj)
-    {
-        return [];
-    }
-    
-    public static TransportCategory AsDomain(this Produktgattung gattung)
-    {
-        return gattung switch
-        {
-            Produktgattung.ICE => TransportCategory.HighSpeedTrain,
-            Produktgattung.EC_IC => TransportCategory.FastTrain,
-            Produktgattung.IR => TransportCategory.FastTrain,
-            Produktgattung.REGIONAL => TransportCategory.RegionalTrain,
-            Produktgattung.SBAHN => TransportCategory.SuburbanTrain,
-            Produktgattung.BUS => TransportCategory.Bus,
-            Produktgattung.SCHIFF => TransportCategory.Boat,
-            Produktgattung.UBAHN => TransportCategory.UndergroundTrain,
-            Produktgattung.TRAM => TransportCategory.Tram,
-            Produktgattung.ERSATZVERKEHR => TransportCategory.Replacement,
-            Produktgattung.ANRUFPFLICHTIG => TransportCategory.CallService,
-            _ => throw new InvalidDataException()
-        };
-    }
     
     public static DateTime? ConvertToDateTime(this string? bahnDateString)
     {
@@ -58,12 +32,12 @@ public static class DTOExtensions
     public static Demand GetDemand(this IHasDemandInformation auslastung)
     {
         var firstClassDemand = auslastung.Auslastungsmeldungen
-            .Where(m => m.Klasse == Klasse.KLASSE_1)
+            .Where(m => m.Klasse == Klasse.GetAliasFromComfortClass(ComfortClass.First))
             .Select(a => a.Stufe)
             .FirstOrDefault();
         
         var secondClassDemand = auslastung.Auslastungsmeldungen
-            .Where(m => m.Klasse == Klasse.KLASSE_2)
+            .Where(m => m.Klasse == Klasse.GetAliasFromComfortClass(ComfortClass.Second))
             .Select(a => a.Stufe)
             .FirstOrDefault();
 
@@ -72,16 +46,7 @@ public static class DTOExtensions
             secondClassDemand.ToDomainDemandStatus());
     }
 
-    public static DemandDto ToDto(this Demand demand)
-    {
-        return new DemandDto
-        {
-            FirstClass = demand.FirstClass.ToString(),
-            SecondClass = demand.SecondClass.ToString(),
-        };
-    }
-
-    public static TravelTime? GetDepartureTime(this IRouteStop stop)
+    public static TravelTime? GetDepartureTime(this ITrainRunStop stop)
     {
         if(stop.AbfahrtsZeitpunkt is null) return null;
 
@@ -98,7 +63,7 @@ public static class DTOExtensions
             verbindungsabschnitt.EzAbfahrtsZeitpunkt.ConvertToDateTime());
     }
 
-    public static TravelTime? GetArrivalTime(this IRouteStop stop)
+    public static TravelTime? GetArrivalTime(this ITrainRunStop stop)
     {
         if(stop.AnkunftsZeitpunkt is null) return null;
 
@@ -135,16 +100,7 @@ public static class DTOExtensions
         return stop.RisNotizen.Any(r => r.Key is "text.realtime.stop.entry.disabled");
     }
 
-    public static TravelTimeDto? ToDto(this TravelTime? travelTime){
-        if(travelTime is null) return null;
-
-        return new TravelTimeDto{
-            Planned = travelTime.Planned.ToIso8601(),
-            Real = travelTime.Real?.ToIso8601()
-        };
-    }
-
-    public static StationInfoId? GetStationInfoId(this IRouteStop stop){
+    public static StationInfoId? GetStationInfoId(this ITrainRunStop stop){
         if(stop.BahnhofsInfoId is null) return null;
 
         var stationInfoResult = StationInfoId.Create(stop.BahnhofsInfoId);
@@ -152,11 +108,11 @@ public static class DTOExtensions
         return stationInfoResult.Value;
     }
 
-    public static StationName GetStationName(this IRouteStop stop){
+    public static StationName GetStationName(this ITrainRunStop stop){
         return StationName.Create(stop.Name).Value;
     }
 
-    public static Platform? GetPlatform(this IRouteStop stop){
+    public static Platform? GetPlatform(this ITrainRunStop stop){
         if(stop.Gleis is null && stop.EzGleis is null) return null;
 
         var platformType = stop.HaltTyp switch {
@@ -173,41 +129,8 @@ public static class DTOExtensions
         return new Platform(stop.Gleis, stop.EzGleis, platformType);
     }
 
-    public static PlatformDto? ToDto(this Platform? platform){
-        if(platform is null) return null;
-
-        return new PlatformDto {
-            Planned = platform.Planned,
-            Real = platform.Real,
-            Type = platform.Type.ToString()
-        };
-    }
-
-    public static StopIndex GetStopIndex(this IRouteStop stop){
+    public static StopIndex GetStopIndex(this ITrainRunStop stop){
         return new StopIndex(stop.RouteIdx);
-    }
-
-    public static string? GetLine(this ServiceInformation information)
-    {
-        if (information.LineNumber is null && information.ServiceNumber is null) return null;
-        
-        var line = information.LineNumber is not null ? information.LineNumber.Value : information.ServiceNumber!.Value.ToString();
-
-        if (!_ignoredProductClasses.Contains(information.ProductClass))
-        {
-            line = $"{information.ProductClass} {line}";
-        }
-
-        return line;
-    }
-    public static ComfortClass ToComfortClass(this Klasse klasse)
-    {
-        return klasse switch
-        {
-            Klasse.KLASSE_1 => ComfortClass.First,
-            Klasse.KLASSE_2 => ComfortClass.Second,
-            _ => ComfortClass.Unknown
-        };
     }
 
     public static Currency ToCurrency(this Waehrung currency)
@@ -216,22 +139,6 @@ public static class DTOExtensions
         {
             Waehrung.EUR => Currency.Euro,
             _ => Currency.Unknown
-        };
-    }
-
-    public static BikeCarriageInformationDto ToDto(this BikeCarriageInformation bikeCarriage){
-        return new BikeCarriageInformationDto{
-            Status = bikeCarriage.CarriageStatus.ToString(),
-            FromStopIndex = bikeCarriage.FromStopIndex.Value,
-            ToStopIndex = bikeCarriage.ToStopIndex.Value
-        };
-    }
-
-    public static CateringInformationDto ToDto(this CateringInformation catering){
-        return new CateringInformationDto{
-            Type = catering.Type.ToString(),
-            FromStopIndex = catering.FromStopIndex.Value,
-            ToStopIndex = catering.ToStopIndex.Value
         };
     }
 

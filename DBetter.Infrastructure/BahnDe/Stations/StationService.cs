@@ -1,6 +1,4 @@
 using System.Net.Http.Json;
-using DBetter.Domain.Stations;
-using DBetter.Domain.Stations.ValueObjects;
 
 namespace DBetter.Infrastructure.BahnDe.Stations;
 
@@ -19,6 +17,7 @@ public class StationService(HttpClient http)
                 .Where(ort => ort.ExtId is not null)
                 .Select(ort => new Haltestelle
                 {
+                    Products = ort.Products,
                     ExtId = ort.ExtId!,
                     Name = ort.Name,
                     Lat = ort.Lat,

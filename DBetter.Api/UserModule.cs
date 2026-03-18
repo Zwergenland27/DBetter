@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using CleanDomainValidation.Application;
+using CleanMediator;
 using DBetter.Application.Users.Commands.AddDiscount;
 using DBetter.Application.Users.Commands.EditPersonalData;
 using DBetter.Application.Users.Queries.GetMyPassengers;
 using DBetter.Contracts.Users.Commands.AddDiscount;
 using DBetter.Contracts.Users.Commands.EditPersonalData;
 using DBetter.Contracts.Users.Queries.GetMyPassengers;
-using MediatR;
 
 namespace DBetter.Api;
 

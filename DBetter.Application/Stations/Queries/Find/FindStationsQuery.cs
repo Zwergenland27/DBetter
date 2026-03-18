@@ -1,6 +1,6 @@
 using CleanDomainValidation.Application;
 using CleanDomainValidation.Application.Extensions;
-using DBetter.Application.Abstractions.Messaging;
+using CleanMediator.Queries;
 using DBetter.Contracts.Stations.Queries.Find;
 
 namespace DBetter.Application.Stations.Queries.Find;

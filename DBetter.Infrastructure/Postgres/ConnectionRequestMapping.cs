@@ -91,9 +91,7 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
         
         builder.Property(o => o.ComfortClass);
 
-        builder.Ignore(cr => cr.Route);
-
-        builder.OwnsOne(cr => cr.Route, rb =>
+        builder.OwnsOne(cr => cr.PlannedRoute, rb =>
         {
             rb.Property(r => r.OriginStationId)
                 .HasConversion(
@@ -150,5 +148,28 @@ public class ConnectionRequestMapping : IEntityTypeConfiguration<ConnectionReque
                     transferTime => transferTime.Value,
                     value => TransferTime.Create(value).Value);
         });
+
+        builder.Property(x => x.EarlierReference)
+            .HasConversion(
+                reference => reference != null ? reference.Token.ToString() : null,
+                value => value != null ? PaginationReference.Create(value) : null);
+        
+        builder.Property(x => x.LaterReference)
+            .HasConversion(
+                reference => reference != null ? reference.Token.ToString() : null,
+                value => value != null ? PaginationReference.Create(value) : null);
+
+        builder.OwnsMany(x => x.SuggestedConnectionIds, crb =>
+        {
+            crb.ToTable("ConnectionRequestSuggestedConnectionIds");
+            
+            crb.WithOwner().HasForeignKey("ConnectionRequestId");
+            
+            crb.HasKey("Id");
+            
+            crb.Property(x => x.Value)
+                .HasColumnName("ConnectionId")
+                .ValueGeneratedNever();
+        }).UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

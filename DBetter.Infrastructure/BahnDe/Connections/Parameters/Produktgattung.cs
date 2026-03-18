@@ -1,62 +1,77 @@
+using DBetter.Domain.ConnectionRequests.ValueObjects;
+using DBetter.Domain.TrainCirculations.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
+
 namespace DBetter.Infrastructure.BahnDe.Connections.Parameters;
 
 /// <summary>
 /// Means of transport
 /// </summary>
-public enum Produktgattung
+public static class Produktgattung
 {
-    /// <summary>
-    /// ICE, RJ
-    /// </summary>
-    ICE,
+    private record TransportCategoryWithAlias(string Alias,  TransportCategory Category, string UrlId);
     
-    /// <summary>
-    /// EC, IC,
-    /// </summary>
-    EC_IC,
+    private static readonly TransportCategoryWithAlias[] TransportCategories= [
+        new("ICE", TransportCategory.HighSpeedTrain, "00"),
+        new("EC_IC", TransportCategory.FastTrain, "01"),
+        new("IR", TransportCategory.FastTrain, "02"),
+        new("REGIONAL", TransportCategory.RegionalTrain, "03"),
+        new("SBAHN", TransportCategory.SuburbanTrain, "04"),
+        new("BUS", TransportCategory.Bus, "05"),
+        new("SCHIFF", TransportCategory.Boat, "06"),
+        new("UBAHN", TransportCategory.UndergroundTrain, "07"),
+        new("TRAM", TransportCategory.Tram, "08"),
+        new("ANRUFPFLICHTIG", TransportCategory.CallService, "09"),
+        new("ERSATZVERKEHR", TransportCategory.Replacement, string.Empty) //There is no option to select/deselect replacement services in the uri -> urlId empty
+    ];
     
-    /// <summary>
-    /// FLX, ES
-    /// </summary>
-    IR,
-    
-    /// <summary>
-    /// Regional Trains (RE, RB, IRE)
-    /// </summary>
-    REGIONAL,
-    
-    /// <summary>
-    /// S-Bahn
-    /// </summary>
-    SBAHN,
-    
-    /// <summary>
-    /// Bus
-    /// </summary>
-    BUS,
-    
-    /// <summary>
-    /// Boat, Ferry
-    /// </summary>
-    SCHIFF,
-    
-    /// <summary>
-    /// Underground
-    /// </summary>
-    UBAHN,
-    
-    /// <summary>
-    /// Tram
-    /// </summary>
-    TRAM,
-    
-    /// <summary>
-    /// Services requiring telephonic registration
-    /// </summary>
-    ANRUFPFLICHTIG,
-    
-    /// <summary>
-    /// Replacement service
-    /// </summary>
-    ERSATZVERKEHR
+    public static TransportCategory GetTransportCategoryFromAlias(string alias)
+    {
+        var result = TransportCategories.FirstOrDefault(x => x.Alias == alias);
+
+        if (result is null)
+        {
+            throw new BahnDeException("Mapping.Produktgattung", $"Alias {alias} not found");
+        }
+        
+        return result.Category;
+    }
+
+    public static List<string> GetAliasesFromTransportCategory(TransportCategory transportCategory)
+    {
+        var transportCategories = TransportCategories
+            .Where(x => x.Category == transportCategory)
+            .Select(x => x.Alias)
+            .ToList();
+
+        if (!transportCategories.Any())
+            throw new BahnDeException("Mapping.Produktgattung", $"transport category {transportCategory} not found");
+        return transportCategories;
+    }
+
+
+    public static List<string> GetUrlIdsFromTransportCategory(TransportCategory transportCategory)
+    {
+        var transportCategories = TransportCategories
+            .Where(x => x.Category == transportCategory)
+            .Select(x => x.UrlId)
+            .ToList();
+
+        if (!transportCategories.Any())
+            throw new BahnDeException("Mapping.Produktgattung", $"transport category {transportCategory} not found");
+        return transportCategories;
+    }
+
+    public static MeansOfTransport GetMeansOfTransportObject(List<string> products)
+    {
+        return new MeansOfTransport( 
+            products.Any(p => GetAliasesFromTransportCategory(TransportCategory.HighSpeedTrain).Contains(p)),
+            products.Any(p => GetAliasesFromTransportCategory(TransportCategory.FastTrain).Contains(p)), 
+            products.Any(p => GetAliasesFromTransportCategory(TransportCategory.RegionalTrain).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.SuburbanTrain).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.UndergroundTrain).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.Tram).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.Bus).Contains(p)), 
+            products.Any(p =>GetAliasesFromTransportCategory(TransportCategory.Boat).Contains(p)));
+    }
 }

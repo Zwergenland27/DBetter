@@ -32,17 +32,20 @@ public class ReiseAnfrage
     /// <summary>
     /// Comfort Class of travel
     /// </summary>
-    public required Klasse Klasse { get; set; }
+    /// <see cref="Klasse"/>
+    public required string Klasse { get; set; }
     
     /// <summary>
     /// Sets the <see cref="AnfrageZeitpunkt"/> to departure or arrival
     /// </summary>
-    public required AnkunftSuche AnkunftSuche { get; set; }
+    /// <remarks>Either "ANKUNFT" or "ABFAHRT"</remarks>
+    public required string AnkunftSuche { get; set; }
     
     /// <summary>
     /// Allowed vehicles for the journey
     /// </summary>
-    public required List<Produktgattung> Produktgattungen { get; set; }
+    /// <see cref="Produktgattung"/>
+    public required List<string> Produktgattungen { get; set; }
     
     /// <summary>
     /// Passengers
@@ -97,13 +100,4 @@ public class ReiseAnfrage
     /// Pagination reference for earlier and later connections
     /// </summary>
     public required string? PagingReference { get; set; }
-
-    internal List<EvaNumber> GetEvaNumbers()
-    {
-        List<EvaNumber> evaNumbers = [];
-        evaNumbers.Add(EvaNumber.Create(AbfahrtsHalt).Value);
-        evaNumbers.Add(EvaNumber.Create(AnkunftsHalt).Value);
-        evaNumbers.AddRange(Zwischenhalte.Select(stopover => EvaNumber.Create(stopover.Id).Value));
-        return evaNumbers;
-    }
 }

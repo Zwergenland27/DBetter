@@ -1,0 +1,69 @@
+using DBetter.Contracts.Requests.Queries.GetSuggestions.Results;
+using DBetter.Contracts.Shared.DTOs;
+using DBetter.Contracts.TrainCompositions.Get;
+
+namespace DBetter.Contracts.TrainRuns.Queries.Get.Results;
+
+/// <summary>
+/// Full trip of a public transport relation from start to destination station
+/// </summary>
+public class TrainRunResponse {
+
+    /// <summary>
+    /// Id of the train run
+    /// </summary>
+    public required string Id { get; set; }
+    
+    /// <summary>
+    /// Date time of the last train run update
+    /// </summary>
+    public required DateTime LastUpdatedAt { get; set; }
+    
+    /// <summary>
+    /// Id of the corresponding train circulation
+    /// </summary>
+    public required string CirculationId { get; set; }
+
+    /// <summary>
+    /// Operator of the service
+    /// </summary>
+    /// <example>DB Regio Südost</example>
+    public required string? Operator { get; set; } 
+
+    /// <summary>
+    /// The transport category
+    /// </summary>
+    /// <example>HighSpeedTrains</example>
+    public required string TransportCategory { get; set; }
+    
+    /// <summary>
+    /// Line number
+    /// </summary>
+    /// <example>RE 2</example>
+    public required LineInformationResponse? Line { get; set; }
+    
+    /// <summary>
+    /// Stops of the train run
+    /// </summary>
+    public required List<StopResponse> Stops { get; set; }
+    
+    /// <summary>
+    /// Information about bike carriage
+    /// </summary>
+    public required BikeCarriageInformationDto BikeCarriage { get; set; }
+    
+    /// <summary>
+    /// Information about catering in the vehicle
+    /// </summary>
+    public required CateringInformationDto Catering { get; set; }
+    
+    /// <summary>
+    /// Messages for passengers
+    /// </summary>
+    public required List<PassengerInformationResponse> PassengerInformation { get; set; }
+    
+    /// <summary>
+    /// Train composition
+    /// </summary>
+    public required GetTrainCompositionResultDto? TrainComposition { get; set; }
+}

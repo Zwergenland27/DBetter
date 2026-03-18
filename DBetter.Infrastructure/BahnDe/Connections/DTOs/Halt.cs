@@ -5,7 +5,7 @@ namespace DBetter.Infrastructure.BahnDe.Connections.DTOs;
 /// <summary>
 /// Stop of a train run that is part of a connection
 /// </summary>
-public class Halt : IHasMessage, IRouteStop, IHasDemandInformation
+public class Halt : IHasMessage, ITrainRunStop, IHasDemandInformation
 {
     /// <inheritdoc/>
     public required string Id { get; set; }

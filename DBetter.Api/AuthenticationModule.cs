@@ -1,4 +1,5 @@
 using CleanDomainValidation.Application;
+using CleanMediator;
 using DBetter.Application;
 using DBetter.Application.Users.Commands.Login;
 using DBetter.Application.Users.Commands.RefreshJwtToken;
@@ -8,7 +9,6 @@ using DBetter.Contracts.Users.Commands;
 using DBetter.Contracts.Users.Commands.Login;
 using DBetter.Contracts.Users.Commands.RefreshJwtTokenParameters;
 using DBetter.Domain.Users.ValueObjects;
-using MediatR;
 
 namespace DBetter.Api;
 
