@@ -4,9 +4,6 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PublishProfile>DefaultContainer</PublishProfile>
-        <ContainerRepository>zwergenland27/dbetter-api</ContainerRepository>
-        <ContainerImageTag>0.1.2</ContainerImageTag>
   </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

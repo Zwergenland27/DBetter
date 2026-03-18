@@ -1,0 +1,48 @@
+name: Deploy to NuGet
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - v*
+
+env:
+  PACKAGE_OUTPUT_DIR: ${{ github.workspace }}/${{ vars.PACKAGE_OUTPUT_DIR }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Get Version from tag
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo Version: $VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{vars.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Publish Container
+        run: |
+          dotnet publish ${{ vars.PROJECT_NAME }} \
+          --no-restore \
+          --no-build \
+          --configuration Release \
+          --os linux \
+          --arch x64 \
+          --no-self-contained \
+          /t:PublishContainer \
+          -p:ContainerRegistry=registry-1.docker.io \
+          -p:ContainerRepository=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.CONTAINER_NAME }} \
+          -p:ContainerImageTags="${VERSION}"
