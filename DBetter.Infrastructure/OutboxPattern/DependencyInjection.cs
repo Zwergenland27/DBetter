@@ -22,7 +22,7 @@ public static class DependencyInjection
             options.AddJob<ScrapeLongDistanceTrainsJob>(ScrapeLongDistanceTrainsJob.JobKey)
                 .AddTrigger(trigger => trigger
                     .ForJob(ScrapeLongDistanceTrainsJob.JobKey)
-                    .WithCronSchedule("0 0 3 * * ?"));
+                    .WithCronSchedule("0 0 3 * * ?", x => x.WithMisfireHandlingInstructionDoNothing()));
             
             options.UsePersistentStore(store =>
             {
