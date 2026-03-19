@@ -49,7 +49,7 @@ public static class DependencyInjection
             cfg.RegisterHandlersFromAssembly(typeof(Application.DependencyInjection).Assembly);
             cfg.UseRabbitMq(config =>
             {
-                config.WithHostname("localhost");
+                config.WithHostname(configuration.GetSection("RabbitMQ:Hostname").Value);
             });
         });
         return services;
