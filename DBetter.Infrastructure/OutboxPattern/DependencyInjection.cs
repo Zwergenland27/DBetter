@@ -21,6 +21,7 @@ public static class DependencyInjection
             
             options.AddJob<ScrapeLongDistanceTrainsJob>(ScrapeLongDistanceTrainsJob.JobKey)
                 .AddTrigger(trigger => trigger
+                    .WithIdentity("ScrapeLongDistanceTrains")
                     .ForJob(ScrapeLongDistanceTrainsJob.JobKey)
                     .WithCronSchedule("0 0 3 * * ?", x => x.WithMisfireHandlingInstructionDoNothing()));
             
