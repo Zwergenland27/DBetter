@@ -78,11 +78,20 @@ public class BahnDeTrainCompositionProvider(HttpClient http) : IExternalTrainCom
 
     public async Task<PlannedTrainCompositionDto?> GetPlannedDataAsync(ServiceNumber serviceNumber, EvaNumber originStation, DateTime deparureTime, EvaNumber destinationStation, DateTime arrivalTime)
     {
+        var resiliencePipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
+            .AddRetry(new HttpRetryStrategyOptions
+            {
+                MaxRetryAttempts = 4,
+                Delay = TimeSpan.FromSeconds(5),
+                ShouldHandle = BahnDeRetryStrategyOptions.IsTransient
+            })
+            .Build();
+        
         var request = new RequestBuilder(serviceNumber, originStation, deparureTime, destinationStation, arrivalTime).Build();
         var requestJson = JsonSerializer.Serialize(request, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         
         var uri = HttpUtility.UrlPathEncode(requestJson);
-        var response = await http.GetAsync($"gsd/gsd_v3?data={uri}");
+        var response = await resiliencePipeline.ExecuteAsync(async ct => await http.GetAsync($"gsd/gsd_v3?data={uri}", ct));
         if (!response.IsSuccessStatusCode)
         {
             if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Conflict) return null;
