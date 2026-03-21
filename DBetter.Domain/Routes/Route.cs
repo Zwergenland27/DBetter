@@ -69,24 +69,31 @@ public class Route : AggregateRoot<RouteId>
 
     public void UpdateFromRoute(List<StopSnapshot> stopSnapshots)
     {
+        var containsRealTimeInformation = stopSnapshots.Any(s => s.DepartureTime?.Real is not null || s.ArrivalTime?.Real is not null);
+        
         var lastStop = Stops.LastOrDefault();
+        var inPast = lastStop is not null && lastStop.ArrivalTime!.Planned < DateTime.UtcNow.AddHours(-1);
+        
         var stopIndex = (short) 0;
-        if (lastStop is not null)
+        if (_stops.Any())
         {
-            stopIndex = (short)(lastStop.Id.Value + 1);
+            stopIndex = (short) (_stops.Max(s => s.Id.Value) + 1);
         }
         foreach (var stop in stopSnapshots)
         {
             var existingStop = _stops.FirstOrDefault(s => s.StationId == stop.StationId);
             if (existingStop is not null)
             {
-                existingStop.Update(
-                    stop.RouteIndex,
-                    stop.DepartureTime,
-                    stop.ArrivalTime,
-                    stop.Demand,
-                    stop.Platform,
-                    stop.Attributes);
+                if (containsRealTimeInformation || !inPast)
+                {
+                    existingStop.Update(
+                        stop.RouteIndex, 
+                        stop.DepartureTime,
+                        stop.ArrivalTime,
+                        stop.Demand,
+                        stop.Platform,
+                        stop.Attributes);
+                }
                 continue;
             }
             
@@ -118,9 +125,9 @@ public class Route : AggregateRoot<RouteId>
         var inPast = lastStop is not null && lastStop.ArrivalTime!.Planned < DateTime.UtcNow.AddHours(-1);
         
         var stopIndex = (short) 0;
-        if (lastStop is not null)
+        if (_stops.Any())
         {
-            stopIndex = (short)(lastStop.Id.Value + 1);
+            stopIndex = (short) (_stops.Max(s => s.Id.Value) + 1);
         }
         foreach (var stop in stopSnapshots)
         {
