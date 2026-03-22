@@ -63,7 +63,7 @@ public class ScrapeStationDeparturesCommandHandler(
         }
         
         trainRun = TrainRunFactory.Create(trainCirculation, departureDto.JourneyId, [], BikeCarriageInformation.Unknown, CateringInformation.Unknown);
-        trainRunRepository.Add(trainRun);
+        trainRunRepository.Save(trainRun);
 
         var route = Route.CreateEmpty(trainRun.Id);
         routeRepository.Add(route);

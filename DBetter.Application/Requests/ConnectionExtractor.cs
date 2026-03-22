@@ -78,7 +78,7 @@ public class ConnectionExtractor(
         
         if(ExistingTrainCirculations is null)
             throw new InvalidOperationException("Train circulations have not been extracted");
-        if (TrainRunsToCreate is null)
+        if (ExistingTrainRuns is null)
             throw new InvalidOperationException("Train runs have not been extracted");
         if( RoutesToCreate is null)
             throw new InvalidOperationException("Routes have not been extracted");
@@ -90,9 +90,9 @@ public class ConnectionExtractor(
             throw new InvalidOperationException("Connections have not been extracted");
 
         trainCirculationRepository.Save(ExistingTrainCirculations);
+        trainRunRepository.Save(ExistingTrainRuns);
         
         return new ConnectionExtractorResult(
-            TrainRunsToCreate,
             RoutesToCreate,
             PassengerInformationToCreate,
             StationsToCreate,

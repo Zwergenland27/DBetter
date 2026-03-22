@@ -11,10 +11,9 @@ public class TrainRunPassengerInformation : Entity<TrainRunPassengerInformationI
     public StopIndex FromStopIndex { get; private set; }
     
     public StopIndex ToStopIndex { get; private set; }
+    
 
-    internal TrainRunPassengerInformation() : base(null!){}
-
-    private TrainRunPassengerInformation(
+    internal TrainRunPassengerInformation(
         TrainRunPassengerInformationId id,
         PassengerInformationId informationId,
         StopIndex fromStopIndex,

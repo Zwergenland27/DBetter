@@ -2,10 +2,11 @@ using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainCirculations.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
+using DBetter.Infrastructure.Postgres;
 
 namespace DBetter.Infrastructure.TrainCirculations;
 
-public class TrainCirculationPersistenceDto
+public class TrainCirculationPersistenceDto: IPersistenceDto<TrainCirculation>
 {
     public required Guid Id { get; set; }
     

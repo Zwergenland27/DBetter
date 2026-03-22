@@ -25,10 +25,8 @@ public class TrainRun : AggregateRoot<TrainRunId>
     public CateringInformation Catering  { get; private set; }
     
     public BikeCarriageInformation BikeCarriage { get; private set; }
-    
-    private TrainRun() : base(null!){}
 
-    private TrainRun(
+    internal TrainRun(
         TrainRunId id,
         TrainCirculationId circulationId,
         OperatingDay operatingDay,

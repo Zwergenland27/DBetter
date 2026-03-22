@@ -91,6 +91,7 @@ public class GetTrainRunQueryHandler(
         }
 
         trainCirculationRepository.Save(trainCirculation);
+        trainRunRepository.Save(trainRun);
 
         await unitOfWork.CommitAsync(cancellationToken);
 

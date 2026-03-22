@@ -12,7 +12,7 @@ public interface ITrainRunRepository
 
     Task<List<TrainRun>> GetManyAsync(IEnumerable<TrainRunIdentifier> identifiers);
     
-    void AddRange(IEnumerable<TrainRun> trainRuns);
+    void Save(IEnumerable<TrainRun> trainRuns);
     
-    void Add(TrainRun trainRun);
+    void Save(TrainRun trainRun);
 }
