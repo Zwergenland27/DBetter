@@ -1,5 +1,7 @@
+using DBetter.Domain.Stations.ValueObjects;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainCirculations.ValueObjects;
+using DBetter.Domain.TrainRuns.ValueObjects;
 
 namespace DBetter.Infrastructure.TrainCirculations;
 
@@ -7,10 +9,15 @@ public class TrainCirculationPersistenceDto
 {
     public required Guid Id { get; set; }
     
-    public required int TimeTablePeriod { get; set; }
+    public required string Identifier { get; set; }
     
-    public required int TrainId { get; set; }
+    public required string Identifier_OriginStationEva {get; set;}
     
+    public required TimeOnly Identifier_DepartureTime { get; set; }
+    
+    public required string Identifier_DestinationStationEva {get; set;}
+    
+    public required ushort Identifier_DurationMinutes { get; set; }
     public required int ServiceInformation_TransportCategory { get; set; }
     
     public required string? ServiceInformation_LineNumber_Number { get; set; }
@@ -24,8 +31,11 @@ public class TrainCirculationPersistenceDto
         return new TrainCirculationPersistenceDto
         {
             Id = domain.Id.Value,
-            TimeTablePeriod = domain.TimeTablePeriod.Year,
-            TrainId = domain.TrainId.Value,
+            Identifier = domain.Identifier.DatabaseFriendly(),
+            Identifier_OriginStationEva = domain.Identifier.Origin.Value,
+            Identifier_DepartureTime = domain.Identifier.DepartureTime,
+            Identifier_DestinationStationEva = domain.Identifier.Destination.Value,
+            Identifier_DurationMinutes = domain.Identifier.Duration.Minutes,
             ServiceInformation_TransportCategory = (int)domain.ServiceInformation.TransportCategory,
             ServiceInformation_LineNumber_Number = domain.ServiceInformation.LineNumber?.Number,
             ServiceInformation_LineNumber_ProductClass = domain.ServiceInformation.LineNumber?.ProductClass,
@@ -57,15 +67,21 @@ public class TrainCirculationPersistenceDto
         
         return new TrainCirculation(
             new TrainCirculationId(Id),
-            new TimeTablePeriod(TimeTablePeriod),
-            new TrainId(TrainId),
+            new TrainCirculationIdentifier(
+                EvaNumber.Create(Identifier_OriginStationEva).Value,
+                Identifier_DepartureTime,
+                EvaNumber.Create(Identifier_DestinationStationEva).Value,
+                new TravelDuration(Identifier_DurationMinutes)),
             serviceInformation);
     }
 
     public void Apply(TrainCirculation domain)
     {
-        TimeTablePeriod = domain.TimeTablePeriod.Year;
-        TrainId = domain.TrainId.Value;
+        Identifier = domain.Identifier.DatabaseFriendly();
+        Identifier_OriginStationEva = domain.Identifier.Origin.Value;
+        Identifier_DepartureTime = domain.Identifier.DepartureTime;
+        Identifier_DestinationStationEva = domain.Identifier.Destination.Value;
+        Identifier_DurationMinutes = domain.Identifier.Duration.Minutes;
         ServiceInformation_TransportCategory = (int)domain.ServiceInformation.TransportCategory;
         ServiceInformation_LineNumber_Number = domain.ServiceInformation.LineNumber?.Number;
         ServiceInformation_LineNumber_ProductClass = domain.ServiceInformation.LineNumber?.ProductClass;

@@ -13,25 +13,20 @@ public class TrainCirculationRepository(DBetterContext db) : ITrainCirculationRe
         return persistenceDto?.ToDomain();
     }
 
-    public async Task<TrainCirculation?> GetAsync(TimeTableCompositeIdentifier identifier)
+    public async Task<TrainCirculation?> GetAsync(TrainCirculationIdentifier identifier)
     {
-        var persistenceDto = await db.TrainCirculations.FirstOrDefaultAsync(tc =>
-            tc.TimeTablePeriod == identifier.TimeTablePeriod.Year && tc.TrainId == identifier.TrainId.Value);
+        var persistenceDto = await db.TrainCirculations.FirstOrDefaultAsync(tc => tc.Identifier == identifier.DatabaseFriendly());
         return persistenceDto?.ToDomain();
     }
 
-    public async Task<List<TrainCirculation>> GetManyAsync(IEnumerable<TimeTableCompositeIdentifier> timeTableIdentifier)
+    public async Task<List<TrainCirculation>> GetManyAsync(IEnumerable<TrainCirculationIdentifier> identifiers)
     {
-        var sql = $"""
-                   SELECT *
-                   FROM "TrainCirculations"
-                   WHERE ("TrainId", "TimeTablePeriod") IN (
-                       {string.Join(",", timeTableIdentifier.Select(id => $"({id.TrainId.Value}, {id.TimeTablePeriod.Year})"))}
-                   )
-                   """;
+        var databaseFriendlyIdentifiers = identifiers
+            .Select(id => id.DatabaseFriendly())
+            .ToList();
         
         var persistenceDtos = await db.TrainCirculations
-            .FromSqlRaw(sql)
+            .Where(tc => databaseFriendlyIdentifiers.Contains(tc.Identifier))
             .ToListAsync();
         
         return persistenceDtos.Select(x => x.ToDomain()).ToList();
