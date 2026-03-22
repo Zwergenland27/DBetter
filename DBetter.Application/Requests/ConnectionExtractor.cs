@@ -159,7 +159,7 @@ public class ConnectionExtractor(
     {
         if (_journeyIds is null)
             throw new InvalidOperationException("Cannot extract train circulations before journeyIds have been extracted.");
-        ExistingTrainCirculations = await trainCirculationRepository.GetManyAsync(_journeyIds.Select(jid => jid.TimeTableCompositeIdentifier).Distinct());
+        ExistingTrainCirculations = await trainCirculationRepository.GetManyAsync(_journeyIds.Select(jid => jid.TrainCirculationIdentifier).Distinct());
     }
 
     private async Task ExtractTrainRuns()
@@ -167,7 +167,7 @@ public class ConnectionExtractor(
         if (_journeyIds is null)
             throw new InvalidOperationException("Cannot extract train runs before journeyIds have been extracted.");
         
-        ExistingTrainRuns = await trainRunRepository.GetManyAsync(_journeyIds.Select(jid => jid.TrainRunCompositeIdentifier).Distinct());
+        ExistingTrainRuns = await trainRunRepository.GetManyAsync(_journeyIds.Select(jid => jid.TrainRunIdentifier).Distinct());
         TrainCompositions = await trainCompositionRepository.GetManyAsync(ExistingTrainRuns.Select(tr => tr.Id));
     }
 
@@ -229,8 +229,7 @@ public class ConnectionExtractor(
         var transportSegments = connectionDto.Segments.OfType<TransportSegmentDto>();
         foreach (var transportSegment in transportSegments)
         {
-            var compositeKey = transportSegment.JourneyId.TimeTableCompositeIdentifier;
-            var existingTrainCirculation = ExistingTrainCirculations.FirstOrDefault(tc => tc.TrainId == compositeKey.TrainId && tc.TimeTablePeriod == compositeKey.TimeTablePeriod);
+            var existingTrainCirculation = ExistingTrainCirculations.FirstOrDefault(tc => tc.Identifier == transportSegment.JourneyId.TrainCirculationIdentifier);
             if (existingTrainCirculation is not null)
             {
                 continue;
@@ -265,9 +264,7 @@ public class ConnectionExtractor(
         foreach (var transportSegment in transportSegments)
         {
             var journeyId = transportSegment.JourneyId;
-            var trainId = journeyId.TrainId;
             var operatingDay = journeyId.OperatingDay;
-            var timeTablePeriod = TimeTablePeriod.FromOperatingDay(operatingDay);
             
             var passengerInformationSnapshots = transportSegment.PassengerInformation
                 .Select(pimDto =>
@@ -276,7 +273,7 @@ public class ConnectionExtractor(
                     return new TrainRunPassengerInformationSnapshot(pim.Id, pimDto.FromStopIndex, pimDto.ToStopIndex);
                 }).ToList();
             
-            var trainCirculation = ExistingTrainCirculations.First(tc => tc.TrainId == trainId && tc.TimeTablePeriod == timeTablePeriod);
+            var trainCirculation = ExistingTrainCirculations.First(tc => tc.Identifier ==  journeyId.TrainCirculationIdentifier);
             
             var existingTrainRun = ExistingTrainRuns.FirstOrDefault(r => r.CirculationId == trainCirculation.Id && r.OperatingDay == operatingDay);
             if (existingTrainRun is not null)

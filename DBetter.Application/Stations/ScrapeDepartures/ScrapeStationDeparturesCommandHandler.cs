@@ -41,7 +41,7 @@ public class ScrapeStationDeparturesCommandHandler(
     {
         await unitOfWork.BeginTransaction();
         
-        var trainCirculation = await trainCirculationRepository.GetAsync(departureDto.JourneyId.TimeTableCompositeIdentifier);
+        var trainCirculation = await trainCirculationRepository.GetAsync(departureDto.JourneyId.TrainCirculationIdentifier);
         if (trainCirculation is null)
         {
             trainCirculation = TrainCirculation.Create(
@@ -55,7 +55,7 @@ public class ScrapeStationDeparturesCommandHandler(
         
         trainCirculationRepository.Save(trainCirculation);
 
-        var trainRun = await trainRunRepository.GetAsync(departureDto.JourneyId.TrainRunCompositeIdentifier);
+        var trainRun = await trainRunRepository.GetAsync(departureDto.JourneyId.TrainRunIdentifier);
         if (trainRun is not null)
         {
             await unitOfWork.CommitAsync();
