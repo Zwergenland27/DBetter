@@ -8,9 +8,9 @@ public interface ITrainRunRepository
 {
     Task<TrainRun?> GetAsync(TrainRunId id);
 
-    Task<TrainRun?> GetAsync(TrainRunCompositeIdentifier identifier);
+    Task<TrainRun?> GetAsync(TrainRunIdentifier identifier);
 
-    Task<List<TrainRun>> GetManyAsync(IEnumerable<TrainRunCompositeIdentifier> compositeIdentifiers);
+    Task<List<TrainRun>> GetManyAsync(IEnumerable<TrainRunIdentifier> identifiers);
     
     void AddRange(IEnumerable<TrainRun> trainRuns);
     

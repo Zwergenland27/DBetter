@@ -13,16 +13,39 @@ public record BahnJourneyId
     {
         Value = value;
     }
-    public TrainId TrainId => TrainId.Create(Parse(Value)["ZI"]).Value;
     public EvaNumber DestinationEvaNumber => EvaNumber.Create(Parse(Value)["LS"]).Value;
     
     public EvaNumber OriginEvaNumber => EvaNumber.Create(Parse(Value)["1S"]).Value;
-    
-    public OperatingDay OperatingDay => OperatingDay.Parse(Parse(Value)["DA"]);
 
-    public TimeTableCompositeIdentifier TimeTableCompositeIdentifier => new (TrainId, TimeTablePeriod.FromOperatingDay(OperatingDay));
+    public OperatingDay OperatingDay => GetOperatingDay(Value);
+
+    public TrainCirculationIdentifier TrainCirculationIdentifier => GetTrainCirculationIdentifier(Value);
     
-    public TrainRunCompositeIdentifier TrainRunCompositeIdentifier => new (TrainId, TimeTablePeriod.FromOperatingDay(OperatingDay), OperatingDay);
+    public TrainRunIdentifier TrainRunIdentifier => new (TrainCirculationIdentifier, OperatingDay);
+
+    private static TrainCirculationIdentifier GetTrainCirculationIdentifier(string value)
+    {
+        var values = Parse(value);
+        
+        var departureTime = HafasTime.Create(values["1T"]);
+        var arrivalTime = HafasTime.Create(values["LT"]);
+        var travelDuration = TravelDuration.Create(departureTime, arrivalTime);
+        
+        var originStationEva = EvaNumber.Create(values["1S"]).Value;
+        var destinationStationEva = EvaNumber.Create(values["LS"]).Value;
+        
+        return new TrainCirculationIdentifier(originStationEva, departureTime.Time, destinationStationEva, travelDuration);
+    }
+
+    private static OperatingDay GetOperatingDay(string value)
+    {
+        var values = Parse(value);
+        
+        var operatingDay = OperatingDay.Parse(values["DA"]);
+        var departureTime = HafasTime.Create(values["1T"]);
+        
+        return operatingDay.CorrectTimeOffset(departureTime);
+    }
     
     private static Dictionary<string, string> Parse(string value)
     {
