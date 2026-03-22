@@ -12,38 +12,39 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
         return db.TrainRuns.FirstOrDefaultAsync(r => r.Id == id);
     }
 
-    public Task<TrainRun?> GetAsync(TrainRunCompositeIdentifier identifier)
+    public Task<TrainRun?> GetAsync(TrainRunIdentifier identifier)
     {
-        var sql = $"""
-                   SELECT tr.*
-                   FROM "TrainRuns" tr
-                   JOIN "TrainCirculations" tc ON tr."CirculationId" = tc."Id"
-                   WHERE 
-                       tc."TrainId" = {identifier.TrainId.Value} AND
-                       tc."TimeTablePeriod" = {identifier.TimeTablePeriod.Year} AND
-                       tr."OperatingDay" = '{identifier.OperatingDay.Date.ToString("yyyy-MM-dd")}'
-                   """;
-        
-        return db.TrainRuns
-            .FromSqlRaw(sql)
-            .FirstOrDefaultAsync();
+        throw new NotImplementedException("TrainRuns as persistence dtos and use composite identifier");
+//         var sql = $"""
+//                    SELECT tr.*
+//                    FROM "TrainRuns" tr
+//                    JOIN "TrainCirculations" tc ON tr."CirculationId" = tc."Id"
+//                    WHERE 
+//                        tc."TrainId" = {identifier.TrainId.Value} AND
+//                        tc."TimeTablePeriod" = {identifier.TimeTablePeriod.Year} AND
+//                        tr."OperatingDay" = '{identifier.OperatingDay.Date.ToString("yyyy-MM-dd")}'
+//                    """;
+//         
+//         return db.TrainRuns
+//             .FromSqlRaw(sql)
+//             .FirstOrDefaultAsync();
     }
 
-    public Task<List<TrainRun>> GetManyAsync(IEnumerable<TrainRunCompositeIdentifier> compositeIdentifiers)
+    public Task<List<TrainRun>> GetManyAsync(IEnumerable<TrainRunIdentifier> identifiers)
     {
-        
-        var sql = $"""
-                   SELECT tr.*
-                   FROM "TrainRuns" tr
-                   JOIN "TrainCirculations" tc ON tr."CirculationId" = tc."Id"
-                   WHERE (tc."TrainId", tc."TimeTablePeriod", tr."OperatingDay") IN (
-                       {string.Join(",", compositeIdentifiers.Select(id => $"({id.TrainId.Value}, {id.TimeTablePeriod.Year}, '{id.OperatingDay.Date.ToString("yyyy-MM-dd")}')"))}
-                   )
-                   """;
-        
-        return db.TrainRuns
-            .FromSqlRaw(sql)
-            .ToListAsync();
+        throw new NotImplementedException("TrainRuns as persistence dtos and use composite identifier");
+//         var sql = $"""
+//                    SELECT tr.*
+//                    FROM "TrainRuns" tr
+//                    JOIN "TrainCirculations" tc ON tr."CirculationId" = tc."Id"
+//                    WHERE (tc."TrainId", tc."TimeTablePeriod", tr."OperatingDay") IN (
+//                        {string.Join(",", identifiers.Select(id => $"({id.TrainId.Value}, {id.TimeTablePeriod.Year}, '{id.OperatingDay.Date.ToString("yyyy-MM-dd")}')"))}
+//                    )
+//                    """;
+//         
+//         return db.TrainRuns
+//             .FromSqlRaw(sql)
+//             .ToListAsync();
     }
 
     public void AddRange(IEnumerable<TrainRun> trainRuns)
