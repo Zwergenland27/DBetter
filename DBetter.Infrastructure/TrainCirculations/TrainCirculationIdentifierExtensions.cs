@@ -6,6 +6,6 @@ public static class TrainCirculationIdentifierExtensions
 {
     public static string DatabaseFriendly(this TrainCirculationIdentifier identifier)
     {
-        return $"{identifier.Origin.Value}:{identifier.DepartureTime}-{identifier.Destination.Value}:{identifier.Duration.Minutes}";
+        return $"{identifier.Origin.Value}T{identifier.DepartureTime}-{identifier.Destination.Value}:{identifier.Duration.Minutes}";
     }
 }
