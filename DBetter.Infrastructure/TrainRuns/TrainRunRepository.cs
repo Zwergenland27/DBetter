@@ -41,7 +41,7 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
                    FROM "TrainRuns" tr
                    JOIN "TrainCirculations" tc ON tr."TrainCirculationId" = tc."Id"
                    WHERE (tc."Identifier", tr."OperatingDay") IN (
-                       {string.Join(",", databaseFriendlyIdentifiers.Select(id => $"({id.TrainCirculationIdentifier}, '{id.OperatingDay.ToString("yyyy-MM-dd")}')"))}
+                       {string.Join(",", databaseFriendlyIdentifiers.Select(id => $"('{id.TrainCirculationIdentifier}', '{id.OperatingDay.ToString("yyyy-MM-dd")}')"))}
                    )
                    """;
          
