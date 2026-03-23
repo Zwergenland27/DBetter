@@ -20,7 +20,7 @@ public class HafasTimeTestData: IEnumerable<object[]>
         new("10027", new HafasTime(1, new TimeOnly(0, 27))),
         new("127", new HafasTime(0, new TimeOnly(1, 27))),
         new("10127", new HafasTime(1, new TimeOnly(1, 27))),
-        new("1227", new HafasTime(1, new TimeOnly(12, 27))),
+        new("1227", new HafasTime(0, new TimeOnly(12, 27))),
         new("11227", new HafasTime(1, new TimeOnly(12, 27))),
     ];
     
