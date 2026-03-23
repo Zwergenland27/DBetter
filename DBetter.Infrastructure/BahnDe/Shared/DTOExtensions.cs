@@ -26,6 +26,10 @@ public static class DTOExtensions
         var germanTime = DateTime.Parse(bahnDateString);
         
         TimeZoneInfo germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+        if (germanTimeZone.IsInvalidTime(germanTime))
+        {
+            germanTime = germanTime.AddHours(1);
+        }
         return TimeZoneInfo.ConvertTimeToUtc(germanTime, germanTimeZone);
     }
     
