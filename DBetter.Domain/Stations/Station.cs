@@ -17,7 +17,7 @@ public class Station : AggregateRoot<StationId>
     
     public Ril100Identifier? Ril100 { get; private set; }
     
-    public MeansOfTransport AvailableMeansOfTransport { get; private set; }
+    public MeansOfTransport? AvailableMeansOfTransport { get; private set; }
 
     private Station(
         StationId id,
