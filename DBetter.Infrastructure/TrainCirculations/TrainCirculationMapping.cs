@@ -13,7 +13,7 @@ public class TrainCirculationMapping : IEntityTypeConfiguration<TrainCirculation
         
         builder.HasKey(x => x.Id);
 
-        builder.HasIndex(x => new {x.TrainId, x.TimeTablePeriod})
+        builder.HasIndex(x => x.Identifier)
             .IsUnique();
     }
 }

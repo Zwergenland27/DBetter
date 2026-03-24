@@ -72,7 +72,6 @@ public class IncreaseTransferTimeQueryHandler(
         
         passengerInformationRepository.AddRange(result.PassengerInformationToCreate);
         connectionRepository.AddRange(result.FoundConnections);
-        trainRunRepository.AddRange(result.TrainRunsToCreate);
         routeRepository.AddRange(result.RoutesToCreate);
         stationRepository.AddRange(result.StationsToCreate);
         

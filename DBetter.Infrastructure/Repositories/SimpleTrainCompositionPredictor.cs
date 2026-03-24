@@ -19,16 +19,16 @@ public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainComposit
 
     private const double RecencyDecayPerDay = 0.01;
     
-    private record TrainCompositionOfOperatingDay(TrainComposition TrainComposition, OperatingDay OperatingDay);
+    private record TrainCompositionOfOperatingDay(TrainComposition TrainComposition, DateOnly OperatingDay);
     
     public async Task<PredictionResult?> PredictAsync(TrainCirculationId trainCirculationId, OperatingDay operatingDay)
     {
         var pastTrainCompositions = await db.TrainCompositions
             .Join(db.TrainRuns,
-                tc => tc.TrainRun,
+                tc => tc.TrainRun.Value,
                 tr => tr.Id,
-                (tc, tr) => new { TrainComposition = tc, tr.OperatingDay, TrainCirculationId = tr.CirculationId })
-            .Where(r => r.TrainCirculationId == trainCirculationId && r.TrainComposition.Source != TrainFormationSource.None)
+                (tc, tr) => new { TrainComposition = tc, tr.OperatingDay, tr.TrainCirculationId })
+            .Where(r => r.TrainCirculationId == trainCirculationId.Value && r.TrainComposition.Source != TrainFormationSource.None)
             .Select(r => new TrainCompositionOfOperatingDay(r.TrainComposition, r.OperatingDay))
             .ToListAsync();
 
@@ -42,7 +42,7 @@ public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainComposit
         foreach (var pastTrainComposition in pastTrainCompositions)
         {
             var identifier = pastTrainComposition.TrainComposition.CalculateIdentifier();
-            var score = CalculateScore(pastTrainComposition, operatingDay);
+            var score = CalculateScore(pastTrainComposition, operatingDay.Date);
             if (!scores.TryAdd(identifier, score))
             {
                 scores[identifier] = score;
@@ -67,7 +67,7 @@ public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainComposit
         );
     }
 
-    private static double CalculateScore(TrainCompositionOfOperatingDay pastTrainComposition, OperatingDay operatingDay)
+    private static double CalculateScore(TrainCompositionOfOperatingDay pastTrainComposition, DateOnly operatingDay)
     {
         var sourceWeight = GetSourceWeight(pastTrainComposition.TrainComposition.Source);
         var dayWeight = GetDayWeight(pastTrainComposition.OperatingDay, operatingDay);
@@ -84,10 +84,10 @@ public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainComposit
         _                  => SourceWeight_SeatingPlan
     };
 
-    private static double GetDayWeight(OperatingDay sourceOperatingDay, OperatingDay targetOperatingDay)
+    private static double GetDayWeight(DateOnly sourceOperatingDay, DateOnly targetOperatingDay)
     {
-        DayOfWeek entryDay  = sourceOperatingDay.Date.DayOfWeek;
-        DayOfWeek targetDay = targetOperatingDay.Date.DayOfWeek;
+        DayOfWeek entryDay  = sourceOperatingDay.DayOfWeek;
+        DayOfWeek targetDay = targetOperatingDay.DayOfWeek;
 
         if (entryDay == targetDay)
             return DayMatch_SameDay;
@@ -100,9 +100,9 @@ public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainComposit
             : DayMatch_None;
     }
 
-    private static double GetRecencyFactor(OperatingDay sourceOperatingDay, OperatingDay targetOperatingDay)
+    private static double GetRecencyFactor(DateOnly sourceOperatingDay, DateOnly targetOperatingDay)
     {
-        int daysDiff = Math.Abs(targetOperatingDay.Date.DayNumber - sourceOperatingDay.Date.DayNumber);
+        int daysDiff = Math.Abs(targetOperatingDay.DayNumber - sourceOperatingDay.DayNumber);
         return Math.Exp(-RecencyDecayPerDay * daysDiff);
     }
 }

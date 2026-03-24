@@ -6,26 +6,22 @@ namespace DBetter.Domain.TrainCirculations;
 
 public class TrainCirculation : AggregateRoot<TrainCirculationId>
 {
-    public TimeTablePeriod TimeTablePeriod { get; private set; }
-    public TrainId TrainId { get; private init; }
-    
+    public TrainCirculationIdentifier Identifier { get; private set; }
     public ServiceInformation ServiceInformation { get; private set; }
 
     internal TrainCirculation(
         TrainCirculationId id,
-        TimeTablePeriod timeTablePeriod,
-        TrainId trainId,
+        TrainCirculationIdentifier identifier,
         ServiceInformation serviceInformation) : base(id)
     {
-        TrainId =  trainId;
-        TimeTablePeriod = timeTablePeriod;
+        Identifier = identifier;
         ServiceInformation = serviceInformation;
     }
 
 
     public static TrainCirculation Create(BahnJourneyId journeyId, ServiceInformation serviceInformation)
     {
-        return new TrainCirculation(TrainCirculationId.CreateNew(), TimeTablePeriod.FromOperatingDay(journeyId.OperatingDay),  journeyId.TrainId, serviceInformation);
+        return new TrainCirculation(TrainCirculationId.CreateNew(), journeyId.TrainCirculationIdentifier, serviceInformation);
     }
     public void Update(ServiceNumber newServiceNumber)
     {

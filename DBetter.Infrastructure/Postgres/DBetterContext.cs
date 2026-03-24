@@ -10,6 +10,7 @@ using DBetter.Domain.Users;
 using DBetter.Domain.Vehicles;
 using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.TrainCirculations;
+using DBetter.Infrastructure.TrainRuns;
 using Microsoft.EntityFrameworkCore;
 
 namespace DBetter.Infrastructure.Postgres;
@@ -26,7 +27,7 @@ public class DBetterContext(DbContextOptions<DBetterContext> options) : DbContex
     
     public DbSet<Station> Stations { get; set; }
     
-    public DbSet<TrainRun> TrainRuns { get; set; }
+    public DbSet<TrainRunPersistenceDto> TrainRuns { get; set; }
     
     public DbSet<PassengerInformation> PassengerInformation { get; set; }
     
