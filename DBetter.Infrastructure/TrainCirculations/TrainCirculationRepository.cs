@@ -1,5 +1,7 @@
+using CleanMessageBus.Abstractions;
 using DBetter.Domain.TrainCirculations;
 using DBetter.Domain.TrainCirculations.ValueObjects;
+using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,12 +45,16 @@ public class TrainCirculationRepository(DBetterContext db) : ITrainCirculationRe
         {
             existing.Apply(trainCirculation);
         }
+        
+        db.OutboxMessages.AddRange(trainCirculation.DomainEvents.Select(OutboxMessage.FromEvent));
     }
 
     public void Save(IEnumerable<TrainCirculation> trainCirculations)
     {
         var locals = db.TrainCirculations.Local.ToList();
         var newTrainCirculations = new List<TrainCirculationPersistenceDto>();
+        var domainEvents = new List<IDomainEvent>();
+        
         foreach (var trainCirculation in trainCirculations)
         {
             var existing = locals.FirstOrDefault(e => e.Id == trainCirculation.Id.Value);
@@ -60,7 +66,12 @@ public class TrainCirculationRepository(DBetterContext db) : ITrainCirculationRe
             {
                 existing.Apply(trainCirculation);
             }
+            
+            domainEvents.AddRange(trainCirculation.DomainEvents);
+            trainCirculation.ClearDomainEvents();
         }
+        
+        db.OutboxMessages.AddRange(domainEvents.Select(OutboxMessage.FromEvent));
         db.TrainCirculations.AddRange(newTrainCirculations);
     }
 }

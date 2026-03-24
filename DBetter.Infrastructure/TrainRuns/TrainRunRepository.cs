@@ -1,5 +1,7 @@
+using CleanMessageBus.Abstractions;
 using DBetter.Domain.TrainRuns;
 using DBetter.Domain.TrainRuns.ValueObjects;
+using DBetter.Infrastructure.OutboxPattern;
 using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.TrainCirculations;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +57,7 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
     {
         var locals = db.TrainRuns.Local.ToList();
         var newTrainCirculations = new List<TrainRunPersistenceDto>();
+        var domainEvents = new List<IDomainEvent>();
         foreach (var trainRun in trainRuns)
         {
             var existing = locals.FirstOrDefault(e => e.Id == trainRun.Id.Value);
@@ -66,7 +69,12 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
             {
                 existing.Apply(trainRun);
             }
+            
+            domainEvents.AddRange(trainRun.DomainEvents);
+            trainRun.ClearDomainEvents();
         }
+        
+        db.OutboxMessages.AddRange(domainEvents.Select(OutboxMessage.FromEvent));
         db.TrainRuns.AddRange(newTrainCirculations);
     }
 
@@ -81,5 +89,7 @@ public class TrainRunRepository(DBetterContext db) : ITrainRunRepository
         {
             existing.Apply(trainRun);
         }
+        
+        db.OutboxMessages.AddRange(trainRun.DomainEvents.Select(OutboxMessage.FromEvent));
     }
 }
