@@ -10,6 +10,9 @@ public class TrainCompositionMapping: IEntityTypeConfiguration<TrainCompositionP
         builder.ToTable("TrainCompositions");
         
         builder.HasKey(x => x.Id);
+        
+        builder.HasIndex(x => x.TrainRunId)
+            .IsUnique();
 
         builder.OwnsMany(x => x.Vehicles, vb =>
         {
