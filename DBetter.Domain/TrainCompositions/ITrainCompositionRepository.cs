@@ -4,7 +4,7 @@ namespace DBetter.Domain.TrainCompositions;
 
 public interface ITrainCompositionRepository
 {
-    void Add(TrainComposition trainComposition);
+    void Save(TrainComposition trainComposition);
     
     Task<TrainComposition?> GetAsync(TrainRunId trainRunId);
     

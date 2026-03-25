@@ -5,7 +5,7 @@ using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 
-namespace DBetter.Infrastructure.Repositories;
+namespace DBetter.Infrastructure.TrainCompositions;
 
 public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainCompositionPredictor
 {
@@ -23,14 +23,18 @@ public class SimpleTrainCompositionPredictor(DBetterContext db) : ITrainComposit
     
     public async Task<PredictionResult?> PredictAsync(TrainCirculationId trainCirculationId, OperatingDay operatingDay)
     {
-        var pastTrainCompositions = await db.TrainCompositions
+        var pastTrainCompositionsDtos = await db.TrainCompositions
             .Join(db.TrainRuns,
-                tc => tc.TrainRun.Value,
+                tc => tc.TrainRunId,
                 tr => tr.Id,
                 (tc, tr) => new { TrainComposition = tc, tr.OperatingDay, tr.TrainCirculationId })
-            .Where(r => r.TrainCirculationId == trainCirculationId.Value && r.TrainComposition.Source != TrainFormationSource.None)
-            .Select(r => new TrainCompositionOfOperatingDay(r.TrainComposition, r.OperatingDay))
+            .Where(r => r.TrainCirculationId == trainCirculationId.Value && r.TrainComposition.Source != (int) TrainFormationSource.None)
+            .Select(r => new {r.TrainComposition, r.OperatingDay})
             .ToListAsync();
+        
+        var pastTrainCompositions = pastTrainCompositionsDtos
+            .Select(ptc => new TrainCompositionOfOperatingDay(ptc.TrainComposition.ToDomain(), ptc.OperatingDay))
+            .ToList();
 
         if (pastTrainCompositions.Count == 0)
         {
