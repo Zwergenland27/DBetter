@@ -10,7 +10,7 @@ namespace DBetter.Infrastructure.TrainCompositions;
 
 public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : ITrainCompositionQueryRepository
 {
-    private record RawTrainCompositionResultDto(Guid TrainRun, int Source, string Identifier, DateTime LastUpdate);
+    private record RawTrainCompositionResultDto(Guid TrainRunId, int Source, string Identifier, DateTime LastUpdate);
     
     public async Task<TrainCompositionResultDto?> GetAsync(TrainRunId trainRunId)
     {
@@ -21,11 +21,11 @@ public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : 
             return cached;
         }
         var rawResults = await db.Database.SqlQuery<RawTrainCompositionResultDto>($"""
-                                                                               SELECT tc."TrainRun", tc."Source", v."Identifier", tc."LastUpdate"
+                                                                               SELECT tc."TrainRunId", tc."Source", v."Identifier", tc."LastUpdate"
                                                                                FROM "TrainCompositions" tc
                                                                                JOIN "FormationVehicles" fv ON tc."Id" = fv."TrainCompositionId"
                                                                                JOIN "Vehicles" v ON fv."VehicleId" = v."Id"
-                                                                               WHERE tc."TrainRun" = {trainRunId.Value}
+                                                                               WHERE tc."TrainRunId" = {trainRunId.Value}
                                                                                """).ToListAsync();
         var results = Map(rawResults);
         if (results is null)
@@ -65,7 +65,7 @@ public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : 
     {
         if (!rawResults.Any()) return null;
 
-        var id = rawResults.First().TrainRun;
+        var id = rawResults.First().TrainRunId;
         var source = (TrainFormationSource) rawResults.First().Source;
         var lastUpdatedAt = rawResults.Last().LastUpdate;
 
