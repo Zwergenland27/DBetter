@@ -25,7 +25,22 @@ public class TrainComposition : AggregateRoot<TrainCompositionId>
     //TODO: Rename to NextUpdateInterval
     public int? CurrentUpdateInterval { get; private set; }
     
-    private TrainComposition() : base(null!){}
+    internal TrainComposition(
+        TrainCompositionId id,
+        List<FormationVehicle> vehicles,
+        TrainRunId trainRun,
+        TrainFormationSource source,
+        DateTime departureTime,
+        DateTime lastUpdate,
+        int? currentUpdateInterval) : base(id)
+    {
+        TrainRun = trainRun;
+        Source = source;
+        _vehicles = vehicles;
+        DepartureTime = departureTime;
+        LastUpdate = lastUpdate;
+        CurrentUpdateInterval = currentUpdateInterval;
+    }
 
     private TrainComposition(
         TrainCompositionId id,

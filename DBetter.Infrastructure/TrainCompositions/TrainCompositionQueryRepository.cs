@@ -5,9 +5,8 @@ using DBetter.Domain.TrainCompositions.ValueObjects;
 using DBetter.Domain.TrainRuns.ValueObjects;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 
-namespace DBetter.Infrastructure.Repositories;
+namespace DBetter.Infrastructure.TrainCompositions;
 
 public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : ITrainCompositionQueryRepository
 {

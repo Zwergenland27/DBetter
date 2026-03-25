@@ -26,6 +26,7 @@ using DBetter.Infrastructure.Postgres;
 using DBetter.Infrastructure.RealtimeNotification;
 using DBetter.Infrastructure.Repositories;
 using DBetter.Infrastructure.TrainCirculations;
+using DBetter.Infrastructure.TrainCompositions;
 using DBetter.Infrastructure.TrainRuns;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -56,6 +56,7 @@ public class GetTrainCompositionQueryHandler(
         if (trainComposition is not null && trainComposition.Source is not TrainFormationSource.None)
         {
             var updatedResult = await HandleExistingData(trainComposition);
+            trainCompositionRepository.Save(trainComposition);
             await unitOfWork.CommitAsync(cancellationToken);
             return updatedResult;
         }
@@ -151,7 +152,7 @@ public class GetTrainCompositionQueryHandler(
                 else
                 {
                     trainComposition = TrainComposition.CreateFromRealtime(_trainRun.Id, firstStop.DepartureTime, formationSnapshots);
-                    trainCompositionRepository.Add(trainComposition);
+                    trainCompositionRepository.Save(trainComposition);
                 }
                 
                 return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
@@ -183,7 +184,7 @@ public class GetTrainCompositionQueryHandler(
             else
             {
                 trainComposition = TrainComposition.CreateFromPlanned(_trainRun.Id, firstStop.DepartureTime, formationSnapshots);
-                trainCompositionRepository.Add(trainComposition);   
+                trainCompositionRepository.Save(trainComposition);   
             }
             
             return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
@@ -203,7 +204,7 @@ public class GetTrainCompositionQueryHandler(
             else
             {
                 trainComposition = TrainComposition.CreateFromPrediction(_trainRun.Id, firstStop.DepartureTime, predictedTrainCompositionDto.PredictedComposition);
-                trainCompositionRepository.Add(trainComposition);
+                trainCompositionRepository.Save(trainComposition);
             }
             var relevantVehicles = await vehicleRepository.GetManyAsync(trainComposition.Vehicles.Select(v => v.VehicleId));
             return new TrainCompositionResultFactory(trainComposition, relevantVehicles)
@@ -213,7 +214,7 @@ public class GetTrainCompositionQueryHandler(
         if (baseObject is null)
         {
             var trainComposition = TrainComposition.CreateNotFound(_trainRun.Id, firstStop.DepartureTime);
-            trainCompositionRepository.Add(trainComposition);
+            trainCompositionRepository.Save(trainComposition);
         }
         
         return DomainErrors.TrainComposition.NotFound;
