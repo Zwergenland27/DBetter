@@ -23,11 +23,11 @@ public class TrainRunMapping : IEntityTypeConfiguration<TrainRunPersistenceDto>
         builder.OwnsMany(x => x.PassengerInformation, pib =>
         {
             pib.ToTable("TrainRunPassengerInformation");
-            
+
             pib.WithOwner().HasForeignKey("TrainRunId");
-            
-            pib.HasKey(x => x.Id);
-            
+
+            pib.HasKey("TrainRunId", nameof(TrainRunPassengerInformationPersistenceDto.Id));
+
             pib.HasIndex(nameof(TrainRunPassengerInformation.Id), "TrainRunId")
                 .IsUnique();
         });
