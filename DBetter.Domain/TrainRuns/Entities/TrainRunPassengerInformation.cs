@@ -24,11 +24,12 @@ public class TrainRunPassengerInformation : Entity<TrainRunPassengerInformationI
         ToStopIndex = toStopIndex;
     }
 
-    public static TrainRunPassengerInformation Create(
+    internal static TrainRunPassengerInformation Create(
+        TrainRunPassengerInformationId id,
         PassengerInformationId informationId,
         StopIndex fromStopIndex,
         StopIndex toStopIndex)
     {
-        return new  TrainRunPassengerInformation(TrainRunPassengerInformationId.CreateNew(), informationId, fromStopIndex, toStopIndex);
+        return new  TrainRunPassengerInformation(id, informationId, fromStopIndex, toStopIndex);
     }
 }

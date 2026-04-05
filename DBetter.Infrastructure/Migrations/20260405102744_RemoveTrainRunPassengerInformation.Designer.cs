@@ -3,6 +3,7 @@ using System;
 using DBetter.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBetter.Infrastructure.Migrations
 {
     [DbContext(typeof(DBetterContext))]
-    partial class DBetterContextModelSnapshot : ModelSnapshot
+    [Migration("20260405102744_RemoveTrainRunPassengerInformation")]
+    partial class RemoveTrainRunPassengerInformation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1138,39 +1141,6 @@ namespace DBetter.Infrastructure.Migrations
                         });
 
                     b.Navigation("Vehicles");
-                });
-
-            modelBuilder.Entity("DBetter.Infrastructure.TrainRuns.TrainRunPersistenceDto", b =>
-                {
-                    b.OwnsMany("DBetter.Infrastructure.TrainRuns.TrainRunPassengerInformationPersistenceDto", "PassengerInformation", b1 =>
-                        {
-                            b1.Property<Guid>("TrainRunId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("Id")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("FromStopIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<Guid>("PassengerInformationId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("ToStopIndex")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("TrainRunId", "Id");
-
-                            b1.HasIndex("Id", "TrainRunId")
-                                .IsUnique();
-
-                            b1.ToTable("TrainRunPassengerInformation", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("TrainRunId");
-                        });
-
-                    b.Navigation("PassengerInformation");
                 });
 #pragma warning restore 612, 618
         }

@@ -90,11 +90,17 @@ public class TrainRun : AggregateRoot<TrainRunId>
                 remainingPassengerInformation.Remove(incoming);
             }
         }
+        
+        var nextId = _passengerInformation.Any() 
+            ? (ushort) (_passengerInformation.Max(p => p.Id.Value) + 1) 
+            : (ushort) 0;
 
         foreach (var passengerInformation in remainingPassengerInformation)
         {
-            var trainRunPassengerInformation = TrainRunPassengerInformation.Create(passengerInformation.Id, passengerInformation.FromStopIndex, passengerInformation.ToStopIndex);
+            var trainRunPassengerInformation =
+                TrainRunPassengerInformation.Create(new TrainRunPassengerInformationId(nextId), passengerInformation.Id, passengerInformation.FromStopIndex, passengerInformation.ToStopIndex);
             _passengerInformation.Add(trainRunPassengerInformation);
+            nextId++;
         }
     }
 }

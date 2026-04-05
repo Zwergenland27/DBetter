@@ -7,7 +7,7 @@ namespace DBetter.Infrastructure.TrainRuns;
 
 public class TrainRunPassengerInformationPersistenceDto: IPersistenceDto<TrainRunPassengerInformation>
 {
-    public required Guid Id { get; init; }
+    public required ushort Id { get; init; }
     
     public required Guid PassengerInformationId { get; set; }
     
