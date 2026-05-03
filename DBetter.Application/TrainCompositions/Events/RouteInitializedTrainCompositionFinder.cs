@@ -40,7 +40,7 @@ public class RouteInitializedTrainCompositionFinder(
         var result = await mediator.RunAsync(new GetTrainCompositionQuery(trainRun.Id), cancellationToken);
         if (result.HasFailed)
         {
-            if(result.Errors.Count == 1 && result.Errors.First() == DomainErrors.TrainComposition.NotFound || result.Errors.First() == DomainErrors.TrainComposition.NotFindable) return CanFail.Success;
+            // if(result.Errors.Count == 1 && result.Errors.First() == DomainErrors.TrainComposition.NotFound || result.Errors.First() == DomainErrors.TrainComposition.NotFindable) return CanFail.Success;
             return result.Errors;
         }
         return CanFail.Success;

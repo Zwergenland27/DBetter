@@ -14,7 +14,7 @@ public class TrainCompositionUpdatedRealtimeNotifier(
     public override async Task<CanFail> Handle(TrainCompositionUpdated @event, CancellationToken cancellationToken)
     {
         var newData = await trainCompositionQueryRepository.GetAsync(@event.TrainRun);
-        if(newData is null || newData.Source is TrainFormationSource.None) return CanFail.Success;
+        // if(newData is null || newData.Source is TrainFormationSource.None) return CanFail.Success;
         
         await realtimeNotifier.Notify(@event.TrainRun.Value.ToString(), "Update", new GetTrainCompositionResultDto
         {

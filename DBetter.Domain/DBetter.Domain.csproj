@@ -14,4 +14,8 @@
       <PackageReference Include="Zwergenland.CleanMessageBus.Abstractions" Version="1.2.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="TrainCompositions\TrainParts\ValueObjects\" />
+    </ItemGroup>
+
 </Project>

@@ -63,18 +63,19 @@ public class TrainCompositionQueryRepository(DBetterContext db, ICache cache) : 
 
     private static TrainCompositionResultDto? Map(List<RawTrainCompositionResultDto> rawResults)
     {
-        if (!rawResults.Any()) return null;
-
-        var id = rawResults.First().TrainRunId;
-        var source = (TrainFormationSource) rawResults.First().Source;
-        var lastUpdatedAt = rawResults.Last().LastUpdate;
-
-        return new TrainCompositionResultDto
-        {
-            LastUpdatedAt = lastUpdatedAt,
-            TrainRunId = id.ToString(),
-            Source = source,
-            Vehicles = rawResults.Select(r => r.Identifier).ToList()
-        };
+        throw new NotImplementedException();
+        // if (!rawResults.Any()) return null;
+        //
+        // var id = rawResults.First().TrainRunId;
+        // var source = (TrainFormationSource) rawResults.First().Source;
+        // var lastUpdatedAt = rawResults.Last().LastUpdate;
+        //
+        // return new TrainCompositionResultDto
+        // {
+        //     LastUpdatedAt = lastUpdatedAt,
+        //     TrainRunId = id.ToString(),
+        //     Source = source,
+        //     Vehicles = rawResults.Select(r => r.Identifier).ToList()
+        // };
     }
 }

@@ -1,5 +1,4 @@
 using CleanDomainValidation.Domain;
-using DBetter.Domain.Errors;
 
 namespace DBetter.Domain.Vehicles.ValueObjects;
 
@@ -17,6 +16,6 @@ public record VehicleId(Guid Value)
             return new VehicleId(guid);
         }
 
-        return DomainErrors.Vehicle.Id.Invalid(value);
+        return VehicleErrors.Id.Invalid(value);
     }
 }

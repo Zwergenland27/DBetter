@@ -9,5 +9,5 @@ public class TrainCompositionResultDto
     public required DateTime LastUpdatedAt { get; init; }
     public required List<string> Vehicles { get; init; }
     
-    public required TrainFormationSource Source { get; init; }
+    public required string Source { get; init; }
 }

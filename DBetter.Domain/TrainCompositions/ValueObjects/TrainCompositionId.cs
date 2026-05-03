@@ -17,6 +17,6 @@ public record TrainCompositionId(Guid Value)
             return new TrainCompositionId(guid);
         }
 
-        return DomainErrors.TrainComposition.Id.Invalid(value);
+        return TrainCompositionErrors.Id.Invalid(value);
     }
 }

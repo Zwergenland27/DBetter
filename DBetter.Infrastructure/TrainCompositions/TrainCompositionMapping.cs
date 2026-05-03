@@ -7,20 +7,20 @@ public class TrainCompositionMapping: IEntityTypeConfiguration<TrainCompositionP
 {
     public void Configure(EntityTypeBuilder<TrainCompositionPersistenceDto> builder)
     {
-        builder.ToTable("TrainCompositions");
-        
-        builder.HasKey(x => x.Id);
-        
-        builder.HasIndex(x => x.TrainRunId)
-            .IsUnique();
-
-        builder.OwnsMany(x => x.Vehicles, vb =>
-        {
-            vb.ToTable("FormationVehicles");
-            
-            vb.WithOwner().HasForeignKey("TrainCompositionId");
-            
-            vb.HasKey("TrainCompositionId", nameof(FormationVehiclePersistenceDto.Id));
-        });
+        // builder.ToTable("TrainCompositions");
+        //
+        // builder.HasKey(x => x.Id);
+        //
+        // builder.HasIndex(x => x.TrainRunId)
+        //     .IsUnique();
+        //
+        // builder.OwnsMany(x => x.Vehicles, vb =>
+        // {
+        //     vb.ToTable("FormationVehicles");
+        //     
+        //     vb.WithOwner().HasForeignKey("TrainCompositionId");
+        //     
+        //     vb.HasKey("TrainCompositionId", nameof(FormationVehiclePersistenceDto.Id));
+        // });
     }
 }

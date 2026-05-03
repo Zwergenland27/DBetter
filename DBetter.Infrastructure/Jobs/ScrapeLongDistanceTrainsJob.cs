@@ -49,7 +49,7 @@ public class ScrapeLongDistanceTrainsJob(
 
         foreach (var station in mostImportantStations)
         {
-            station.ScrapeDepartures(inTwoWeeks);
+            //station.ScrapeDepartures(inTwoWeeks);
         }
 
         await unitOfWork.CommitAsync();
