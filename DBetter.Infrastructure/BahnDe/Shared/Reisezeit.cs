@@ -13,7 +13,7 @@ public class Reisezeit
     /// Null, if the train does not depart at the stop or no real time data is available
     /// </remarks>
     /// <example>2025-03-15T19:08:00</example>
-    public required string? Echtzeit { get; set; }
+    public string? Echtzeit { get; set; }
     
     /// <summary>
     /// Planned departure / arrival time
