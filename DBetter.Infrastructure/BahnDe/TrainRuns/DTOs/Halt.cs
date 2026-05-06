@@ -12,10 +12,10 @@ public class Halt : IHasMessage, ITrainRunStop, IHasDemandInformation
     public required string Id { get; set; }
     
     /// <inheritdoc/>
-    public required Reisezeit? Abfahrt { get; set; }
+    public Reisezeit? Abfahrt { get; set; }
     
     /// <inheritdoc/>
-    public required Reisezeit? Ankunft { get; set; }
+    public Reisezeit? Ankunft { get; set; }
     
     /// <inheritdoc/>
     public required List<AuslastungsMeldung> Auslastungsmeldungen { get; set; }
