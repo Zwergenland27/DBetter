@@ -5,7 +5,7 @@ using DBetter.Infrastructure.Monitoring;
 using DBetter.Infrastructure.RealtimeNotification;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
