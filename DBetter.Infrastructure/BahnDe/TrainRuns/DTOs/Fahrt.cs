@@ -58,44 +58,6 @@ public class Fahrt : IHasMessage
     public required List<Zugattribut> Zugattribute { get; set; }
     
     /// <summary>
-    /// Planned start time
-    /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// </remarks>
-    /// <example>2025-03-15T19:07:00</example>
-    public required string AbfahrtsZeitpunkt { get; set; }
-    
-    /// <summary>
-    /// Real departure time
-    /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// Null, if no real time data is available
-    /// </remarks>
-    /// <example>2025-03-15T19:08:00</example>
-    public string? EzAbfahrtsZeitpunkt { get; set; }
-    
-    /// <summary>
-    /// Planned arrival time
-    /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// </remarks>
-    /// <example>2025-03-15T19:07:00</example>
-    public required string AnkunftsZeitpunkt { get; set; }
-    
-    /// <summary>
-    /// Real arrival time
-    /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// Null, if no real time data is available
-    /// </remarks>
-    /// <example>2025-03-15T19:08:00</example>
-    public string? EzAnkunftsZeitpunkt { get; set; }
-    
-    /// <summary>
     /// Indicates wether the train run is completely cancelled or not
     /// </summary>
     public required bool Cancelled { get; set; }
