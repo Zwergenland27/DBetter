@@ -52,36 +52,22 @@ public static class DTOExtensions
 
     public static TravelTime? GetDepartureTime(this ITrainRunStop stop)
     {
-        if(stop.AbfahrtsZeitpunkt is null) return null;
+        if(stop.Abfahrt is null) return null;
 
         return new TravelTime(
-            stop.AbfahrtsZeitpunkt.ConvertToDateTime()!.Value,
-            stop.EzAbfahrtsZeitpunkt.ConvertToDateTime()
+            stop.Abfahrt.Sollzeit.ConvertToDateTime()!.Value,
+            stop.Abfahrt.Echtzeit.ConvertToDateTime()
         );
-    }
-
-    public static TravelTime GetDepartureTime(this VerbindungsAbschnitt verbindungsabschnitt)
-    {
-        return new TravelTime(
-            verbindungsabschnitt.AbfahrtsZeitpunkt.ConvertToDateTime()!.Value,
-            verbindungsabschnitt.EzAbfahrtsZeitpunkt.ConvertToDateTime());
     }
 
     public static TravelTime? GetArrivalTime(this ITrainRunStop stop)
     {
-        if(stop.AnkunftsZeitpunkt is null) return null;
+        if(stop.Ankunft is null) return null;
 
         return new TravelTime(
-            stop.AnkunftsZeitpunkt.ConvertToDateTime()!.Value,
-            stop.EzAnkunftsZeitpunkt.ConvertToDateTime()
+            stop.Ankunft.Sollzeit.ConvertToDateTime()!.Value,
+            stop.Ankunft.Echtzeit.ConvertToDateTime()
         );
-    }
-    
-    public static TravelTime GetArrivalTime(this VerbindungsAbschnitt verbindungsabschnitt)
-    {
-        return new TravelTime(
-            verbindungsabschnitt.AnkunftsZeitpunkt.ConvertToDateTime()!.Value,
-            verbindungsabschnitt.EzAnkunftsZeitpunkt.ConvertToDateTime());
     }
 
     public static bool IsAdditional(this IHasMessage stop)

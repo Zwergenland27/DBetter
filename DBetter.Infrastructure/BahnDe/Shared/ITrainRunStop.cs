@@ -18,44 +18,14 @@ public interface ITrainRunStop
     public string Name { get; set; }
     
     /// <summary>
-    /// Planned departure time
+    /// Departure time information
     /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// Null, if the train does not depart at the stop
-    /// </remarks>
-    /// <example>2025-03-15T19:08:00</example>
-    public string? AbfahrtsZeitpunkt { get; set; }
-    
+    public Reisezeit? Abfahrt { get; set; }
+
     /// <summary>
-    /// Real departure time
+    /// Arrival time information
     /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// Null, if the train does not depart at the stop or no real time data is available
-    /// </remarks>
-    /// <example>2025-03-15T19:08:00</example>
-    public string? EzAbfahrtsZeitpunkt { get; set; }
-    
-    /// <summary>
-    /// Planned arrival time
-    /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// Null, if the train does not arrive at the stop
-    /// </remarks>
-    /// <example>2025-03-15T19:08:00</example>
-    public string? AnkunftsZeitpunkt { get; set; }
-    
-    /// <summary>
-    /// Real arrival time
-    /// </summary>
-    /// <remarks>
-    /// Time format: yyyy-mm-ddTHH:MM:ss german time zone
-    /// Null, if the train does not arrive at the stop or no real time data is available
-    /// </remarks>
-    /// <example>2025-03-15T19:08:00</example>
-    public string? EzAnkunftsZeitpunkt { get; set; }
+    public Reisezeit? Ankunft { get; set; }
     
     /// <summary>
     /// Planned Platform
