@@ -1,10 +1,16 @@
+using System.Numerics;
 using CleanDomainValidation.Application;
 using CleanMediator;
+using CleanMediator.Commands;
+using CleanMediator.Queries;
 using DBetter.Application.TrainCompositions.Get;
 using DBetter.Application.TrainRuns.Queries.Get;
+using DBetter.Application.TrainRuns.Queries.GetRoute;
 using DBetter.Contracts.TrainCompositions.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get;
 using DBetter.Contracts.TrainRuns.Queries.Get.Results;
+using DBetter.Contracts.TrainRuns.Queries.GetRoute;
+using Microsoft.OpenApi;
 
 namespace DBetter.Api;
 
@@ -14,8 +20,24 @@ public static class TrainRunModule
     {
         app.MapGet("train-runs/{id}", async (
                 IMediator mediator,
+                HttpContext httpContext,
                 string id) =>
             {
+                var acceptHeader = httpContext.Request.Headers.Accept.ToString();
+                if (acceptHeader is "application/dbetter.route-only+json")
+                {
+                    var routeOnlyQuery = Builder<GetRouteQuery>
+                        .WithName("TrainRun.GetRoute")
+                        .BindParameters(new GetRouteParameters())
+                        .MapParameter(p => p.Id, id)
+                        .BuildUsing<GetRouteQueryBuilder>();
+
+                    return await mediator.HandleQueryAsync(routeOnlyQuery, (RouteResponse result) =>
+                    {
+                        return Results.Ok(result);
+                    });
+                }
+
                 var query = Builder<GetTrainRunQuery>
                     .WithName("TrainRun.Get")
                     .BindParameters(new GetTrainRunParameters())
@@ -27,9 +49,9 @@ public static class TrainRunModule
                     return Results.Ok(result);
                 });
             })
-        .WithName("GetTrainRun")
-        .Produces<TrainRunResponse>()
-        .WithOpenApi();
+            .WithName("GetTrainRun")
+            .Produces<TrainRunResponse>(200, "application/json")
+            .Produces<RouteResponse>(200, "application/dbetter.route-only+json");
         
         app.MapGet("train-runs/{id}/trainComposition", async (
                 IMediator mediator,

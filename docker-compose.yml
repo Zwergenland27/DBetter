@@ -1,31 +1,21 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: postgres_db
+    container_name: dbetter-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - postgres_network
-  postgres-frontend:
-    image: dpage/pgadmin4
-    container_name: postgres_frontend
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: test@test.de
-      PGADMIN_DEFAULT_PASSWORD: password
+      - postgres_data:/var/lib/postgresql
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: dbetter-rabbitmq
     ports:
-      - "5050:80"
-    networks:
-      - postgres_network
+      - "15672:15672"
+      - "5672:5672"
 
 volumes:
   postgres_data:
-
-networks:
-  postgres_network:
